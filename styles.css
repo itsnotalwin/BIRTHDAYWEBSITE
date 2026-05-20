@@ -1,19 +1,47 @@
 :root {
   --c-bg:       #070A12;
-  --c-bg2:      #0B1020;
-  --c-cream:    #F4F1FF;
-  --c-parchment:#E9E4FF;
-  --c-warm:     #F7F3FF;
-  --c-gold:     #C7A6FF;
-  --c-gold2:    #9FD3FF;
-  --c-rust:     #FF8FB1;
-  --c-muted:    #A7A3C7;
-  --c-dimmed:   #5C5A7A;
-  --c-red:      #FF5C7A;
-  --c-green:    #6EE7B7;
-  --c-tape:     rgba(159,211,255,0.55);
-  --c-sticky-y: #FFE9A8;
-  --c-sticky-p: #FFB6D9;
-  --c-sticky-d: #12121A;
-  --c-sticky-c: #F3F0FF;
+  --c-bg2:      #0D1324;
+
+  --c-cream:    #F6F2FF;
+  --c-parchment:#ECE6FF;
+  --c-warm:     #FBF8FF;
+
+  --c-gold:     #C8A6FF;
+  --c-gold2:    #9ED6FF;
+
+  --c-rust:     #FF8CB7;
+
+  --c-muted:    #AAA4C8;
+  --c-dimmed:   #5B5872;
+
+  --c-red:      #FF5D87;
+  --c-green:    #79E7B7;
+
+  --c-tape:     rgba(200,166,255,0.45);
+
+  --c-sticky-y: #FFEAA0;
+  --c-sticky-p: #FFC1DE;
+  --c-sticky-d: #16141E;
+  --c-sticky-c: #F5F1FF;
+
+  --f-mono:  'Space Mono', 'Courier New', monospace;
+  --f-hand:  'Caveat', cursive;
+  --f-type:  'Special Elite', cursive;
+  --f-serif: 'Libre Baskerville', Georgia, serif;
+  --f-big:   'Bebas Neue', Impact, sans-serif;
+
+  --ease-out: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  --shadow-pol:
+    4px 8px 32px rgba(0,0,0,0.55),
+    0 2px 6px rgba(0,0,0,0.4);
+
+  --shadow-stick:
+    3px 4px 16px rgba(0,0,0,0.4);
+
+  --shadow-folder:
+    2px 4px 20px rgba(0,0,0,0.45);
+
+  --warmth: 0;
 }
