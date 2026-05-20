@@ -141,18 +141,26 @@ const STAR_SECRETS = [
 
 function buildStarField() {
   const field = $('#star-field');
-  const count = 80;
+  const count = 28; // reduced from 80 — fewer floating dots
 
-  // Regular decorative stars
+  // Regular decorative sparkles (pastel pink palette)
+  const sparkleColors = [
+    'hsl(340,70%,72%)',  // rose
+    'hsl(310,60%,75%)',  // lilac
+    'hsl(350,80%,78%)',  // blush
+    'hsl(280,55%,75%)',  // lavender
+    'hsl(330,65%,70%)',  // deep rose
+  ];
   for (let i = 0; i < count; i++) {
     const star = document.createElement('div');
     star.className = 'star ' + (Math.random() > 0.6 ? 'bright' : 'dim');
-    const size = Math.random() * 2.5 + 0.8;
+    const size = Math.random() * 3 + 1;
+    const color = sparkleColors[Math.floor(Math.random() * sparkleColors.length)];
     star.style.cssText = `
       width:${size}px; height:${size}px;
       left:${Math.random()*100}%;
       top:${Math.random()*100}%;
-      background: hsl(${40 + Math.random()*20}, 70%, ${60 + Math.random()*30}%);
+      background: ${color};
     `;
     field.appendChild(star);
   }
@@ -671,7 +679,7 @@ function triggerDistortion() {
 ══════════════════════════════════════ */
 function triggerBgBleed() {
   document.body.style.transition = 'background-color 0.5s ease';
-  document.body.style.backgroundColor = '#1a0d06';
+  document.body.style.backgroundColor = '#ffe0ee';
   setTimeout(() => {
     document.body.style.backgroundColor = '';
     setTimeout(() => document.body.style.transition = '', 1000);
