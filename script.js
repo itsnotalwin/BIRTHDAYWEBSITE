@@ -1,6 +1,8 @@
 let opened = false;
 let count = 0;
 
+document.addEventListener("DOMContentLoaded", () => {
+
 const bootBtn = document.getElementById("open-vault-btn");
 const boot = document.getElementById("boot-screen");
 const vault = document.getElementById("vault");
@@ -10,9 +12,12 @@ const progressCount = document.getElementById("progress-count");
 const stars = document.getElementById("star-field");
 
 function initStars() {
+  if (!stars) return;
+
   for (let i = 0; i < 60; i++) {
     const s = document.createElement("div");
     s.className = "star";
+
     const size = Math.random() * 3 + 1;
     s.style.width = size + "px";
     s.style.height = size + "px";
@@ -35,13 +40,11 @@ function increment() {
   count++;
   const pct = (count / 22) * 100;
 
-  progressWrap.classList.add("show");
-  progressFill.style.width = pct + "%";
-  progressCount.textContent = `${count} / 22`;
+  if (progressWrap) progressWrap.classList.add("show");
+  if (progressFill) progressFill.style.width = pct + "%";
+  if (progressCount) progressCount.textContent = `${count} / 22`;
 
-  if (count >= 22) {
-    revealFinal();
-  }
+  if (count >= 22) revealFinal();
 }
 
 function revealFinal() {
@@ -49,6 +52,8 @@ function revealFinal() {
 
   setTimeout(() => {
     const letter = document.getElementById("letter-body");
+    if (!letter) return;
+
     letter.innerHTML = `
       <p class="letter-big">you found all fragments</p>
       <p>this was never about memory</p>
@@ -57,8 +62,12 @@ function revealFinal() {
   }, 1200);
 }
 
-bootBtn.addEventListener("click", () => {
-  boot.classList.add("out");
-  vault.classList.add("show");
-  initStars();
+if (bootBtn) {
+  bootBtn.addEventListener("click", () => {
+    if (boot) boot.classList.add("out");
+    if (vault) vault.classList.add("show");
+    initStars();
+  });
+}
+
 });
