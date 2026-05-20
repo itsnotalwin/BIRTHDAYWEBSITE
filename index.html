@@ -1,561 +1,161 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0"/>
-<title>for you. obviously.</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;600;700&family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Libre+Baskerville:ital,wght@0,400;1,400&family=Bebas+Neue&family=Special+Elite&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="styles.css"/>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>22 — Memory Vault</title>
+
+  <link rel="stylesheet" href="styles.css"/>
 </head>
+
 <body>
 
-<!-- SOUND TOGGLE -->
-<button id="sound-toggle" title="Toggle ambient sound" aria-label="Toggle sound">
-  <svg id="sound-on-icon" width="16" height="16" viewBox="0 0 16 16" fill="none">
-    <path d="M9 2.5C10.5 3.8 11.5 5.8 11.5 8s-1 4.2-2.5 5.5M7 4.5C8 5.4 8.7 6.6 8.7 8s-.7 2.6-1.7 3.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
-    <path d="M5.5 5.5L3 7H1v2h2l2.5 1.5V5.5z" fill="currentColor"/>
-  </svg>
-  <svg id="sound-off-icon" width="16" height="16" viewBox="0 0 16 16" fill="none" class="hidden">
-    <path d="M5.5 5.5L3 7H1v2h2l2.5 1.5V5.5z" fill="currentColor"/>
-    <line x1="9" y1="5" x2="13" y2="11" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
-    <line x1="13" y1="5" x2="9" y2="11" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
-  </svg>
-</button>
-
-<!-- PROGRESS BAR -->
-<div id="progress-bar-wrap">
-  <span id="progress-label">THINGS FOUND</span>
-  <div id="progress-track"><div id="progress-fill"></div></div>
-  <span id="progress-count">0 / 22</span>
-</div>
-
-<!-- ═══════════════ BOOT SCREEN ═══════════════ -->
+<!-- ───────── BOOT SCREEN ───────── -->
 <div id="boot-screen">
   <div id="boot-inner">
     <pre id="boot-ascii">
- ██████╗  ██████╗ ██████╗ 
- ██╔══██╗██╔═══██╗██╔══██╗
- ██████╔╝██║   ██║██████╔╝
- ██╔══██╗██║   ██║██╔══██╗
- ██║  ██║╚██████╔╝██║  ██║
- ╚═╝  ╚═╝ ╚═════╝ ╚═╝  ╚═╝</pre>
-    <div class="boot-tagline">private archive · for your eyes only</div>
+22 MEMORY VAULT
+initialising...
+    </pre>
+
+    <div class="boot-tagline">PRIVATE ARCHIVE SYSTEM</div>
+
     <div id="boot-lines">
-      <div class="boot-line" data-d="300">▸ booting memory system<span class="boot-dots"></span></div>
-      <div class="boot-line" data-d="800">▸ scanning 22 fragments<span class="boot-dots"></span></div>
-      <div class="boot-line" data-d="1200">▸ integrity check: <span class="b-ok">PASSED</span></div>
-      <div class="boot-line" data-d="1700">▸ loading nostalgia module: <span class="b-ok">OK</span></div>
-      <div class="boot-line" data-d="2100">▸ feelings.exe is running</div>
-      <div class="boot-line b-warn" data-d="2600">▸ WARNING: may cause unexpected emotions</div>
-      <div class="boot-line boot-ready" data-d="3100">
-        <span class="b-ready-text">VAULT READY.</span>
-        <button id="open-vault-btn">[ OPEN IT ]</button>
-      </div>
+      <div class="boot-line show b-ok">system check</div>
+      <div class="boot-line show b-ok">memory nodes loaded</div>
+      <div class="boot-line show b-warn">22 fragments detected</div>
+    </div>
+
+    <div class="boot-ready">
+      <div class="b-ready-text">READY</div>
+      <button id="open-vault-btn">OPEN VAULT</button>
     </div>
   </div>
 </div>
 
-<!-- GLITCH TRANSITION -->
-<div id="glitch-overlay" aria-hidden="true"></div>
+<!-- ───────── STAR FIELD ───────── -->
+<div id="star-field"></div>
+<div id="particles"></div>
+<canvas id="grain-canvas"></canvas>
 
-<!-- ═══════════════ VAULT ═══════════════ -->
-<div id="vault" class="hidden">
+<!-- ───────── SOUND ───────── -->
+<button id="sound-toggle">♪</button>
 
-  <!-- Grain canvas (drawn by JS) -->
-  <canvas id="grain-canvas" aria-hidden="true"></canvas>
+<!-- ───────── PROGRESS ───────── -->
+<div id="progress-bar-wrap">
+  <div id="progress-label">MEMORIES</div>
+  <div id="progress-track"><div id="progress-fill"></div></div>
+  <div id="progress-count">0 / 22</div>
+</div>
 
-  <!-- Star field — clickable hidden stars -->
-  <div id="star-field" aria-hidden="true"></div>
+<!-- ───────── VAULT ───────── -->
+<main id="vault">
 
-  <!-- Floating dust particles -->
-  <div id="particles" aria-hidden="true"></div>
-
-  <!-- Header -->
   <header id="vault-header">
-    <div id="vh-left">
-      <span class="vh-num">22</span>
-      <span class="vh-sep">—</span>
-      <span class="vh-sub">a vault built for one person</span>
+    <div class="vh-num">22</div>
+    <div>
+      <div class="vh-sub">MEMORY VAULT</div>
     </div>
-    <div id="vh-right">
-      <span id="timestamp"></span>
-    </div>
+    <div id="vh-right">PRIVATE ARCHIVE</div>
   </header>
 
-  <!-- ═════════════════════════
-       MAIN DESKTOP CANVAS
-  ═════════════════════════ -->
-  <main id="desktop">
+  <section id="desktop">
 
-    <!-- ─────────────────────────
-         HERO TITLE BLOCK
-    ───────────────────────── -->
-    <div id="hero-block">
-      <p id="hero-eye">this one's for you.</p>
+    <!-- HERO -->
+    <section id="hero-block">
+      <div id="hero-eye">YOU ARE NOT SUPPOSED TO BE HERE</div>
+
       <h1 id="hero-title">
-        <span>you didn't just</span>
-        <span class="ht-gold">grow up.</span>
-        <span>you grew into</span>
-        <span class="ht-gold">yourself.</span>
+        MEMORY<br><span class="ht-gold">VAULT</span>
       </h1>
-      <p id="hero-sub">and i was there for it. i saw it all. this is the proof.</p>
-      <div id="hero-scroll-hint">↓ explore everything</div>
-    </div>
 
-    <!-- ─────────────────────────
-         POLAROIDS (floating, scattered)
-         SECRET 1–5
-         ⚠ REPLACE assets/polaroids/p01.jpg → p05.jpg
-    ───────────────────────── -->
-
-    <!-- S1: hover to reveal caption text -->
-    <div class="polaroid secret" id="s1" data-secret="1" data-type="hover-reveal"
-         style="--px:6%;--py:18%;--pr:-5deg;">
-      <div class="pol-img-wrap">
-        <img src="assets/polaroids/p01.jpg" alt="memory 01" onerror="this.parentElement.classList.add('no-img')"/>
-        <div class="pol-placeholder"><span>p01.jpg</span></div>
-      </div>
-      <div class="pol-caption">the version of you that existed before you stopped apologising for taking up space.</div>
-      <div class="pol-tape" style="--tr:-2deg;--tx:30%"></div>
-    </div>
-
-    <!-- S2: double-click to flip -->
-    <div class="polaroid flippable secret" id="s2" data-secret="2" data-type="flip"
-         style="--px:23%;--py:7%;--pr:3deg;">
-      <div class="pol-flip-inner">
-        <div class="pol-flip-front">
-          <div class="pol-img-wrap">
-            <img src="assets/polaroids/p02.jpg" alt="memory 02" onerror="this.parentElement.classList.add('no-img')"/>
-            <div class="pol-placeholder"><span>p02.jpg</span></div>
-          </div>
-          <div class="pol-caption">double-click to flip ↺</div>
-        </div>
-        <div class="pol-flip-back">
-          <p>you used to shrink yourself to fit wherever you were. then one day you just... stopped. i don't think you even noticed. i did.</p>
-        </div>
-      </div>
-      <div class="pol-tape" style="--tr:1deg;--tx:50%"></div>
-    </div>
-
-    <!-- S3: VHS glitch on click -->
-    <div class="polaroid secret vhs-pol" id="s3" data-secret="3" data-type="vhs"
-         style="--px:62%;--py:7%;--pr:6deg;">
-      <div class="pol-img-wrap">
-        <img src="assets/polaroids/p03.jpg" alt="memory 03" onerror="this.parentElement.classList.add('no-img')"/>
-        <div class="pol-placeholder"><span>p03.jpg</span></div>
-      </div>
-      <div class="pol-caption">you in your era of giving zero f*cks.</div>
-      <div class="pol-tape" style="--tr:-3deg;--tx:65%"></div>
-    </div>
-
-    <!-- S4: floating + audio ping -->
-    <div class="polaroid float-pol secret" id="s4" data-secret="4" data-type="float-ping"
-         style="--px:78%;--py:20%;--pr:-9deg;">
-      <div class="pol-img-wrap">
-        <img src="assets/polaroids/p04.jpg" alt="memory 04" onerror="this.parentElement.classList.add('no-img')"/>
-        <div class="pol-placeholder"><span>p04.jpg</span></div>
-      </div>
-      <div class="pol-caption">the laugh that makes other people start laughing.</div>
-      <div class="pol-tape" style="--tr:2deg;--tx:20%"></div>
-    </div>
-
-    <!-- S5: shake then reveal note -->
-    <div class="polaroid shake-pol secret" id="s5" data-secret="5" data-type="shake"
-         style="--px:44%;--py:14%;--pr:-2deg;">
-      <div class="pol-img-wrap">
-        <img src="assets/polaroids/p05.jpg" alt="memory 05" onerror="this.parentElement.classList.add('no-img')"/>
-        <div class="pol-placeholder"><span>p05.jpg</span></div>
-      </div>
-      <div class="pol-caption">do NOT shake this one.</div>
-      <div class="pol-tape" style="--tr:0deg;--tx:42%"></div>
-    </div>
-
-    <!-- ─────────────────────────
-         SECTION DIVIDER
-    ───────────────────────── -->
-    <div class="section-rule">
-      <span>▸ ARCHIVE FILES</span>
-    </div>
-
-    <!-- ─────────────────────────
-         FOLDERS
-         SECRET 6–10
-    ───────────────────────── -->
-    <div id="folder-grid">
-
-      <!-- S6 -->
-      <div class="folder secret" id="s6" data-secret="6">
-        <div class="folder-tab">THINGS I WATCHED YOU FIGURE OUT</div>
-        <div class="folder-body">
-          <p class="fn">how to say no and not feel guilty about it for three weeks after.</p>
-          <p class="fn">that you're allowed to want things. actually want them. out loud.</p>
-          <p class="fn">the difference between people who drain you and people who don't.</p>
-          <p class="fn">that "too much" is only a problem for people who can't handle it. those people are not your problem.</p>
-        </div>
+      <div id="hero-sub">
+        22 fragments stored. some visible. some waiting.
       </div>
 
-      <!-- S7 -->
-      <div class="folder secret" id="s7" data-secret="7">
-        <div class="folder-tab">EVIDENCE (that you're built different)</div>
-        <div class="folder-body">
-          <p class="fn">you bounced back from things that would have broken other people. and then acted like it was nothing. it wasn't nothing.</p>
-          <p class="fn">you've helped people through their worst days while quietly having your own. and you did it anyway.</p>
-          <p class="fn">every time you got knocked down, you came back a slightly upgraded version. that's not luck. that's you.</p>
-        </div>
+      <div id="hero-scroll-hint">SCROLL DOWN</div>
+    </section>
+
+    <div class="section-rule"><span>FRAGMENTS</span></div>
+
+    <!-- POLAROIDS -->
+    <section id="pol-row">
+      <div class="polaroid row-pol">
+        <div class="pol-img-wrap no-img"></div>
+        <div class="pol-caption">placeholder memory</div>
       </div>
 
-      <!-- S8 -->
-      <div class="folder secret" id="s8" data-secret="8">
-        <div class="folder-tab">THINGS I NEVER SAID [unsent]</div>
-        <div class="folder-body">
-          <p class="fn fn-label">[draft — never sent]</p>
-          <p class="fn">"i brag about you to people who've never met you. you'd be embarrassed. i don't care."</p>
-          <p class="fn fn-label">[draft 2 — also never sent]</p>
-          <p class="fn">"watching you become who you are has been one of the actual privileges of my life. i mean it."</p>
-        </div>
+      <div class="polaroid row-pol">
+        <div class="pol-img-wrap no-img"></div>
+        <div class="pol-caption">placeholder memory</div>
+      </div>
+    </section>
+
+    <div class="section-rule"><span>STICKY NOTES</span></div>
+
+    <!-- STICKY FIELD -->
+    <section id="sticky-field">
+      <div class="sticky" style="--sx:10%;--sy:10%;--sr:-4deg;">
+        <span class="s-label">NOTE</span>
+        <p>you will find things when you're not trying</p>
       </div>
 
-      <!-- S9 -->
-      <div class="folder secret" id="s9" data-secret="9">
-        <div class="folder-tab">THE HONEST FILES</div>
-        <div class="folder-body">
-          <p class="fn">you are genuinely one of the funniest people i know and not enough people acknowledge this.</p>
-          <p class="fn">you have a terrifying amount of potential and the worst part is you keep finding more of it.</p>
-          <p class="fn">you're the kind of friend people don't realise they needed until they have you. then they can't imagine life without you.</p>
-        </div>
+      <div class="sticky sticky-pink" style="--sx:55%;--sy:30%;--sr:3deg;">
+        <span class="s-label">NOTE</span>
+        <p>some memories only activate when touched</p>
+      </div>
+    </section>
+
+    <div class="section-rule"><span>FILES</span></div>
+
+    <!-- FILE ICONS -->
+    <section id="file-icons-row">
+      <div class="file-icon">
+        <div class="fi-icon">✦</div>
+        <div class="fi-name">fragment_01</div>
       </div>
 
-      <!-- S10 -->
-      <div class="folder secret" id="s10" data-secret="10">
-        <div class="folder-tab">GROWTH LOG</div>
-        <div class="folder-body">
-          <p class="fn">version: before — nervous to take up space.</p>
-          <p class="fn">version: now — takes up exactly the right amount of space. unapologetically.</p>
-          <p class="fn">rate of change: terrifying (complimentary).</p>
-          <p class="fn">expected ceiling: none found.</p>
-        </div>
+      <div class="file-icon corrupt-icon">
+        <div class="fi-icon">?</div>
+        <div class="fi-name">corrupt_file</div>
       </div>
 
-    </div><!-- /folder-grid -->
-
-    <!-- ─────────────────────────
-         SECTION DIVIDER
-    ───────────────────────── -->
-    <div class="section-rule">
-      <span>▸ FRAGMENTS / NOTES</span>
-    </div>
-
-    <!-- ─────────────────────────
-         STICKY NOTES (scattered)
-         SECRET 11–20
-    ───────────────────────── -->
-    <div id="sticky-field">
-
-      <!-- S11: invisible until hover -->
-      <div class="sticky secret inv-note" id="s11" data-secret="11"
-           style="--sx:5%;--sy:4%;--sr:-3deg;">
-        <p>you don't realise how rare it is — the way you make people feel seen. properly seen. you just do it naturally and it's honestly a little unfair how good you are at it.</p>
+      <div class="file-icon">
+        <div class="fi-icon">✧</div>
+        <div class="fi-name">audio_memory</div>
       </div>
+    </section>
 
-      <!-- S12: typewriter on click -->
-      <div class="sticky sticky-dark secret tw-note" id="s12" data-secret="12"
-           style="--sx:26%;--sy:3%;--sr:2deg;">
-        <div class="tw-output"></div>
-        <span class="tw-cursor">▌</span>
-      </div>
+    <div class="section-rule"><span>THE END</span></div>
 
-      <!-- S13: password unlock -->
-      <div class="sticky sticky-pink secret" id="s13" data-secret="13"
-           style="--sx:48%;--sy:2%;--sr:-1deg;">
-        <div class="s13-locked">
-          <p class="s-label">🔒 LOCKED FILE</p>
-          <p class="s-hint">hint: what did we always get at 2am?</p>
-          <input class="s-input" id="s13-input" type="text" placeholder="type it..." autocomplete="off" spellcheck="false"/>
-        </div>
-        <div class="s13-unlocked hidden">
-          <p>i remember. the exact table. what you were wearing. that you laughed so hard you nearly choked. i remember all of it.</p>
-        </div>
-      </div>
-
-      <!-- S14: draggable — drag away to reveal -->
-      <div class="sticky sticky-torn draggable secret" id="s14" data-secret="14"
-           style="--sx:70%;--sy:5%;--sr:4deg;">
-        <p class="s-label">drag me somewhere</p>
-        <p class="s14-hidden hidden">underneath all the jokes and the chaos and the "i'm fine"s — you are one of the realest people i know. full stop.</p>
-      </div>
-
-      <!-- S15: triggers fake Win98 error popup -->
-      <div class="sticky sticky-error secret" id="s15" data-secret="15"
-           style="--sx:86%;--sy:3%;--sr:-2deg;">
-        <p class="err-head">⚠ feelings.exe</p>
-        <p class="err-body">this file contains:<br>"you scare me a little.<br>in the best way."</p>
-      </div>
-
-      <!-- S16: theme changer -->
-      <div class="sticky sticky-cream secret theme-note" id="s16" data-secret="16"
-           style="--sx:5%;--sy:52%;--sr:-5deg;">
-        <p class="s-label">atmosphere.shift</p>
-        <p>click to change the whole vibe. because you always changed the vibe of every room you walked into.</p>
-      </div>
-
-      <!-- S17: distortion screen -->
-      <div class="sticky sticky-dark secret distort-note" id="s17" data-secret="17"
-           style="--sx:26%;--sy:56%;--sr:3deg;">
-        <p>you are not who you were two years ago. not even close. the glow-up has been physical, mental, emotional, and honestly a little bit rude to the rest of us.</p>
-      </div>
-
-      <!-- S18: cinematic film reel overlay -->
-      <div class="sticky sticky-film secret cinema-note" id="s18" data-secret="18"
-           style="--sx:48%;--sy:50%;--sr:-2deg;">
-        <p class="s-label">▶ fragment_18.reel</p>
-        <p>this one plays like a movie in my head.</p>
-      </div>
-
-      <!-- S19: background colour bleeds for 3s -->
-      <div class="sticky sticky-torn secret bg-bleed-note" id="s19" data-secret="19"
-           style="--sx:68%;--sy:54%;--sr:5deg;">
-        <p class="s-label">memory_bleed.tmp</p>
-        <p>i don't know when exactly you went from figuring it out to actually living it. but i watched it happen. and it was everything.</p>
-      </div>
-
-      <!-- S20: chaos — everything briefly flies around -->
-      <div class="sticky sticky-pink secret chaos-note" id="s20" data-secret="20"
-           style="--sx:86%;--sy:50%;--sr:-3deg;">
-        <p class="s-label">⚠ do not tap</p>
-        <p>do NOT press this note unless you want everything on this page to briefly lose its mind.</p>
-      </div>
-
-    </div><!-- /sticky-field -->
-
-    <!-- ─────────────────────────
-         SCROLL POEMS (not secrets)
-    ───────────────────────── -->
-    <div class="section-rule"><span>▸ RECOVERED DOCUMENTS</span></div>
-
-    <div class="scroll-poems">
-      <div class="sp reveal-scroll">
-        <p>"the version of you at rock bottom was still more resilient than most people at their best."</p>
-      </div>
-
-      <!-- FILE ICONS: S21 + S22 (chain) -->
-      <div id="file-icons-row">
-
-        <!-- S21: corrupted file -->
-        <div class="file-icon secret corrupt-icon" id="s21" data-secret="21">
-          <div class="fi-icon">?</div>
-          <div class="fi-name">UNKNOWN_DATA.fragment</div>
-        </div>
-
-        <!-- S22-chain: plays cinematic then reveals final dot -->
-        <div class="file-icon secret chain-icon" id="s21b" data-secret="21b">
-          <div class="fi-icon">▶</div>
-          <div class="fi-name">the_moment_it_changed.mov</div>
-        </div>
-
-      </div>
-
-      <div class="sp reveal-scroll" style="--spd:0.2s">
-        <p>"i have watched you turn pain into something beautiful more times than you know."</p>
-      </div>
-      <div class="sp reveal-scroll" style="--spd:0.4s">
-        <p>"the audacity of you — to keep going, keep growing, keep showing up. honestly? legendary behaviour."</p>
-      </div>
-    </div>
-
-    <!-- ─────────────────────────
-         THE LETTER
-    ───────────────────────── -->
-    <div class="section-rule"><span>▸ THE ACTUAL LETTER</span></div>
-
-    <div id="letter-wrap">
-      <div class="washi-tape wt-top"></div>
-      <div id="letter-paper">
-        <div id="letter-header">
-          <span id="letter-to">to: you. (yes, you.)</span>
-          <span id="letter-from">from: your idiot best friend, alwin</span>
-        </div>
-        <div id="letter-body">
-
-          <p>okay. i built a whole website. for you. that's how you know this is serious.</p>
-
-          <p>i'm not good at the big emotional speeches — you know this, i usually make a dumb joke right about now — but i'm trying something different. because you deserve something different. you deserve someone actually saying it. out loud. in HTML.</p>
-
-          <p>so here it is:</p>
-
-          <p class="letter-big">you became someone extraordinary.</p>
-
-          <p>not overnight. not quietly. loudly, messily, with setbacks and bad days and moments where you probably didn't believe it yourself. i believed it. i kept receipts. they're all in here.</p>
-
-          <p>i've watched you go through things that would have floored most people. and you didn't just survive them — you came out the other side somehow <em>more</em>. more yourself. more grounded. more impossible to ignore. and you did it without losing the parts of you that make you <em>you</em> — the ridiculous sense of humour, the way you actually care about people, the fact that you're secretly so much softer than you let on.</p>
-
-          <p>there is not a version of this universe where i'm not grateful to know you. i mean that. completely.</p>
-
-          <p class="letter-big">you are not who you were.</p>
-
-          <p>and who you are now is someone worth documenting. so i did.</p>
-
-          <p>there are 22 things hidden in here. explore. some of them are photos. some are notes. some are me being chaotic because that's on brand. but if you find all 22 — there's something at the end for you.</p>
-
-          <p class="letter-ps">p.s. — yes i spent way too long on this. no i don't regret it. don't be weird about it.</p>
-          <p class="letter-ps">p.p.s. — you're genuinely annoying for being this impressive. some of us are trying to feel special here.</p>
-          <p class="letter-ps">p.p.p.s. — you really are a bitch sometimes but god i love you for it.</p>
-
-          <div id="letter-sig">
-            — alwin<br>
-            <span class="sig-small">(your biggest fan / will deny this if asked)</span>
-          </div>
-
-        </div>
-      </div>
-      <div class="washi-tape wt-bottom"></div>
-    </div>
-
-    <!-- ─────────────────────────
-         MORE POLAROIDS ROW
-         ⚠ REPLACE assets/polaroids/p06–p09.jpg
-    ───────────────────────── -->
-    <div class="section-rule"><span>▸ MORE EVIDENCE</span></div>
-
-    <div id="pol-row">
-      <div class="polaroid row-pol" style="--pr:-4deg;">
-        <div class="pol-img-wrap">
-          <img src="assets/polaroids/p06.jpg" alt="" onerror="this.parentElement.classList.add('no-img')"/>
-          <div class="pol-placeholder"><span>p06.jpg</span></div>
-        </div>
-        <div class="pol-caption">when you finally said no without explaining yourself.</div>
-        <div class="pol-tape" style="--tr:1deg;--tx:35%"></div>
-      </div>
-      <div class="polaroid row-pol" style="--pr:5deg;">
-        <div class="pol-img-wrap">
-          <img src="assets/polaroids/p07.jpg" alt="" onerror="this.parentElement.classList.add('no-img')"/>
-          <div class="pol-placeholder"><span>p07.jpg</span></div>
-        </div>
-        <div class="pol-caption">unbothered era. iconic.</div>
-        <div class="pol-tape" style="--tr:-2deg;--tx:55%"></div>
-      </div>
-      <div class="polaroid row-pol" style="--pr:-2deg;">
-        <div class="pol-img-wrap">
-          <img src="assets/polaroids/p08.jpg" alt="" onerror="this.parentElement.classList.add('no-img')"/>
-          <div class="pol-placeholder"><span>p08.jpg</span></div>
-        </div>
-        <div class="pol-caption">the glow-up that deserved its own documentary.</div>
-        <div class="pol-tape" style="--tr:3deg;--tx:40%"></div>
-      </div>
-      <div class="polaroid row-pol" style="--pr:7deg;">
-        <div class="pol-img-wrap">
-          <img src="assets/polaroids/p09.jpg" alt="" onerror="this.parentElement.classList.add('no-img')"/>
-          <div class="pol-placeholder"><span>p09.jpg</span></div>
-        </div>
-        <div class="pol-caption">happy looks good on you. wear it more.</div>
-        <div class="pol-tape" style="--tr:-1deg;--tx:60%"></div>
-      </div>
-    </div>
-
-    <!-- ─────────────────────────
-         CLOSING POEM + SECRET 22 DOT
-    ───────────────────────── -->
-    <div id="section-close">
-
-      <div class="sp reveal-scroll" style="--spd:0s">
-        <p>"in ten years you'll look back at who you were becoming right now and understand exactly why it had to be this hard. and you'll be proud."</p>
-      </div>
-
-      <!-- THE SECRET 22 DOT — tiny, barely visible, bottom-right -->
+    <!-- LETTER -->
+    <section id="section-close">
       <div id="s22-zone">
-        <div id="s22-dot" class="secret" data-secret="22" title="">·</div>
+        <span id="s22-dot">22</span>
       </div>
 
-    </div>
+      <div id="letter-wrap">
+        <div id="letter-paper">
+          <div id="letter-header">
+            <div id="letter-to">to: you</div>
+            <div id="letter-from">from: memory system</div>
+          </div>
 
-  </main><!-- /desktop -->
+          <div id="letter-body">
+            <p>this is where the final memory will appear.</p>
+            <p class="letter-ps">unlock all fragments first.</p>
+          </div>
 
-  <!-- ═════════════════════════
-       THE ROOM (photo wall — Alwin uploads only)
-       Place images in assets/room/r01.jpg → r10.jpg
-  ═════════════════════════ -->
-  <div id="the-room" class="hidden">
-    <div id="room-backdrop"></div>
-    <button id="close-room" aria-label="Close the room">✕</button>
-    <div id="room-inner">
-      <h2 id="room-heading">the room at the end.</h2>
-      <p id="room-sub">some things are just for keeping.</p>
-      <div id="room-wall">
-        <!-- Polaroids rendered by JS from assets/room/r01–r10.jpg -->
+          <div id="letter-sig">—</div>
+        </div>
+
+        <div class="washi-tape wt-top"></div>
+        <div class="washi-tape wt-bottom"></div>
       </div>
-      <p id="room-close-note">close the door when you're done.</p>
-    </div>
-  </div>
+    </section>
 
-  <!-- Room door (appears when enough secrets found) -->
-  <div id="room-door">
-    <span class="rd-arrow">↳</span>
-    <span class="rd-text">there's a room</span>
-  </div>
-
-</div><!-- /vault -->
-
-<!-- ═══════════ OVERLAYS ═══════════ -->
-
-<!-- MODAL -->
-<div id="modal-overlay" class="hidden" role="dialog" aria-modal="true">
-  <div id="modal-box">
-    <button id="modal-close" aria-label="Close">✕</button>
-    <div id="modal-content"></div>
-  </div>
-</div>
-
-<!-- CINEMATIC -->
-<div id="cinematic-overlay" class="hidden" aria-hidden="true">
-  <div class="cine-bar top"></div>
-  <div id="cinematic-text"></div>
-  <div class="cine-bar bottom"></div>
-</div>
-
-<!-- VHS -->
-<div id="vhs-overlay" class="hidden" aria-hidden="true">
-  <div class="vhs-scanline"></div>
-  <div id="vhs-rec">● REC</div>
-  <div id="vhs-tc">00:00:00</div>
-</div>
-
-<!-- FAKE WIN98 ERROR -->
-<div id="win98-error" class="hidden" role="alertdialog">
-  <div class="w98-title">
-    <span>⚠ feelings.exe</span>
-    <button id="w98-close">✕</button>
-  </div>
-  <div class="w98-body">
-    <p id="w98-msg">A fatal error has occurred.</p>
-    <button id="w98-ok">OK</button>
-  </div>
-</div>
-
-<!-- DISTORTION FLASH -->
-<div id="distort-flash" aria-hidden="true"></div>
-
-<!-- ═══════════ FINAL REVEAL ═══════════ -->
-<!--
-  FINAL BACKGROUND IMAGE:
-  Place YOUR photo at: assets/final/her.jpg
-  It renders fullscreen behind the text.
--->
-<div id="final-reveal" class="hidden" aria-live="polite">
-  <div id="final-bg">
-    <img id="final-img" src="assets/final/her.jpg" alt="" onerror="this.style.opacity='0'"/>
-    <div id="final-vignette"></div>
-  </div>
-  <div id="final-content">
-    <div class="fl hidden" id="fl1">YOU'RE A BITCH</div>
-    <div class="fl fl-small hidden" id="fl2">haha</div>
-    <div class="fl fl-div hidden" id="fl3">— — —</div>
-    <div class="fl fl-mid hidden" id="fl4">but honestly?</div>
-    <div class="fl fl-big hidden" id="fl5">i'm so proud of you.</div>
-    <div class="fl fl-small hidden" id="fl6">like actually. embarrassingly proud.</div>
-    <div class="fl fl-love hidden" id="fl7">love from alwin ♡</div>
-    <div class="fl fl-ps hidden" id="fl8">( you found all 22. of course you did. )</div>
-  </div>
-</div>
+  </section>
+</main>
 
 <script src="script.js"></script>
 </body>
