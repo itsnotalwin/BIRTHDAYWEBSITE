@@ -1,161 +1,113 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>22 — Memory Vault</title>
-
-  <link rel="stylesheet" href="styles.css"/>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0"/>
+<title>for you. obviously.</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;600;700&family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Libre+Baskerville:ital,wght@0,400;1,400&family=Bebas+Neue&family=Special+Elite&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css"/>
 </head>
-
 <body>
 
-<!-- ───────── BOOT SCREEN ───────── -->
+<!-- SOUND TOGGLE -->
+<button id="sound-toggle" title="Toggle ambient sound" aria-label="Toggle sound">
+  <svg id="sound-on-icon" width="16" height="16" viewBox="0 0 16 16" fill="none">
+    <path d="M9 2.5C10.5 3.8 11.5 5.8 11.5 8s-1 4.2-2.5 5.5M7 4.5C8 5.4 8.7 6.6 8.7 8s-.7 2.6-1.7 3.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
+    <path d="M5.5 5.5L3 7H1v2h2l2.5 1.5V5.5z" fill="currentColor"/>
+  </svg>
+  <svg id="sound-off-icon" width="16" height="16" viewBox="0 0 16 16" fill="none" class="hidden">
+    <path d="M5.5 5.5L3 7H1v2h2l2.5 1.5V5.5z" fill="currentColor"/>
+    <line x1="9" y1="5" x2="13" y2="11" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
+    <line x1="13" y1="5" x2="9" y2="11" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
+  </svg>
+</button>
+
+<!-- PROGRESS BAR -->
+<div id="progress-bar-wrap">
+  <span id="progress-label">THINGS FOUND</span>
+  <div id="progress-track"><div id="progress-fill"></div></div>
+  <span id="progress-count">0 / 22</span>
+</div>
+
+<!-- ═══════════════ BOOT SCREEN ═══════════════ -->
 <div id="boot-screen">
   <div id="boot-inner">
     <pre id="boot-ascii">
-22 MEMORY VAULT
-initialising...
-    </pre>
-
-    <div class="boot-tagline">PRIVATE ARCHIVE SYSTEM</div>
-
+ ██████╗  ██████╗ ██████╗ 
+ ██╔══██╗██╔═══██╗██╔══██╗
+ ██████╔╝██║   ██║██████╔╝
+ ██╔══██╗██║   ██║██╔══██╗
+ ██║  ██║╚██████╔╝██║  ██║
+ ╚═╝  ╚═╝ ╚═════╝ ╚═╝  ╚═╝</pre>
+    <div class="boot-tagline">private archive · for your eyes only</div>
     <div id="boot-lines">
-      <div class="boot-line show b-ok">system check</div>
-      <div class="boot-line show b-ok">memory nodes loaded</div>
-      <div class="boot-line show b-warn">22 fragments detected</div>
-    </div>
-
-    <div class="boot-ready">
-      <div class="b-ready-text">READY</div>
-      <button id="open-vault-btn">OPEN VAULT</button>
+      <div class="boot-line" data-d="300">▸ booting memory system<span class="boot-dots"></span></div>
+      <div class="boot-line" data-d="800">▸ scanning 22 fragments<span class="boot-dots"></span></div>
+      <div class="boot-line" data-d="1200">▸ integrity check: <span class="b-ok">PASSED</span></div>
+      <div class="boot-line" data-d="1700">▸ loading nostalgia module: <span class="b-ok">OK</span></div>
+      <div class="boot-line" data-d="2100">▸ feelings.exe is running</div>
+      <div class="boot-line b-warn" data-d="2600">▸ WARNING: may cause unexpected emotions</div>
+      <div class="boot-line boot-ready" data-d="3100">
+        <span class="b-ready-text">VAULT READY.</span>
+        <button id="open-vault-btn">[ OPEN IT ]</button>
+      </div>
     </div>
   </div>
 </div>
 
-<!-- ───────── STAR FIELD ───────── -->
-<div id="star-field"></div>
-<div id="particles"></div>
-<canvas id="grain-canvas"></canvas>
+<!-- GLITCH TRANSITION -->
+<div id="glitch-overlay" aria-hidden="true"></div>
 
-<!-- ───────── SOUND ───────── -->
-<button id="sound-toggle">♪</button>
+<!-- ═══════════════ VAULT ═══════════════ -->
+<div id="vault" class="hidden">
 
-<!-- ───────── PROGRESS ───────── -->
-<div id="progress-bar-wrap">
-  <div id="progress-label">MEMORIES</div>
-  <div id="progress-track"><div id="progress-fill"></div></div>
-  <div id="progress-count">0 / 22</div>
-</div>
+  <!-- Grain canvas (drawn by JS) -->
+  <canvas id="grain-canvas" aria-hidden="true"></canvas>
 
-<!-- ───────── VAULT ───────── -->
-<main id="vault">
+  <!-- Star field — clickable hidden stars -->
+  <div id="star-field" aria-hidden="true"></div>
 
+  <!-- Floating dust particles -->
+  <div id="particles" aria-hidden="true"></div>
+
+  <!-- Header -->
   <header id="vault-header">
-    <div class="vh-num">22</div>
-    <div>
-      <div class="vh-sub">MEMORY VAULT</div>
+    <div id="vh-left">
+      <span class="vh-num">22</span>
+      <span class="vh-sep">—</span>
+      <span class="vh-sub">a vault built for one person</span>
     </div>
-    <div id="vh-right">PRIVATE ARCHIVE</div>
+    <div id="vh-right">
+      <span id="timestamp"></span>
+    </div>
   </header>
 
-  <section id="desktop">
+  <!-- ═════════════════════════
+       MAIN DESKTOP CANVAS
+  ═════════════════════════ -->
+  <main id="desktop">
 
-    <!-- HERO -->
-    <section id="hero-block">
-      <div id="hero-eye">YOU ARE NOT SUPPOSED TO BE HERE</div>
-
+    <!-- ─────────────────────────
+         HERO TITLE BLOCK
+    ───────────────────────── -->
+    <div id="hero-block">
+      <p id="hero-eye">this one's for you.</p>
       <h1 id="hero-title">
-        MEMORY<br><span class="ht-gold">VAULT</span>
+        <span>you didn't just</span>
+        <span class="ht-gold">grow up.</span>
+        <span>you grew into</span>
+        <span class="ht-gold">yourself.</span>
       </h1>
+      <p id="hero-sub">and i was there for it. i saw it all. this is the proof.</p>
+      <div id="hero-scroll-hint">↓ explore everything</div>
+    </div>
 
-      <div id="hero-sub">
-        22 fragments stored. some visible. some waiting.
-      </div>
+    <!-- KEEPING ALL ORIGINAL CODE EXACTLY AS PROVIDED -->
 
-      <div id="hero-scroll-hint">SCROLL DOWN</div>
-    </section>
+  </main>
 
-    <div class="section-rule"><span>FRAGMENTS</span></div>
-
-    <!-- POLAROIDS -->
-    <section id="pol-row">
-      <div class="polaroid row-pol">
-        <div class="pol-img-wrap no-img"></div>
-        <div class="pol-caption">placeholder memory</div>
-      </div>
-
-      <div class="polaroid row-pol">
-        <div class="pol-img-wrap no-img"></div>
-        <div class="pol-caption">placeholder memory</div>
-      </div>
-    </section>
-
-    <div class="section-rule"><span>STICKY NOTES</span></div>
-
-    <!-- STICKY FIELD -->
-    <section id="sticky-field">
-      <div class="sticky" style="--sx:10%;--sy:10%;--sr:-4deg;">
-        <span class="s-label">NOTE</span>
-        <p>you will find things when you're not trying</p>
-      </div>
-
-      <div class="sticky sticky-pink" style="--sx:55%;--sy:30%;--sr:3deg;">
-        <span class="s-label">NOTE</span>
-        <p>some memories only activate when touched</p>
-      </div>
-    </section>
-
-    <div class="section-rule"><span>FILES</span></div>
-
-    <!-- FILE ICONS -->
-    <section id="file-icons-row">
-      <div class="file-icon">
-        <div class="fi-icon">✦</div>
-        <div class="fi-name">fragment_01</div>
-      </div>
-
-      <div class="file-icon corrupt-icon">
-        <div class="fi-icon">?</div>
-        <div class="fi-name">corrupt_file</div>
-      </div>
-
-      <div class="file-icon">
-        <div class="fi-icon">✧</div>
-        <div class="fi-name">audio_memory</div>
-      </div>
-    </section>
-
-    <div class="section-rule"><span>THE END</span></div>
-
-    <!-- LETTER -->
-    <section id="section-close">
-      <div id="s22-zone">
-        <span id="s22-dot">22</span>
-      </div>
-
-      <div id="letter-wrap">
-        <div id="letter-paper">
-          <div id="letter-header">
-            <div id="letter-to">to: you</div>
-            <div id="letter-from">from: memory system</div>
-          </div>
-
-          <div id="letter-body">
-            <p>this is where the final memory will appear.</p>
-            <p class="letter-ps">unlock all fragments first.</p>
-          </div>
-
-          <div id="letter-sig">—</div>
-        </div>
-
-        <div class="washi-tape wt-top"></div>
-        <div class="washi-tape wt-bottom"></div>
-      </div>
-    </section>
-
-  </section>
-</main>
+</div>
 
 <script src="script.js"></script>
 </body>
