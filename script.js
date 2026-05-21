@@ -56,6 +56,11 @@ function enterVault() {
 
   // Show progress bar
   setTimeout(() => $('#progress-bar-wrap').classList.add('show'), 600);
+  // Show floating secret counter
+  setTimeout(() => {
+    const counter = $('#secret-counter');
+    if (counter) counter.classList.add('show');
+  }, 900);
 
   // Start timestamp
   startTimestamp();
@@ -65,6 +70,12 @@ function enterVault() {
 
   // Build particles
   buildParticles();
+
+  // Build floating petals
+  buildPetals();
+
+  // Random confetti cannon
+  scheduleConfetti();
 
   // Draw grain
   drawGrain();
@@ -131,62 +142,105 @@ function drawGrain() {
 /* ══════════════════════════════════════
    STAR FIELD (hidden clickable stars)
 ══════════════════════════════════════ */
-const STAR_SECRETS = [
-  { id:'star1', message:"you are not who you used to be. this is a good thing. this is the point." },
-  { id:'star2', message:"i see everything you've grown into. i kept count." },
-  { id:'star3', message:"every bad thing you survived made you sharper, not harder. that's rare." },
-  { id:'star4', message:"the version of you that doubted everything still got here. think about that." },
-  { id:'star5', message:"you're someone's reason to keep going. i know for a fact. i'm not telling you who." },
+const STAR_COMPLIMENTS = [
+  "oh my god you look SO good today. like actually??",
+  "your eyes are genuinely gorgeous. criminal.",
+  "you have THE best laugh. it makes everyone else laugh too.",
+  "okay but can we talk about how pretty you are?? hello??",
+  "your smile literally lights up every single room. not exaggerating.",
+  "you have such a good heart. genuinely one of the best people i know.",
+  "the way you carry yourself?? confident energy. obsessed.",
+  "you're THAT girl and i need you to know it.",
+  "your vibe is immaculate. everyone feels it when you walk in.",
+  "you smell good and your hair always looks great and it's annoying.",
+  "your taste in everything is just... chef's kiss. impeccable.",
+  "you make being you look so effortless. iconic behaviour.",
+  "i love the way your brain works. genuinely so interesting to talk to.",
+  "you are so much funnier than most people. unfair advantage.",
+  "your skin is glowing and you need to take that compliment.",
+  "the way you dress?? always. every time. nailed it.",
+  "you have such a warm presence. people feel safe around you.",
+  "best friend of the century. not up for debate.",
+  "you are literally so beautiful it's embarrassing for the rest of us.",
+  "the world is genuinely better with you in it. i mean every word.",
+  "you've grown so much and you still don't fully see it. i do.",
+  "your confidence lately? everything. we love to see it.",
+  "okay but your personality is actually unmatched. where did you come from.",
+  "you are SO loved. by so many people. don't forget that.",
+  "there is genuinely nobody like you and that's the highest compliment.",
+  "you give the best hugs and that's a skill not everyone has.",
+  "the way you care about people? rare. really genuinely rare.",
+  "you are that girl. you have always been that girl.",
+  "every single person who gets to know you is lucky. including me.",
+  "i think about how proud i am of you more than you know.",
+  "you turned your worst chapters into your best traits. that's everything.",
+  "your energy is addictive. people want to be around you always.",
+  "you are beautiful on your worst days too. just so you know.",
+  "i could brag about you to strangers and honestly? i have.",
+  "you have main character energy and i will not be taking questions.",
+  "the version of you right now? my favourite era so far.",
+  "you deserve every good thing that's coming. and a lot is coming.",
+  "your determination is actually kind of terrifying. in the best way.",
+  "god i'm so glad you exist. genuinely. what a world with you in it.",
+  "you are too hard on yourself. the rest of us can see how amazing you are.",
+  "that thing you're insecure about? nobody else even notices. they're too busy thinking you're gorgeous.",
+  "you radiate warmth and people are drawn to it. it's a superpower.",
+  "okay but real talk — you're one of the most beautiful people i've ever met.",
+  "the way you love people? it changes them. it changed me.",
+  "you have no idea the impact you have. i wish you could see what i see.",
+  "soft and strong at the same time. that's hard to pull off. you do it.",
+  "i am so honoured to know you. i don't say that lightly.",
+  "you're going to look back at this chapter and realise how much you were glowing.",
+  "cuteness.exe is running perfectly. zero errors detected. 🌹",
+  "paige. you are so incredibly loved. i hope you feel it today.",
 ];
 
 function buildStarField() {
   const field = $('#star-field');
-  const count = 80;
+  if (!field) return;
 
-  // Regular decorative stars
-  for (let i = 0; i < count; i++) {
+  // 50 big dark floating clickable compliment stars
+  const positions = [];
+  for (let i = 0; i < 50; i++) {
+    // Spread them across the full scroll height (300vh) and full width
+    let x, y, attempts = 0;
+    do {
+      x = 3 + Math.random() * 94;
+      y = 2 + Math.random() * 296;
+      attempts++;
+    } while (attempts < 20 && positions.some(p => Math.abs(p.x-x)<6 && Math.abs(p.y-y)<6));
+    positions.push({x, y});
+
     const star = document.createElement('div');
-    star.className = 'star ' + (Math.random() > 0.6 ? 'bright' : 'dim');
-    const size = Math.random() * 2.5 + 0.8;
+    star.className = 'star clickable-star';
+    const size = 5 + Math.random() * 5;
+    const compliment = STAR_COMPLIMENTS[i % STAR_COMPLIMENTS.length];
     star.style.cssText = `
       width:${size}px; height:${size}px;
-      left:${Math.random()*100}%;
-      top:${Math.random()*100}%;
-      background: hsl(${40 + Math.random()*20}, 70%, ${60 + Math.random()*30}%);
+      left:${x}%;
+      top:${y}vh;
+      --star-dur:${3 + Math.random()*4}s;
+      --star-delay:${-Math.random()*4}s;
+      --star-drift:${(Math.random()-0.5)*12}px;
     `;
+    star.addEventListener('click', (e) => {
+      e.stopPropagation();
+      handleStarClick(compliment, star);
+    });
     field.appendChild(star);
   }
-
-  // Hidden secret stars (slightly larger, very dim)
-  STAR_SECRETS.forEach((ss, idx) => {
-    const star = document.createElement('div');
-    star.className = 'star secret-star';
-    star.id = ss.id;
-    star.dataset.secretStar = idx;
-    star.style.cssText = `
-      width: 5px; height: 5px;
-      left: ${10 + idx * 18}%;
-      top:  ${20 + (idx % 3) * 22}%;
-      background: #c9a44a;
-      opacity: 0.07;
-    `;
-    star.addEventListener('click', () => handleStarSecret(ss, star));
-    field.appendChild(star);
-  });
 }
 
-function handleStarSecret(ss, starEl) {
-  if (starEl.classList.contains('discovered')) return;
-  starEl.classList.add('discovered');
-  playPing();
-  showModal(`<span class="m-label">★ star fragment</span><p>${ss.message}</p>`);
-
-  // Count star discoveries towards progress (max 5 stars = 1 secret slot each)
-  // We'll track stars separately but they contribute to atmosphere
+function handleStarClick(compliment, starEl) {
+  if (starEl.classList.contains('used')) return;
+  starEl.classList.add('used');
+  playChime();
   emitParticleBurst(
-    parseFloat(starEl.style.left) / 100 * window.innerWidth,
-    parseFloat(starEl.style.top)  / 100 * window.innerHeight
+    starEl.getBoundingClientRect().left + starEl.offsetWidth/2,
+    starEl.getBoundingClientRect().top  + starEl.offsetHeight/2
   );
+  showModal(`<span class="m-label">🌟 just for you</span><p>${compliment}</p>`);
+  setTimeout(() => starEl.classList.remove('used'), 5000);
 }
 
 /* ══════════════════════════════════════
@@ -230,6 +284,111 @@ function emitParticleBurst(x, y) {
 }
 
 /* ══════════════════════════════════════
+   FLOATING PETALS
+══════════════════════════════════════ */
+const PETAL_COLORS = ['#f5c2d3','#e8a5b8','#ffd6e8','#ffb3cc','#f9d4e1','#fce4ec'];
+const PETAL_SVG = (color) => `<svg viewBox="0 0 20 24" xmlns="http://www.w3.org/2000/svg">
+  <path d="M10 2 C14 2, 18 6, 18 11 C18 17, 14 22, 10 22 C6 22, 2 17, 2 11 C2 6, 6 2, 10 2Z"
+    fill="${color}" opacity="0.85"/>
+  <path d="M10 2 C10 2, 10 12, 10 22" stroke="${color}" stroke-width="0.5" opacity="0.4" fill="none"/>
+</svg>`;
+
+function buildPetals() {
+  const field = $('#petal-field');
+  if (!field) return;
+  const count = 18;
+  for (let i = 0; i < count; i++) {
+    spawnPetal(field, i * (14000 / count));
+  }
+}
+
+function spawnPetal(field, initialDelay) {
+  const color = PETAL_COLORS[Math.floor(Math.random() * PETAL_COLORS.length)];
+  const size  = 10 + Math.random() * 14;
+  const left  = Math.random() * 100;
+  const dur   = 9 + Math.random() * 10;
+  const sway  = (Math.random() - 0.5) * 100;
+  const rot0  = Math.random() * 360;
+  const rot1  = rot0 + 180 + Math.random() * 180;
+  const op    = 0.35 + Math.random() * 0.35;
+
+  const petal = document.createElement('div');
+  petal.className = 'petal';
+  petal.innerHTML = PETAL_SVG(color);
+  petal.style.cssText = `
+    --ps:${size}px;
+    --pf-dur:${dur}s;
+    --pf-delay:${initialDelay}ms;
+    --pf-sway:${dur * 0.4}s;
+    --pf-swing:${sway}px;
+    --pr0:${rot0}deg;
+    --pr1:${rot1}deg;
+    --pf-op:${op};
+    left:${left}%;
+  `;
+  field.appendChild(petal);
+
+  // Recycle petal after each cycle
+  petal.addEventListener('animationiteration', () => {
+    petal.style.left = Math.random() * 100 + '%';
+  });
+}
+
+/* ══════════════════════════════════════
+   CONFETTI CANNON
+══════════════════════════════════════ */
+const CONFETTI_COLORS = [
+  '#f5c2d3','#e8a5b8','#d97b99','#c4668a',
+  '#ffd6e8','#ffb3cc','#a8d5ba','#c9f0d8',
+  '#ffe8cc','#ffd4e5','#f9d4e1'
+];
+
+function fireConfetti(originX) {
+  const cx = originX !== undefined ? originX : (30 + Math.random() * 40);
+  const count = 38 + Math.floor(Math.random() * 22);
+
+  for (let i = 0; i < count; i++) {
+    const piece = document.createElement('div');
+    piece.className = 'confetti-piece';
+    const color = CONFETTI_COLORS[Math.floor(Math.random() * CONFETTI_COLORS.length)];
+    const isCircle = Math.random() > 0.6;
+    const w = isCircle ? 6 + Math.random() * 5 : 5 + Math.random() * 8;
+    const h = isCircle ? w : 4 + Math.random() * 7;
+    const vx = (Math.random() - 0.5) * 260;
+    const rot = (Math.random() - 0.5) * 900;
+    const dur = 1.8 + Math.random() * 1.2;
+    const delay = Math.random() * 0.25;
+
+    piece.style.cssText = `
+      --cy: -5px;
+      --cx: ${cx}%;
+      --cw: ${w}px;
+      --ch: ${h}px;
+      --cc: ${color};
+      --cbr: ${isCircle ? '50%' : '2px'};
+      --cvx: ${vx}px;
+      --crot: ${rot}deg;
+      --cd: ${dur}s;
+      --cdelay: ${delay}s;
+    `;
+    document.body.appendChild(piece);
+    setTimeout(() => piece.remove(), (dur + delay + 0.3) * 1000);
+  }
+}
+
+function scheduleConfetti() {
+  // Fire once shortly after vault opens
+  setTimeout(() => fireConfetti(50), 3500);
+
+  // Then randomly every 35-65 seconds
+  function randomFire() {
+    fireConfetti(20 + Math.random() * 60);
+    setTimeout(randomFire, 35000 + Math.random() * 30000);
+  }
+  setTimeout(randomFire, 40000);
+}
+
+/* ══════════════════════════════════════
    PROGRESS SYSTEM
 ══════════════════════════════════════ */
 function markFound(id) {
@@ -247,6 +406,17 @@ function markFound(id) {
   $('#progress-fill').style.width = pct + '%';
   $('#progress-count').textContent = `${count} / ${STATE.total}`;
 
+  // Update floating secret counter
+  const scFound = $('#sc-found');
+  const counter = $('#secret-counter');
+  if (scFound) scFound.textContent = count;
+  if (counter) {
+    counter.classList.remove('pop');
+    void counter.offsetWidth; // reflow to restart animation
+    counter.classList.add('pop');
+    counter.classList.add('show');
+  }
+
   // Warmth level
   const warm = Math.min(4, Math.floor(count / 6));
   document.body.className = document.body.className.replace(/warmth-\d/,'');
@@ -255,13 +425,15 @@ function markFound(id) {
   // Unlock room door at 10 secrets
   if (count >= 10 && !STATE.roomUnlocked) {
     STATE.roomUnlocked = true;
-    $('#room-door').classList.add('show');
+    const door = $('#room-door');
+    if (door) {
+      door.classList.add('show');
+      // little pulse to draw attention
+      setTimeout(() => door.classList.add('pulse'), 800);
+    }
   }
 
-  // All 22 found
-  if (count >= STATE.total) {
-    setTimeout(triggerFinalReveal, 800);
-  }
+  // All 22 found — counter only, room triggers the actual reveal
 
   playPing();
 }
@@ -279,17 +451,20 @@ function initSecrets() {
     <p>the version of you that existed before you stopped apologising for taking up space was already incredible.<br><br>the version after? unfair.</p>`);
   });
 
-  /* ── S2: Double-click to flip ── */
+  /* ── S2: Double-click to flip (single tap on touch) ── */
   const s2 = $('#s2');
   if (s2) {
+    const isTouchDevice = () => window.matchMedia('(hover: none)').matches;
     s2.addEventListener('dblclick', (e) => {
       e.preventDefault();
       s2.classList.toggle('flipped');
       markFound(2);
     });
-    // Also single click reminder
     s2.addEventListener('click', () => {
-      if (!s2.classList.contains('flipped') && !STATE.found.has('2')) {
+      if (isTouchDevice()) {
+        s2.classList.toggle('flipped');
+        markFound(2);
+      } else if (!s2.classList.contains('flipped') && !STATE.found.has('2')) {
         s2.querySelector('.pol-caption').textContent = 'double-click me! ↺';
       }
     });
@@ -391,7 +566,7 @@ function initSecrets() {
   const s15 = $('#s15');
   if (s15) s15.addEventListener('click', () => {
     markFound(15);
-    showWin98Error("A fatal feelings.exe error has occurred.\n\n\"You scare me a little.\nIn the best possible way.\"\n\nThis file cannot be suppressed.\nPlease tell her.");
+    showWin98Error("cuteness.exe has encountered a fatal error.\n\n\"Paige overflow detected.\nSystem cannot process this level\nof charm and resilience.\"\n\nPlease restart your heart.\nError code: TOO_MUCH_HER");
   });
 
   /* ── S16: Theme changer ── */
@@ -460,11 +635,12 @@ function initSecrets() {
     showCinematic("there was a moment.\n\nyou probably don't even remember it.\n\nbut everything changed.\n\nand i saw it.");
   });
 
-  /* ── S22: The tiny dot — FINAL ── */
+  /* ── S22: The tiny dot — opens the room ── */
   const s22 = $('#s22-dot');
   if (s22) s22.addEventListener('click', () => {
     markFound(22);
-    // delay then final
+    playChime();
+    setTimeout(() => openRoom(), 600);
   });
 
   /* ── Scroll-triggered poems ── */
@@ -587,8 +763,12 @@ function showModal(html) {
   const content = $('#modal-content');
   if (!overlay || !content) return;
 
+  // Save scroll position so page doesn't jump
+  const scrollY = window.scrollY;
   content.innerHTML = html;
   overlay.classList.remove('hidden');
+  // Restore scroll position after DOM update
+  requestAnimationFrame(() => window.scrollTo(0, scrollY));
 
   $('#modal-close').onclick = closeModal;
   overlay.onclick = (e) => { if (e.target === overlay) closeModal(); };
@@ -596,7 +776,9 @@ function showModal(html) {
 }
 
 function closeModal() {
+  const scrollY = window.scrollY;
   $('#modal-overlay').classList.add('hidden');
+  requestAnimationFrame(() => window.scrollTo(0, scrollY));
   document.removeEventListener('keydown', escModal);
 }
 
@@ -633,11 +815,14 @@ function showCinematic(text) {
   const textEl   = $('#cinematic-text');
   if (!overlay || !textEl) return;
 
+  const scrollY = window.scrollY;
   textEl.innerHTML = text.split('\n').map(l => l ? `<span>${l}</span>` : `<br>`).join('');
   overlay.classList.remove('hidden');
+  requestAnimationFrame(() => window.scrollTo(0, scrollY));
 
   setTimeout(() => {
     overlay.classList.add('hidden');
+    requestAnimationFrame(() => window.scrollTo(0, scrollY));
   }, 5800);
 }
 
@@ -671,7 +856,7 @@ function triggerDistortion() {
 ══════════════════════════════════════ */
 function triggerBgBleed() {
   document.body.style.transition = 'background-color 0.5s ease';
-  document.body.style.backgroundColor = '#1a0d06';
+  document.body.style.backgroundColor = '#f0c8d8';
   setTimeout(() => {
     document.body.style.backgroundColor = '';
     setTimeout(() => document.body.style.transition = '', 1000);
@@ -746,17 +931,35 @@ $('#close-room') && $('#close-room').addEventListener('click', closeRoom);
 function openRoom() {
   const room = $('#the-room');
   if (!room) return;
+  // Two-step for iOS: remove hidden first, then add open after a frame
   room.classList.remove('hidden');
-  requestAnimationFrame(() => room.classList.add('open'));
+  room.style.opacity = '0';
+  room.style.display = 'block';
+  setTimeout(() => {
+    room.style.transition = 'opacity 0.9s ease';
+    room.style.opacity = '1';
+    room.classList.add('open');
+  }, 30);
   document.body.style.overflow = 'hidden';
+  document.body.style.position = 'fixed';
+  document.body.style.width = '100%';
+
+  // Trigger the final reveal after she has a moment in the room
+  setTimeout(() => triggerFinalReveal(), 3500);
 }
 function closeRoom() {
   const room = $('#the-room');
   if (!room) return;
+  room.style.opacity = '0';
   room.classList.remove('open');
   setTimeout(() => {
+    room.style.display = 'none';
     room.classList.add('hidden');
+    room.style.opacity = '';
+    room.style.transition = '';
     document.body.style.overflow = '';
+    document.body.style.position = '';
+    document.body.style.width = '';
   }, 900);
 }
 
@@ -904,6 +1107,11 @@ function triggerFinalReveal() {
   requestAnimationFrame(() => rev.classList.add('show'));
 
   playChime();
+
+  // Confetti celebration!
+  setTimeout(() => fireConfetti(50), 800);
+  setTimeout(() => fireConfetti(20), 1400);
+  setTimeout(() => fireConfetti(80), 1900);
 
   const lines = [
     { id:'fl1', delay: 1200 },
