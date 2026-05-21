@@ -143,11 +143,11 @@ function drawGrain() {
    STAR FIELD (hidden clickable stars)
 ══════════════════════════════════════ */
 const STAR_SECRETS = [
-  { id:'star1', message:"you are not who you used to be. this is a good thing. this is the point." },
-  { id:'star2', message:"i see everything you've grown into. i kept count." },
-  { id:'star3', message:"every bad thing you survived made you sharper, not harder. that's rare." },
-  { id:'star4', message:"the version of you that doubted everything still got here. think about that." },
-  { id:'star5', message:"you're someone's reason to keep going. i know for a fact. i'm not telling you who." },
+  { id:'star1', message:"You are not who you used to be. this is a good thing. this is the point." },
+  { id:'star2', message:"I see everything you've grown into.I kept count." },
+  { id:'star3', message:"Every bad thing you survived made you sharper, not harder." },
+  { id:'star4', message:"The version of you that doubted everything still got here.Think about that." },
+  { id:'star5', message:"You're someone's reason to keep going.I know for a fact. i'm not telling you who." },
 ];
 
 function buildStarField() {
@@ -403,7 +403,7 @@ function initSecrets() {
   if (s1) s1.addEventListener('click', () => {
     markFound(1);
     showModal(`<span class="m-label">memory_01 / observation</span>
-    <p>the version of you that existed before you stopped apologising for taking up space was already incredible.<br><br>the version after? unfair.</p>`);
+    <p>The version of you that existed before you stopped apologising for taking up space was already incredible.<br><br>The version after?Unfair.</p>`);
   });
 
   /* ── S2: Double-click to flip ── */
@@ -429,7 +429,7 @@ function initSecrets() {
     triggerVHS();
     setTimeout(() => {
       showModal(`<span class="m-label">fragment_03 / vhs_recovered</span>
-      <p>you in your era of giving zero f*cks was one of the best things i've ever watched happen to a person in real time.</p>`);
+      <p>You in your era of giving zero f*cks was one of the best things I've ever watched happen.</p>`);
     }, 800);
   });
 
@@ -439,7 +439,7 @@ function initSecrets() {
     markFound(4);
     playChime();
     showModal(`<span class="m-label">memory_04 / sound</span>
-    <p>the laugh that makes other people start laughing. you don't realise you do it. you've never realised.</p>`);
+    <p>Your hyena laugh the one that sets everyone else off without you even trying.</p>`);
   });
 
   /* ── S5: Shake then reveal note ── */
@@ -451,7 +451,7 @@ function initSecrets() {
       s5.classList.remove('pol-shaking');
       markFound(5);
       showModal(`<span class="m-label">memory_05 / shaken_loose</span>
-      <p>you've shaken off more than i know about. i know that much. and you still show up every time. still you.</p>`);
+      <p>You’ve shaken off more than I know about.I know that much. and you still show up every time still you, just a little more gentle than before..</p>`);
     }, 550);
   });
 
@@ -476,7 +476,7 @@ function initSecrets() {
     if (!STATE.found.has('12')) {
       markFound(12);
       typewrite(s12.querySelector('.tw-output'),
-        "you have this thing where you make everyone around you feel like the most important person in the room. you do it without trying. it's a gift and you give it for free.",
+        "You have this thing where you make everyone around you feel like the most important person in the room.You do it without trying. it's a gift and you give it for free.",
         38
       );
     }
@@ -518,7 +518,7 @@ function initSecrets() {
   const s15 = $('#s15');
   if (s15) s15.addEventListener('click', () => {
     markFound(15);
-    showWin98Error("cuteness.exe has encountered a fatal error.\n\n\"Paige overflow detected.\nSystem cannot process this level\nof charm and resilience.\"\n\nPlease restart your heart.\nError code: TOO_MUCH_HER");
+    showWin98Error("cuteness.exe has encountered a fatal error.\n\n\"Cuteness overflow detectedfrom user.\nSystem cannot process this level\nof charm and resilience.\"\n\nPlease restart your heart.\nError code: TOO_MUCH_HER");
   });
 
   /* ── S16: Theme changer ── */
@@ -539,7 +539,7 @@ function initSecrets() {
     triggerDistortion();
     setTimeout(() => {
       showModal(`<span class="m-label">observation_17 / verified</span>
-      <p>you are not who you were two years ago. not even close. the glow-up has been physical, mental, emotional, and honestly a little bit rude to the rest of us.</p>`);
+      <p>You are not who you were two years ago. Not even close. The glow-up has been physical, mental, emotional, and honestly a little bit rude to the rest of us.</p>`);
     }, 900);
   });
 
@@ -547,7 +547,7 @@ function initSecrets() {
   const s18 = $('#s18');
   if (s18) s18.addEventListener('click', () => {
     markFound(18);
-    showCinematic("i don't know when exactly you went from figuring it out\n\nto actually living it.\n\nbut i was there.\n\nand it looked like something worth remembering.");
+    showCinematic("I don't know when exactly you went from figuring it out\n\nto actually living it.\n\nbut I was there.\n\nand it looked like something worth remembering.");
   });
 
   /* ── S19: Background colour bleed ── */
@@ -556,7 +556,7 @@ function initSecrets() {
     markFound(19);
     triggerBgBleed();
     showModal(`<span class="m-label">memory_bleed.tmp</span>
-    <p>i don't know exactly when it happened. the shift. but one day you just... landed. you became someone who felt settled in themselves. watching that happen from the outside? quietly one of my favourite things.</p>`);
+    <p>I don't know exactly when it happened. the shift. but one day you just... landed. You became someone who felt settled in themselves. Watching that happen from the outside.</p>`);
   });
 
   /* ── S20: Chaos — everything flies ── */
@@ -573,7 +573,7 @@ function initSecrets() {
     playError();
     setTimeout(() => {
       showModal(`<span class="m-label">UNKNOWN_DATA.fragment / decrypted</span>
-      <p>this file was corrupted. but the core message survived:<br><br>you are not a work in progress. you are already the work. you are already the point.</p>`);
+      <p>this file was corrupted. but the core message survived:<br><br>You are not a work in progress. You are already the work. you are already the point. Nothing about you is unfinished.</p>`);
     }, 600);
     // glitch the icon
     s21.querySelector('.fi-icon').style.animation = 'corrupt 0.3s steps(2) 4';
