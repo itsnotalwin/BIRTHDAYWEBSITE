@@ -359,12 +359,12 @@ function scheduleConfetti() {
   // Fire once shortly after vault opens
   setTimeout(() => fireConfetti(50), 3500);
 
-  // Then randomly every 35-65 seconds
+  // Then randomly every 5-10 seconds
   function randomFire() {
     fireConfetti(20 + Math.random() * 60);
-    setTimeout(randomFire, 35000 + Math.random() * 30000);
+    setTimeout(randomFire, 5000 + Math.random() * 5000);
   }
-  setTimeout(randomFire, 40000);
+  setTimeout(randomFire, 8000);
 }
 
 /* ══════════════════════════════════════
@@ -736,12 +736,15 @@ function showModal(html) {
   const content = $('#modal-content');
   if (!overlay || !content) return;
 
-  // Save scroll position so page doesn't jump
+  // Lock scroll in place — prevents page jumping to top
   const scrollY = window.scrollY;
+  document.body.style.position = 'fixed';
+  document.body.style.top = `-${scrollY}px`;
+  document.body.style.width = '100%';
+  document.body.dataset.scrollY = scrollY;
+
   content.innerHTML = html;
   overlay.classList.remove('hidden');
-  // Restore scroll position after DOM update
-  requestAnimationFrame(() => window.scrollTo(0, scrollY));
 
   $('#modal-close').onclick = closeModal;
   overlay.onclick = (e) => { if (e.target === overlay) closeModal(); };
@@ -749,10 +752,15 @@ function showModal(html) {
 }
 
 function closeModal() {
-  const scrollY = window.scrollY;
   $('#modal-overlay').classList.add('hidden');
-  requestAnimationFrame(() => window.scrollTo(0, scrollY));
   document.removeEventListener('keydown', escModal);
+
+  // Restore scroll position
+  const scrollY = parseInt(document.body.dataset.scrollY || '0');
+  document.body.style.position = '';
+  document.body.style.top = '';
+  document.body.style.width = '';
+  window.scrollTo(0, scrollY);
 }
 
 function escModal(e) { if (e.key === 'Escape') closeModal(); }
@@ -789,13 +797,21 @@ function showCinematic(text) {
   if (!overlay || !textEl) return;
 
   const scrollY = window.scrollY;
+  document.body.style.position = 'fixed';
+  document.body.style.top = `-${scrollY}px`;
+  document.body.style.width = '100%';
+  document.body.dataset.scrollY = scrollY;
+
   textEl.innerHTML = text.split('\n').map(l => l ? `<span>${l}</span>` : `<br>`).join('');
   overlay.classList.remove('hidden');
-  requestAnimationFrame(() => window.scrollTo(0, scrollY));
 
   setTimeout(() => {
     overlay.classList.add('hidden');
-    requestAnimationFrame(() => window.scrollTo(0, scrollY));
+    const sy = parseInt(document.body.dataset.scrollY || '0');
+    document.body.style.position = '';
+    document.body.style.top = '';
+    document.body.style.width = '';
+    window.scrollTo(0, sy);
   }, 5800);
 }
 
@@ -933,21 +949,30 @@ function revealRoomLetter() {
     wall.style.opacity = '0';
   }
 
-  // Create and show the letter
+  // Create and show the letter — same style as the main page letter
   const letter = document.createElement('div');
   letter.id = 'room-final-letter';
   letter.innerHTML = `
-    <div class="rfl-tape"></div>
-    <div class="rfl-body">
-      <p class="rfl-to">to: tannie 🌹</p>
-      <p>if you found this room it means you looked for everything.</p>
-      <p>that's so you.</p>
-      <p>you don't half-do anything. never have. that's the thing about you that I've always loved most.</p>
-      <p>you show up fully. for everything. for everyone.</p>
-      <p class="rfl-big">show up for yourself that way too. 💕</p>
-      <p>happy birthday, tannie.</p>
-      <p class="rfl-sig">— oomie 🌹<br><span>(your biggest fan. still denying it.)</span></p>
+    <div class="washi-tape wt-top"></div>
+    <div id="room-letter-paper">
+      <div id="letter-header">
+        <span id="letter-to">to: tannie 💕</span>
+        <span id="letter-from">from: your idiot best friend, alwin 🌹</span>
+      </div>
+      <div id="letter-body">
+        <p>Okay tannie. Last year I wrote you a long ass letter. This year I built you a website instead. Slight evolution.</p>
+        <p class="letter-big">you became someone extraordinary. 💕</p>
+        <p>Loudly, messily, with setbacks and bad days and moments where you probably didn't believe it yourself. I believed it. I kept receipts.</p>
+        <p>There are 22 things hidden in here. Go find them properly. Something's waiting at the end.</p>
+        <p class="letter-ps">p.s. — Don't be weird about this. 🌸</p>
+        <p class="letter-ps">p.p.s. — You're genuinely annoying for being this impressive. Some of us are trying.</p>
+        <div id="letter-sig">
+          — oomie 🌹<br>
+          <span class="sig-small">(your biggest fan / will deny this if asked)</span>
+        </div>
+      </div>
     </div>
+    <div class="washi-tape wt-bottom"></div>
   `;
 
   const roomInner = $('#room-inner');
