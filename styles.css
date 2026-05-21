@@ -58,6 +58,24 @@ body {
   transition: filter 1s ease, background-color 1s ease;
   -webkit-tap-highlight-color: transparent;
   touch-action: manipulation;
+  /* Performance optimizations */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+/* GPU acceleration for animated elements */
+.polaroid,
+.sticky,
+.folder,
+.file-icon,
+.petal,
+.particle,
+.clickable-star {
+  will-change: transform;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
 }
 
 .hidden { display: none !important; }
@@ -1040,12 +1058,30 @@ body::after {
 }
 
 /* ══════════════════════════════════
-   THE LETTER
+   THE LETTER (NO ANIMATIONS)
 ══════════════════════════════════ */
 #letter-wrap {
   position: relative;
   max-width: 680px;
   margin: 20px auto;
+}
+
+/* CRITICAL: Letter section stays completely static - NO animations */
+#letter-wrap,
+#letter-wrap *,
+#letter-paper,
+#letter-paper *,
+#letter-body,
+#letter-body *,
+#letter-header,
+#letter-header *,
+#letter-sig,
+.letter-big,
+.letter-ps {
+  animation: none !important;
+  transition: none !important;
+  opacity: 1 !important;
+  transform: none !important;
 }
 
 .washi-tape {
