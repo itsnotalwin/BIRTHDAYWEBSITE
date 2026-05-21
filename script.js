@@ -213,7 +213,7 @@ function buildStarField() {
 
     const star = document.createElement('div');
     star.className = 'star clickable-star';
-    const size = 10 + Math.random() * 8;
+    const size = 5 + Math.random() * 5;
     const compliment = STAR_COMPLIMENTS[i % STAR_COMPLIMENTS.length];
     star.style.cssText = `
       width:${size}px; height:${size}px;
