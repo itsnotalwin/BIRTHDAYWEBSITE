@@ -160,6 +160,71 @@ body::after {
   100% { opacity: 0; transform: translateY(-120px) translateX(var(--px-drift, 20px)) scale(0.5); }
 }
 
+/* ── FLOATING SECRET COUNTER ── */
+#secret-counter {
+  position: fixed;
+  bottom: 24px;
+  left: 20px;
+  z-index: 9400;
+  background: rgba(42, 21, 32, 0.92);
+  border: 1px solid rgba(232,165,184,0.35);
+  border-radius: 60px;
+  padding: 10px 18px 10px 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  backdrop-filter: blur(12px);
+  box-shadow: 0 4px 24px rgba(42,21,32,0.25), 0 0 0 1px rgba(232,165,184,0.08);
+  transition: transform 0.4s var(--ease-spring), opacity 0.4s ease;
+  opacity: 0;
+  transform: translateY(12px) scale(0.95);
+}
+#secret-counter.show {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+#secret-counter.pop {
+  animation: sc-pop 0.35s var(--ease-spring);
+}
+@keyframes sc-pop {
+  0%   { transform: scale(1); }
+  40%  { transform: scale(1.18); }
+  100% { transform: scale(1); }
+}
+#sc-rose {
+  font-size: 18px;
+  line-height: 1;
+  animation: sc-spin 6s linear infinite;
+}
+@keyframes sc-spin {
+  0%   { transform: rotate(0deg); }
+  10%  { transform: rotate(-8deg); }
+  20%  { transform: rotate(8deg); }
+  30%  { transform: rotate(0deg); }
+  100% { transform: rotate(0deg); }
+}
+#sc-text {
+  font-family: var(--f-big);
+  font-size: 22px;
+  color: #ffe8f2;
+  letter-spacing: 0.04em;
+  line-height: 1;
+}
+#sc-found { color: #f5c2d3; }
+#sc-sep   { color: rgba(232,165,184,0.4); margin: 0 1px; font-size: 16px; }
+#sc-total { color: rgba(255,232,242,0.4); font-size: 16px; }
+#sc-label {
+  font-family: var(--f-mono);
+  font-size: 7px;
+  color: rgba(232,165,184,0.5);
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+  transform: rotate(180deg);
+  margin-left: 2px;
+}
+
 /* ── SOUND TOGGLE ── */
 #sound-toggle {
   position: fixed;
@@ -258,11 +323,14 @@ body::after {
 
 #boot-ascii {
   font-family: var(--f-mono);
-  font-size: clamp(6px, 1.2vw, 11px);
+  font-size: clamp(7px, 1.5vw, 13px);
   color: #d97b99;
-  line-height: 1.3;
+  line-height: 1.25;
   margin-bottom: 12px;
-  opacity: 0.85;
+  opacity: 1;
+  white-space: pre;
+  overflow: hidden;
+  text-shadow: 0 0 18px rgba(217,123,153,0.5);
 }
 
 .boot-tagline {
@@ -1212,13 +1280,13 @@ body::after {
 @keyframes modal-in { from{opacity:0} to{opacity:1} }
 
 #modal-box {
-  background: var(--c-bg2);
-  border: 1px solid rgba(255,255,255,0.07);
+  background: #2a1520;
+  border: 1px solid rgba(232,165,184,0.2);
   max-width: 500px;
   width: 100%;
   padding: 34px 36px;
   position: relative;
-  box-shadow: 0 20px 60px rgba(0,0,0,0.7);
+  box-shadow: 0 20px 60px rgba(0,0,0,0.4), 0 0 0 1px rgba(232,165,184,0.1);
   animation: modal-box-in 0.4s var(--ease-spring);
 }
 @keyframes modal-box-in {
@@ -1231,17 +1299,17 @@ body::after {
   right: 16px;
   background: none;
   border: none;
-  color: var(--c-muted);
+  color: #c9a8b5;
   font-size: 16px;
   cursor: pointer;
   transition: color 0.2s;
   padding: 4px;
 }
-#modal-close:hover { color: var(--c-cream); }
+#modal-close:hover { color: #f5c2d3; }
 #modal-content .m-label {
   font-family: var(--f-mono);
   font-size: 8px;
-  color: var(--c-gold);
+  color: #e8a5b8;
   letter-spacing: 0.3em;
   text-transform: uppercase;
   display: block;
@@ -1250,7 +1318,7 @@ body::after {
 #modal-content p {
   font-family: var(--f-hand);
   font-size: clamp(15px, 3vw, 18px);
-  color: var(--c-cream);
+  color: #ffe8f2;
   line-height: 1.75;
 }
 
@@ -1598,5 +1666,5 @@ body.distorting {
 
 @media (max-width: 480px) {
   #hero-title { font-size: 40px; }
-  #boot-ascii { display: none; }
+  #boot-ascii { font-size: clamp(5px, 2.2vw, 9px); }
 }

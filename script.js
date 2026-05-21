@@ -56,6 +56,11 @@ function enterVault() {
 
   // Show progress bar
   setTimeout(() => $('#progress-bar-wrap').classList.add('show'), 600);
+  // Show floating secret counter
+  setTimeout(() => {
+    const counter = $('#secret-counter');
+    if (counter) counter.classList.add('show');
+  }, 900);
 
   // Start timestamp
   startTimestamp();
@@ -246,6 +251,17 @@ function markFound(id) {
   const pct   = (count / STATE.total) * 100;
   $('#progress-fill').style.width = pct + '%';
   $('#progress-count').textContent = `${count} / ${STATE.total}`;
+
+  // Update floating secret counter
+  const scFound = $('#sc-found');
+  const counter = $('#secret-counter');
+  if (scFound) scFound.textContent = count;
+  if (counter) {
+    counter.classList.remove('pop');
+    void counter.offsetWidth; // reflow to restart animation
+    counter.classList.add('pop');
+    counter.classList.add('show');
+  }
 
   // Warmth level
   const warm = Math.min(4, Math.floor(count / 6));
@@ -587,8 +603,12 @@ function showModal(html) {
   const content = $('#modal-content');
   if (!overlay || !content) return;
 
+  // Save scroll position so page doesn't jump
+  const scrollY = window.scrollY;
   content.innerHTML = html;
   overlay.classList.remove('hidden');
+  // Restore scroll position after DOM update
+  requestAnimationFrame(() => window.scrollTo(0, scrollY));
 
   $('#modal-close').onclick = closeModal;
   overlay.onclick = (e) => { if (e.target === overlay) closeModal(); };
@@ -596,7 +616,9 @@ function showModal(html) {
 }
 
 function closeModal() {
+  const scrollY = window.scrollY;
   $('#modal-overlay').classList.add('hidden');
+  requestAnimationFrame(() => window.scrollTo(0, scrollY));
   document.removeEventListener('keydown', escModal);
 }
 
@@ -633,11 +655,14 @@ function showCinematic(text) {
   const textEl   = $('#cinematic-text');
   if (!overlay || !textEl) return;
 
+  const scrollY = window.scrollY;
   textEl.innerHTML = text.split('\n').map(l => l ? `<span>${l}</span>` : `<br>`).join('');
   overlay.classList.remove('hidden');
+  requestAnimationFrame(() => window.scrollTo(0, scrollY));
 
   setTimeout(() => {
     overlay.classList.add('hidden');
+    requestAnimationFrame(() => window.scrollTo(0, scrollY));
   }, 5800);
 }
 
