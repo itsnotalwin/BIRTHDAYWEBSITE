@@ -14,6 +14,7 @@ const STATE = {
   themes: ['', 'theme-warm', 'theme-cold', 'theme-void', 'theme-bloom'],
   themeIdx: 0,
   roomUnlocked: false,
+  roomLetterShown: false,
   audioCtx: null,
 };
 
@@ -143,11 +144,11 @@ function drawGrain() {
    STAR FIELD (hidden clickable stars)
 ══════════════════════════════════════ */
 const STAR_SECRETS = [
-  { id:'star1', message:"You are not who you used to be. this is a good thing. this is the point." },
-  { id:'star2', message:"I see everything you've grown into.I kept count." },
-  { id:'star3', message:"Every bad thing you survived made you sharper, not harder." },
-  { id:'star4', message:"The version of you that doubted everything still got here.Think about that." },
-  { id:'star5', message:"You're someone's reason to keep going.I know for a fact. i'm not telling you who." },
+  { id:'star1', message:"omg you look so pretty today?? like actually unreal 🌸" },
+  { id:'star2', message:"CRAZY bestie energy detected. off the charts. sending u away." },
+  { id:'star3', message:"the way you walk into a room and people just?? feel it?? iconic behaviour tbh 💕" },
+  { id:'star4', message:"ur literally that girl. not a metaphor. literally THAT girl. 🌹" },
+  { id:'star5', message:"bestie ur giving main character and the whole supporting cast simultaneously. how." },
 ];
 
 function buildStarField() {
@@ -168,18 +169,19 @@ function buildStarField() {
     field.appendChild(star);
   }
 
-  // Hidden secret stars (slightly larger, very dim)
+  // Hidden secret stars (slightly larger, visible enough to find)
   STAR_SECRETS.forEach((ss, idx) => {
     const star = document.createElement('div');
     star.className = 'star secret-star';
     star.id = ss.id;
     star.dataset.secretStar = idx;
     star.style.cssText = `
-      width: 5px; height: 5px;
+      width: 7px; height: 7px;
       left: ${10 + idx * 18}%;
       top:  ${20 + (idx % 3) * 22}%;
-      background: #c9a44a;
-      opacity: 0.07;
+      background: #f0c0d8;
+      opacity: 0.35;
+      box-shadow: 0 0 6px 2px rgba(240,192,216,0.4);
     `;
     star.addEventListener('click', () => handleStarSecret(ss, star));
     field.appendChild(star);
@@ -190,14 +192,34 @@ function handleStarSecret(ss, starEl) {
   if (starEl.classList.contains('discovered')) return;
   starEl.classList.add('discovered');
   playPing();
-  showModal(`<span class="m-label">★ star fragment</span><p>${ss.message}</p>`);
 
-  // Count star discoveries towards progress (max 5 stars = 1 secret slot each)
-  // We'll track stars separately but they contribute to atmosphere
+  // Show a fun floating compliment toast
+  showStarCompliment(ss.message, starEl);
+
   emitParticleBurst(
     parseFloat(starEl.style.left) / 100 * window.innerWidth,
     parseFloat(starEl.style.top)  / 100 * window.innerHeight
   );
+}
+
+function showStarCompliment(msg, starEl) {
+  const toast = document.createElement('div');
+  toast.className = 'star-toast';
+  toast.textContent = msg;
+
+  // Position near the star
+  const x = parseFloat(starEl.style.left);
+  const y = parseFloat(starEl.style.top);
+  toast.style.left = Math.min(Math.max(x, 5), 60) + '%';
+  toast.style.top  = Math.max(y - 12, 5) + '%';
+
+  document.body.appendChild(toast);
+  requestAnimationFrame(() => toast.classList.add('show'));
+
+  setTimeout(() => {
+    toast.classList.remove('show');
+    setTimeout(() => toast.remove(), 600);
+  }, 3200);
 }
 
 /* ══════════════════════════════════════
@@ -880,12 +902,66 @@ $('#room-door') && $('#room-door').addEventListener('click', openRoom);
 $('#close-room') && $('#close-room').addEventListener('click', closeRoom);
 
 function openRoom() {
+  // Secret lock check — she doesn't know, just gets a hint if not enough
+  if (!STATE.roomUnlocked) {
+    showModal(`<span class="m-label">locked 🌹</span><p>some things aren't ready yet.<br><br>keep looking. you'll know when.</p>`);
+    playError();
+    return;
+  }
+
   const room = $('#the-room');
   if (!room) return;
   room.classList.remove('hidden');
   requestAnimationFrame(() => room.classList.add('open'));
   document.body.style.overflow = 'hidden';
+
+  // After 60 seconds, fade out polaroids and reveal the final letter
+  if (!STATE.roomLetterShown) {
+    STATE.roomLetterShown = true;
+    setTimeout(() => revealRoomLetter(), 60000);
+  }
 }
+
+function revealRoomLetter() {
+  const wall = $('#room-wall');
+  const existing = $('#room-final-letter');
+  if (existing) return; // already shown
+
+  // Fade out the wall
+  if (wall) {
+    wall.style.transition = 'opacity 2s ease';
+    wall.style.opacity = '0';
+  }
+
+  // Create and show the letter
+  const letter = document.createElement('div');
+  letter.id = 'room-final-letter';
+  letter.innerHTML = `
+    <div class="rfl-tape"></div>
+    <div class="rfl-body">
+      <p class="rfl-to">to: tannie 🌹</p>
+      <p>if you found this room it means you looked for everything.</p>
+      <p>that's so you.</p>
+      <p>you don't half-do anything. never have. that's the thing about you that I've always loved most.</p>
+      <p>you show up fully. for everything. for everyone.</p>
+      <p class="rfl-big">show up for yourself that way too. 💕</p>
+      <p>happy birthday, tannie.</p>
+      <p class="rfl-sig">— oomie 🌹<br><span>(your biggest fan. still denying it.)</span></p>
+    </div>
+  `;
+
+  const roomInner = $('#room-inner');
+  if (roomInner) {
+    roomInner.appendChild(letter);
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => letter.classList.add('show'));
+    });
+  }
+
+  playChime();
+  setTimeout(() => fireConfetti(50), 600);
+}
+
 function closeRoom() {
   const room = $('#the-room');
   if (!room) return;
