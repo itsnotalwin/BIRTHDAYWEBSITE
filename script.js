@@ -71,6 +71,12 @@ function enterVault() {
   // Build particles
   buildParticles();
 
+  // Build floating petals
+  buildPetals();
+
+  // Random confetti cannon
+  scheduleConfetti();
+
   // Draw grain
   drawGrain();
 
@@ -232,6 +238,111 @@ function emitParticleBurst(x, y) {
     field.appendChild(p);
     setTimeout(() => p.remove(), 2000);
   }
+}
+
+/* ══════════════════════════════════════
+   FLOATING PETALS
+══════════════════════════════════════ */
+const PETAL_COLORS = ['#f5c2d3','#e8a5b8','#ffd6e8','#ffb3cc','#f9d4e1','#fce4ec'];
+const PETAL_SVG = (color) => `<svg viewBox="0 0 20 24" xmlns="http://www.w3.org/2000/svg">
+  <path d="M10 2 C14 2, 18 6, 18 11 C18 17, 14 22, 10 22 C6 22, 2 17, 2 11 C2 6, 6 2, 10 2Z"
+    fill="${color}" opacity="0.85"/>
+  <path d="M10 2 C10 2, 10 12, 10 22" stroke="${color}" stroke-width="0.5" opacity="0.4" fill="none"/>
+</svg>`;
+
+function buildPetals() {
+  const field = $('#petal-field');
+  if (!field) return;
+  const count = 18;
+  for (let i = 0; i < count; i++) {
+    spawnPetal(field, i * (14000 / count));
+  }
+}
+
+function spawnPetal(field, initialDelay) {
+  const color = PETAL_COLORS[Math.floor(Math.random() * PETAL_COLORS.length)];
+  const size  = 10 + Math.random() * 14;
+  const left  = Math.random() * 100;
+  const dur   = 9 + Math.random() * 10;
+  const sway  = (Math.random() - 0.5) * 100;
+  const rot0  = Math.random() * 360;
+  const rot1  = rot0 + 180 + Math.random() * 180;
+  const op    = 0.35 + Math.random() * 0.35;
+
+  const petal = document.createElement('div');
+  petal.className = 'petal';
+  petal.innerHTML = PETAL_SVG(color);
+  petal.style.cssText = `
+    --ps:${size}px;
+    --pf-dur:${dur}s;
+    --pf-delay:${initialDelay}ms;
+    --pf-sway:${dur * 0.4}s;
+    --pf-swing:${sway}px;
+    --pr0:${rot0}deg;
+    --pr1:${rot1}deg;
+    --pf-op:${op};
+    left:${left}%;
+  `;
+  field.appendChild(petal);
+
+  // Recycle petal after each cycle
+  petal.addEventListener('animationiteration', () => {
+    petal.style.left = Math.random() * 100 + '%';
+  });
+}
+
+/* ══════════════════════════════════════
+   CONFETTI CANNON
+══════════════════════════════════════ */
+const CONFETTI_COLORS = [
+  '#f5c2d3','#e8a5b8','#d97b99','#c4668a',
+  '#ffd6e8','#ffb3cc','#a8d5ba','#c9f0d8',
+  '#ffe8cc','#ffd4e5','#f9d4e1'
+];
+
+function fireConfetti(originX) {
+  const cx = originX !== undefined ? originX : (30 + Math.random() * 40);
+  const count = 38 + Math.floor(Math.random() * 22);
+
+  for (let i = 0; i < count; i++) {
+    const piece = document.createElement('div');
+    piece.className = 'confetti-piece';
+    const color = CONFETTI_COLORS[Math.floor(Math.random() * CONFETTI_COLORS.length)];
+    const isCircle = Math.random() > 0.6;
+    const w = isCircle ? 6 + Math.random() * 5 : 5 + Math.random() * 8;
+    const h = isCircle ? w : 4 + Math.random() * 7;
+    const vx = (Math.random() - 0.5) * 260;
+    const rot = (Math.random() - 0.5) * 900;
+    const dur = 1.8 + Math.random() * 1.2;
+    const delay = Math.random() * 0.25;
+
+    piece.style.cssText = `
+      --cy: -5px;
+      --cx: ${cx}%;
+      --cw: ${w}px;
+      --ch: ${h}px;
+      --cc: ${color};
+      --cbr: ${isCircle ? '50%' : '2px'};
+      --cvx: ${vx}px;
+      --crot: ${rot}deg;
+      --cd: ${dur}s;
+      --cdelay: ${delay}s;
+    `;
+    document.body.appendChild(piece);
+    setTimeout(() => piece.remove(), (dur + delay + 0.3) * 1000);
+  }
+}
+
+function scheduleConfetti() {
+  // Fire once shortly after vault opens
+  setTimeout(() => fireConfetti(50), 3500);
+
+  // Then randomly every 35-65 seconds
+  function randomFire() {
+    fireConfetti(20 + Math.random() * 60);
+    setTimeout(randomFire, 35000 + Math.random() * 30000);
+  }
+  setTimeout(randomFire, 40000);
 }
 
 /* ══════════════════════════════════════
@@ -407,7 +518,7 @@ function initSecrets() {
   const s15 = $('#s15');
   if (s15) s15.addEventListener('click', () => {
     markFound(15);
-    showWin98Error("A fatal feelings.exe error has occurred.\n\n\"You scare me a little.\nIn the best possible way.\"\n\nThis file cannot be suppressed.\nPlease tell her.");
+    showWin98Error("cuteness.exe has encountered a fatal error.\n\n\"Paige overflow detected.\nSystem cannot process this level\nof charm and resilience.\"\n\nPlease restart your heart.\nError code: TOO_MUCH_HER");
   });
 
   /* ── S16: Theme changer ── */
@@ -696,7 +807,7 @@ function triggerDistortion() {
 ══════════════════════════════════════ */
 function triggerBgBleed() {
   document.body.style.transition = 'background-color 0.5s ease';
-  document.body.style.backgroundColor = '#1a0d06';
+  document.body.style.backgroundColor = '#f0c8d8';
   setTimeout(() => {
     document.body.style.backgroundColor = '';
     setTimeout(() => document.body.style.transition = '', 1000);
@@ -929,6 +1040,11 @@ function triggerFinalReveal() {
   requestAnimationFrame(() => rev.classList.add('show'));
 
   playChime();
+
+  // Confetti celebration!
+  setTimeout(() => fireConfetti(50), 800);
+  setTimeout(() => fireConfetti(20), 1400);
+  setTimeout(() => fireConfetti(80), 1900);
 
   const lines = [
     { id:'fl1', delay: 1200 },
