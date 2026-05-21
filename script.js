@@ -142,62 +142,105 @@ function drawGrain() {
 /* ══════════════════════════════════════
    STAR FIELD (hidden clickable stars)
 ══════════════════════════════════════ */
-const STAR_SECRETS = [
-  { id:'star1', message:"You are not who you used to be. this is a good thing. this is the point." },
-  { id:'star2', message:"I see everything you've grown into.I kept count." },
-  { id:'star3', message:"Every bad thing you survived made you sharper, not harder." },
-  { id:'star4', message:"The version of you that doubted everything still got here.Think about that." },
-  { id:'star5', message:"You're someone's reason to keep going.I know for a fact. i'm not telling you who." },
+const STAR_COMPLIMENTS = [
+  "oh my god you look SO good today. like actually??",
+  "your eyes are genuinely gorgeous. criminal.",
+  "you have THE best laugh. it makes everyone else laugh too.",
+  "okay but can we talk about how pretty you are?? hello??",
+  "your smile literally lights up every single room. not exaggerating.",
+  "you have such a good heart. genuinely one of the best people i know.",
+  "the way you carry yourself?? confident energy. obsessed.",
+  "you're THAT girl and i need you to know it.",
+  "your vibe is immaculate. everyone feels it when you walk in.",
+  "you smell good and your hair always looks great and it's annoying.",
+  "your taste in everything is just... chef's kiss. impeccable.",
+  "you make being you look so effortless. iconic behaviour.",
+  "i love the way your brain works. genuinely so interesting to talk to.",
+  "you are so much funnier than most people. unfair advantage.",
+  "your skin is glowing and you need to take that compliment.",
+  "the way you dress?? always. every time. nailed it.",
+  "you have such a warm presence. people feel safe around you.",
+  "best friend of the century. not up for debate.",
+  "you are literally so beautiful it's embarrassing for the rest of us.",
+  "the world is genuinely better with you in it. i mean every word.",
+  "you've grown so much and you still don't fully see it. i do.",
+  "your confidence lately? everything. we love to see it.",
+  "okay but your personality is actually unmatched. where did you come from.",
+  "you are SO loved. by so many people. don't forget that.",
+  "there is genuinely nobody like you and that's the highest compliment.",
+  "you give the best hugs and that's a skill not everyone has.",
+  "the way you care about people? rare. really genuinely rare.",
+  "you are that girl. you have always been that girl.",
+  "every single person who gets to know you is lucky. including me.",
+  "i think about how proud i am of you more than you know.",
+  "you turned your worst chapters into your best traits. that's everything.",
+  "your energy is addictive. people want to be around you always.",
+  "you are beautiful on your worst days too. just so you know.",
+  "i could brag about you to strangers and honestly? i have.",
+  "you have main character energy and i will not be taking questions.",
+  "the version of you right now? my favourite era so far.",
+  "you deserve every good thing that's coming. and a lot is coming.",
+  "your determination is actually kind of terrifying. in the best way.",
+  "god i'm so glad you exist. genuinely. what a world with you in it.",
+  "you are too hard on yourself. the rest of us can see how amazing you are.",
+  "that thing you're insecure about? nobody else even notices. they're too busy thinking you're gorgeous.",
+  "you radiate warmth and people are drawn to it. it's a superpower.",
+  "okay but real talk — you're one of the most beautiful people i've ever met.",
+  "the way you love people? it changes them. it changed me.",
+  "you have no idea the impact you have. i wish you could see what i see.",
+  "soft and strong at the same time. that's hard to pull off. you do it.",
+  "i am so honoured to know you. i don't say that lightly.",
+  "you're going to look back at this chapter and realise how much you were glowing.",
+  "cuteness.exe is running perfectly. zero errors detected. 🌹",
+  "paige. you are so incredibly loved. i hope you feel it today.",
 ];
 
 function buildStarField() {
   const field = $('#star-field');
-  const count = 80;
+  if (!field) return;
 
-  // Regular decorative stars
-  for (let i = 0; i < count; i++) {
+  // 50 big dark floating clickable compliment stars
+  const positions = [];
+  for (let i = 0; i < 50; i++) {
+    // Spread them across the full scroll height (300vh) and full width
+    let x, y, attempts = 0;
+    do {
+      x = 3 + Math.random() * 94;
+      y = 2 + Math.random() * 296;
+      attempts++;
+    } while (attempts < 20 && positions.some(p => Math.abs(p.x-x)<6 && Math.abs(p.y-y)<6));
+    positions.push({x, y});
+
     const star = document.createElement('div');
-    star.className = 'star ' + (Math.random() > 0.6 ? 'bright' : 'dim');
-    const size = Math.random() * 2.5 + 0.8;
+    star.className = 'star clickable-star';
+    const size = 10 + Math.random() * 8;
+    const compliment = STAR_COMPLIMENTS[i % STAR_COMPLIMENTS.length];
     star.style.cssText = `
       width:${size}px; height:${size}px;
-      left:${Math.random()*100}%;
-      top:${Math.random()*100}%;
-      background: hsl(${40 + Math.random()*20}, 70%, ${60 + Math.random()*30}%);
+      left:${x}%;
+      top:${y}vh;
+      --star-dur:${3 + Math.random()*4}s;
+      --star-delay:${-Math.random()*4}s;
+      --star-drift:${(Math.random()-0.5)*12}px;
     `;
+    star.addEventListener('click', (e) => {
+      e.stopPropagation();
+      handleStarClick(compliment, star);
+    });
     field.appendChild(star);
   }
-
-  // Hidden secret stars (slightly larger, very dim)
-  STAR_SECRETS.forEach((ss, idx) => {
-    const star = document.createElement('div');
-    star.className = 'star secret-star';
-    star.id = ss.id;
-    star.dataset.secretStar = idx;
-    star.style.cssText = `
-      width: 5px; height: 5px;
-      left: ${10 + idx * 18}%;
-      top:  ${20 + (idx % 3) * 22}%;
-      background: #c9a44a;
-      opacity: 0.07;
-    `;
-    star.addEventListener('click', () => handleStarSecret(ss, star));
-    field.appendChild(star);
-  });
 }
 
-function handleStarSecret(ss, starEl) {
-  if (starEl.classList.contains('discovered')) return;
-  starEl.classList.add('discovered');
-  playPing();
-  showModal(`<span class="m-label">★ star fragment</span><p>${ss.message}</p>`);
-
-  // Count star discoveries towards progress (max 5 stars = 1 secret slot each)
-  // We'll track stars separately but they contribute to atmosphere
+function handleStarClick(compliment, starEl) {
+  if (starEl.classList.contains('used')) return;
+  starEl.classList.add('used');
+  playChime();
   emitParticleBurst(
-    parseFloat(starEl.style.left) / 100 * window.innerWidth,
-    parseFloat(starEl.style.top)  / 100 * window.innerHeight
+    starEl.getBoundingClientRect().left + starEl.offsetWidth/2,
+    starEl.getBoundingClientRect().top  + starEl.offsetHeight/2
   );
+  showModal(`<span class="m-label">🌟 just for you</span><p>${compliment}</p>`);
+  setTimeout(() => starEl.classList.remove('used'), 5000);
 }
 
 /* ══════════════════════════════════════
@@ -382,13 +425,15 @@ function markFound(id) {
   // Unlock room door at 10 secrets
   if (count >= 10 && !STATE.roomUnlocked) {
     STATE.roomUnlocked = true;
-    $('#room-door').classList.add('show');
+    const door = $('#room-door');
+    if (door) {
+      door.classList.add('show');
+      // little pulse to draw attention
+      setTimeout(() => door.classList.add('pulse'), 800);
+    }
   }
 
-  // All 22 found
-  if (count >= STATE.total) {
-    setTimeout(triggerFinalReveal, 800);
-  }
+  // All 22 found — counter only, room triggers the actual reveal
 
   playPing();
 }
@@ -403,20 +448,23 @@ function initSecrets() {
   if (s1) s1.addEventListener('click', () => {
     markFound(1);
     showModal(`<span class="m-label">memory_01 / observation</span>
-    <p>The version of you that existed before you stopped apologising for taking up space was already incredible.<br><br>The version after?Unfair.</p>`);
+    <p>the version of you that existed before you stopped apologising for taking up space was already incredible.<br><br>the version after? unfair.</p>`);
   });
 
-  /* ── S2: Double-click to flip ── */
+  /* ── S2: Double-click to flip (single tap on touch) ── */
   const s2 = $('#s2');
   if (s2) {
+    const isTouchDevice = () => window.matchMedia('(hover: none)').matches;
     s2.addEventListener('dblclick', (e) => {
       e.preventDefault();
       s2.classList.toggle('flipped');
       markFound(2);
     });
-    // Also single click reminder
     s2.addEventListener('click', () => {
-      if (!s2.classList.contains('flipped') && !STATE.found.has('2')) {
+      if (isTouchDevice()) {
+        s2.classList.toggle('flipped');
+        markFound(2);
+      } else if (!s2.classList.contains('flipped') && !STATE.found.has('2')) {
         s2.querySelector('.pol-caption').textContent = 'double-click me! ↺';
       }
     });
@@ -429,7 +477,7 @@ function initSecrets() {
     triggerVHS();
     setTimeout(() => {
       showModal(`<span class="m-label">fragment_03 / vhs_recovered</span>
-      <p>You in your era of giving zero f*cks was one of the best things I've ever watched happen.</p>`);
+      <p>you in your era of giving zero f*cks was one of the best things i've ever watched happen to a person in real time.</p>`);
     }, 800);
   });
 
@@ -439,7 +487,7 @@ function initSecrets() {
     markFound(4);
     playChime();
     showModal(`<span class="m-label">memory_04 / sound</span>
-    <p>Your hyena laugh the one that sets everyone else off without you even trying.</p>`);
+    <p>the laugh that makes other people start laughing. you don't realise you do it. you've never realised.</p>`);
   });
 
   /* ── S5: Shake then reveal note ── */
@@ -451,7 +499,7 @@ function initSecrets() {
       s5.classList.remove('pol-shaking');
       markFound(5);
       showModal(`<span class="m-label">memory_05 / shaken_loose</span>
-      <p>You’ve shaken off more than I know about.I know that much. and you still show up every time still you, just a little more gentle than before..</p>`);
+      <p>you've shaken off more than i know about. i know that much. and you still show up every time. still you.</p>`);
     }, 550);
   });
 
@@ -476,7 +524,7 @@ function initSecrets() {
     if (!STATE.found.has('12')) {
       markFound(12);
       typewrite(s12.querySelector('.tw-output'),
-        "You have this thing where you make everyone around you feel like the most important person in the room.You do it without trying. it's a gift and you give it for free.",
+        "you have this thing where you make everyone around you feel like the most important person in the room. you do it without trying. it's a gift and you give it for free.",
         38
       );
     }
@@ -518,7 +566,7 @@ function initSecrets() {
   const s15 = $('#s15');
   if (s15) s15.addEventListener('click', () => {
     markFound(15);
-    showWin98Error("cuteness.exe has encountered a fatal error.\n\n\"Cuteness overflow detectedfrom user.\nSystem cannot process this level\nof charm and resilience.\"\n\nPlease restart your heart.\nError code: TOO_MUCH_HER");
+    showWin98Error("cuteness.exe has encountered a fatal error.\n\n\"Paige overflow detected.\nSystem cannot process this level\nof charm and resilience.\"\n\nPlease restart your heart.\nError code: TOO_MUCH_HER");
   });
 
   /* ── S16: Theme changer ── */
@@ -539,7 +587,7 @@ function initSecrets() {
     triggerDistortion();
     setTimeout(() => {
       showModal(`<span class="m-label">observation_17 / verified</span>
-      <p>You are not who you were two years ago. Not even close. The glow-up has been physical, mental, emotional, and honestly a little bit rude to the rest of us.</p>`);
+      <p>you are not who you were two years ago. not even close. the glow-up has been physical, mental, emotional, and honestly a little bit rude to the rest of us.</p>`);
     }, 900);
   });
 
@@ -547,7 +595,7 @@ function initSecrets() {
   const s18 = $('#s18');
   if (s18) s18.addEventListener('click', () => {
     markFound(18);
-    showCinematic("I don't know when exactly you went from figuring it out\n\nto actually living it.\n\nbut I was there.\n\nand it looked like something worth remembering.");
+    showCinematic("i don't know when exactly you went from figuring it out\n\nto actually living it.\n\nbut i was there.\n\nand it looked like something worth remembering.");
   });
 
   /* ── S19: Background colour bleed ── */
@@ -556,7 +604,7 @@ function initSecrets() {
     markFound(19);
     triggerBgBleed();
     showModal(`<span class="m-label">memory_bleed.tmp</span>
-    <p>I don't know exactly when it happened. the shift. but one day you just... landed. You became someone who felt settled in themselves. Watching that happen from the outside.</p>`);
+    <p>i don't know exactly when it happened. the shift. but one day you just... landed. you became someone who felt settled in themselves. watching that happen from the outside? quietly one of my favourite things.</p>`);
   });
 
   /* ── S20: Chaos — everything flies ── */
@@ -573,7 +621,7 @@ function initSecrets() {
     playError();
     setTimeout(() => {
       showModal(`<span class="m-label">UNKNOWN_DATA.fragment / decrypted</span>
-      <p>this file was corrupted. but the core message survived:<br><br>You are not a work in progress. You are already the work. you are already the point. Nothing about you is unfinished.</p>`);
+      <p>this file was corrupted. but the core message survived:<br><br>you are not a work in progress. you are already the work. you are already the point.</p>`);
     }, 600);
     // glitch the icon
     s21.querySelector('.fi-icon').style.animation = 'corrupt 0.3s steps(2) 4';
@@ -587,11 +635,12 @@ function initSecrets() {
     showCinematic("there was a moment.\n\nyou probably don't even remember it.\n\nbut everything changed.\n\nand i saw it.");
   });
 
-  /* ── S22: The tiny dot — FINAL ── */
+  /* ── S22: The tiny dot — opens the room ── */
   const s22 = $('#s22-dot');
   if (s22) s22.addEventListener('click', () => {
     markFound(22);
-    // delay then final
+    playChime();
+    setTimeout(() => openRoom(), 600);
   });
 
   /* ── Scroll-triggered poems ── */
@@ -882,17 +931,35 @@ $('#close-room') && $('#close-room').addEventListener('click', closeRoom);
 function openRoom() {
   const room = $('#the-room');
   if (!room) return;
+  // Two-step for iOS: remove hidden first, then add open after a frame
   room.classList.remove('hidden');
-  requestAnimationFrame(() => room.classList.add('open'));
+  room.style.opacity = '0';
+  room.style.display = 'block';
+  setTimeout(() => {
+    room.style.transition = 'opacity 0.9s ease';
+    room.style.opacity = '1';
+    room.classList.add('open');
+  }, 30);
   document.body.style.overflow = 'hidden';
+  document.body.style.position = 'fixed';
+  document.body.style.width = '100%';
+
+  // Trigger the final reveal after she has a moment in the room
+  setTimeout(() => triggerFinalReveal(), 3500);
 }
 function closeRoom() {
   const room = $('#the-room');
   if (!room) return;
+  room.style.opacity = '0';
   room.classList.remove('open');
   setTimeout(() => {
+    room.style.display = 'none';
     room.classList.add('hidden');
+    room.style.opacity = '';
+    room.style.transition = '';
     document.body.style.overflow = '';
+    document.body.style.position = '';
+    document.body.style.width = '';
   }, 900);
 }
 
