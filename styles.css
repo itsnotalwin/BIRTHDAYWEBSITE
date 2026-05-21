@@ -53,8 +53,11 @@ body {
   font-family: var(--f-mono);
   overflow-x: hidden;
   min-height: 100vh;
+  min-height: -webkit-fill-available;
   cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='12' r='2.5' fill='%23e8a5b8'/%3E%3Ccircle cx='12' cy='12' r='8' fill='none' stroke='%23e8a5b8' stroke-width='1' opacity='0.4'/%3E%3C/svg%3E") 12 12, crosshair;
   transition: filter 1s ease, background-color 1s ease;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
 }
 
 .hidden { display: none !important; }
@@ -103,39 +106,55 @@ body::after {
   pointer-events: none;
   z-index: 9000;
   opacity: 0.045;
-  mix-blend-mode: screen;
+  mix-blend-mode: multiply;
 }
 
 /* ── STAR FIELD ── */
 #star-field {
-  position: fixed;
+  position: absolute;
   inset: 0;
   pointer-events: none;
   z-index: 50;
-  overflow: hidden;
+  min-height: 300vh;
 }
-.star {
+.star { display: none; } /* hide old stars */
+
+.clickable-star {
   position: absolute;
   border-radius: 50%;
+  background: rgba(90, 30, 55, 0.18);
+  border: 1px solid rgba(180, 80, 120, 0.2);
   pointer-events: all;
   cursor: pointer;
-  transition: transform 0.3s var(--ease-spring), opacity 0.3s ease, box-shadow 0.3s ease;
+  display: block;
+  box-shadow: none;
+  transition: transform 0.25s var(--ease-spring), box-shadow 0.25s ease, background 0.25s ease, opacity 0.25s ease;
+  animation: star-float var(--star-dur, 4s) var(--star-delay, 0s) ease-in-out infinite alternate;
+  opacity: 0.35;
 }
-.star.dim { opacity: 0.12; }
-.star.bright { opacity: 0.55; }
-.star:hover {
-  transform: scale(3.5) !important;
-  opacity: 1 !important;
-  box-shadow: 0 0 12px 4px rgba(232,165,184,0.7);
+.clickable-star:hover {
+  transform: scale(1.8);
+  background: rgba(217, 123, 153, 0.45);
+  box-shadow: 0 0 10px rgba(217,123,153,0.35);
+  opacity: 0.9;
 }
-.star.discovered {
-  opacity: 0.8 !important;
-  box-shadow: 0 0 6px 2px rgba(232,165,184,0.5);
-  animation: star-pulse 2s ease-in-out infinite;
+.clickable-star:active {
+  transform: scale(0.9);
 }
-@keyframes star-pulse {
-  0%,100% { box-shadow: 0 0 6px 2px rgba(232,165,184,0.4); }
-  50%      { box-shadow: 0 0 14px 5px rgba(232,165,184,0.8); }
+.clickable-star.used {
+  background: rgba(196, 102, 138, 0.6);
+  box-shadow: 0 0 14px rgba(217,123,153,0.5);
+  opacity: 1;
+  animation: star-pulse-used 0.6s ease forwards;
+}
+@keyframes star-float {
+  0%   { transform: translateY(0) translateX(0); }
+  100% { transform: translateY(var(--star-drift, 8px)) translateX(calc(var(--star-drift, 8px) * -0.5)); }
+}
+@keyframes star-pulse-used {
+  0%   { transform: scale(1); }
+  40%  { transform: scale(1.8); }
+  100% { transform: scale(1.2); }
 }
 
 /* ── PARTICLES ── */
@@ -735,6 +754,8 @@ body::after {
 .pol-flip-front, .pol-flip-back {
   backface-visibility: hidden;
   -webkit-backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
 }
 .pol-flip-back {
   position: absolute;
@@ -859,13 +880,13 @@ body::after {
 .sticky-pink      { background: var(--c-sticky-p); }
 .sticky-dark      { background: var(--c-sticky-d); }
 .sticky-cream     { background: var(--c-sticky-c); }
-.sticky-film      { background: #1a1612; border: 1px solid rgba(255,255,255,0.08); }
+.sticky-film      { background: #2a1520; border: 1px solid rgba(232,165,184,0.2); }
 .sticky-torn {
   background: var(--c-warm);
   clip-path: polygon(0 2px, 7px 0, 100% 3px, 100% 97%, 93% 100%, 0 98%);
 }
 .sticky-error {
-  background: #150a0a;
+  background: #2a0a0a;
   border: 1px solid var(--c-red);
 }
 
@@ -896,7 +917,7 @@ body::after {
 .err-body {
   font-family: var(--f-mono) !important;
   font-size: 8px !important;
-  color: #999 !important;
+  color: #550000 !important;
   line-height: 1.8;
 }
 
@@ -909,7 +930,7 @@ body::after {
 
 /* Typewriter note */
 .tw-note { min-height: 90px; }
-.tw-output { font-family: var(--f-hand); font-size: 15px; color: var(--c-cream); line-height: 1.6; min-height: 40px; }
+.tw-output { font-family: var(--f-hand); font-size: 15px; color: #ffe8f2; line-height: 1.6; min-height: 40px; }
 .tw-cursor { display: inline-block; font-size: 15px; color: var(--c-gold); animation: blink 0.9s step-end infinite; }
 @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
 
@@ -977,7 +998,7 @@ body::after {
 .fi-name {
   font-family: var(--f-mono);
   font-size: 7.5px;
-  color: var(--c-muted);
+  color: #6d3d56;
   word-break: break-all;
   line-height: 1.4;
 }
@@ -1013,7 +1034,7 @@ body::after {
   font-family: var(--f-serif);
   font-style: italic;
   font-size: clamp(15px, 2.8vw, 20px);
-  color: rgba(77,46,61,0.65);
+  color: rgba(42,21,32,0.78);
   line-height: 1.8;
   letter-spacing: 0.01em;
 }
@@ -1176,16 +1197,23 @@ body::after {
   transition: opacity 0.8s ease;
 }
 #room-door.show { opacity: 1; pointer-events: all; }
+#room-door.pulse {
+  animation: door-pulse 1.2s ease-in-out 3;
+}
+@keyframes door-pulse {
+  0%,100% { transform: translateX(-50%) scale(1); }
+  50%      { transform: translateX(-50%) scale(1.08); }
+}
 
-.rd-arrow { font-size: 12px; color: rgba(196,102,138,0.5); transition: color 0.3s; }
+.rd-arrow { font-size: 16px; color: rgba(196,102,138,0.75); transition: color 0.3s; }
 .rd-text {
   font-family: var(--f-mono);
-  font-size: 9px;
-  color: rgba(196,102,138,0.5);
-  letter-spacing: 0.3em;
+  font-size: 11px;
+  color: rgba(196,102,138,0.75);
+  letter-spacing: 0.25em;
   text-transform: uppercase;
-  border-bottom: 1px solid rgba(196,102,138,0.25);
-  padding-bottom: 1px;
+  border-bottom: 1px solid rgba(196,102,138,0.4);
+  padding-bottom: 2px;
   transition: color 0.3s, border-color 0.3s;
 }
 #room-door:hover .rd-text, #room-door:hover .rd-arrow {
@@ -1197,10 +1225,10 @@ body::after {
   position: fixed;
   inset: 0;
   z-index: 9800;
-  background: #080604;
+  background: linear-gradient(160deg, #1a0812 0%, #0d0508 60%, #160a10 100%);
   overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
   opacity: 0;
-  transition: opacity 0.9s ease;
 }
 #the-room.open { opacity: 1; }
 
@@ -1242,14 +1270,14 @@ body::after {
 #room-heading {
   font-family: var(--f-type);
   font-size: clamp(26px, 6vw, 48px);
-  color: rgba(255,255,255,0.65);
+  color: rgba(255,230,240,0.9);
   letter-spacing: 0.04em;
   text-align: center;
 }
 #room-sub {
   font-family: var(--f-mono);
   font-size: 9px;
-  color: rgba(255,255,255,0.2);
+  color: rgba(255,215,230,0.6);
   letter-spacing: 0.3em;
   text-transform: uppercase;
   margin-bottom: 40px;
@@ -1306,7 +1334,7 @@ body::after {
 #room-close-note {
   font-family: var(--f-mono);
   font-size: 8px;
-  color: rgba(255,255,255,0.12);
+  color: rgba(255,200,220,0.45);
   letter-spacing: 0.3em;
   text-transform: uppercase;
   margin-top: 50px;
@@ -1448,7 +1476,7 @@ body::after {
   right: 18px;
   font-family: var(--f-mono);
   font-size: 9px;
-  color: rgba(255,255,255,0.3);
+  color: rgba(255,255,255,0.65);
   letter-spacing: 0.15em;
 }
 body.vhs-active {
@@ -1717,4 +1745,48 @@ body.distorting {
 @media (max-width: 480px) {
   #hero-title { font-size: 40px; }
   #boot-ascii { font-size: clamp(5px, 2.2vw, 9px); }
+}
+
+/* ══════════════════════════════════════
+   iPhone / iOS SAFE AREA + TOUCH FIXES
+══════════════════════════════════════ */
+@supports (padding: max(0px)) {
+  #progress-bar-wrap {
+    padding-top: max(7px, env(safe-area-inset-top));
+    padding-left: max(18px, env(safe-area-inset-left));
+    padding-right: max(18px, env(safe-area-inset-right));
+  }
+  #room-door {
+    bottom: max(22px, env(safe-area-inset-bottom));
+  }
+  #secret-counter {
+    bottom: max(24px, env(safe-area-inset-bottom));
+    left: max(20px, env(safe-area-inset-left));
+  }
+}
+
+/* Touch targets — minimum 44px on iOS */
+@media (hover: none) and (pointer: coarse) {
+  .clickable-star {
+    min-width: 22px !important;
+    min-height: 22px !important;
+  }
+  .folder         { -webkit-tap-highlight-color: transparent; }
+  .sticky         { -webkit-tap-highlight-color: transparent; }
+  .polaroid       { -webkit-tap-highlight-color: transparent; }
+  .file-icon      { -webkit-tap-highlight-color: transparent; }
+  #open-vault-btn { padding: 18px 40px; font-size: 13px; }
+  #modal-box      { margin: 0 12px; padding: 28px 22px; }
+  #win98-error    { max-width: 92vw; }
+  #cinematic-text { font-size: clamp(16px, 4.5vw, 26px); }
+
+  /* Polaroid flip — use tap instead of dblclick */
+  .flippable .pol-caption { font-size: 9px; }
+}
+
+/* iPhone landscape */
+@media (max-height: 500px) and (orientation: landscape) {
+  #boot-inner   { transform: scale(0.85); }
+  #hero-block   { min-height: 50vh; padding-top: 20px; }
+  #hero-title   { font-size: clamp(36px, 10vw, 60px); }
 }
