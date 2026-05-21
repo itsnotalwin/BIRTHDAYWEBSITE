@@ -160,6 +160,56 @@ body::after {
   100% { opacity: 0; transform: translateY(-120px) translateX(var(--px-drift, 20px)) scale(0.5); }
 }
 
+/* ── FLOATING PETALS ── */
+#petal-field {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 35;
+  overflow: hidden;
+}
+.petal {
+  position: absolute;
+  top: -40px;
+  width: var(--ps, 14px);
+  height: var(--ps, 14px);
+  opacity: 0;
+  animation:
+    petal-fall var(--pf-dur, 9s) var(--pf-delay, 0s) ease-in infinite,
+    petal-sway var(--pf-sway, 4s) var(--pf-delay, 0s) ease-in-out infinite alternate;
+}
+.petal svg { width: 100%; height: 100%; }
+@keyframes petal-fall {
+  0%   { opacity: 0; transform: translateY(-20px) rotate(var(--pr0, 0deg)) scale(0.8); }
+  8%   { opacity: var(--pf-op, 0.55); }
+  90%  { opacity: var(--pf-op, 0.45); }
+  100% { opacity: 0; transform: translateY(110vh) rotate(var(--pr1, 360deg)) scale(0.6); }
+}
+@keyframes petal-sway {
+  0%   { margin-left: 0; }
+  100% { margin-left: var(--pf-swing, 60px); }
+}
+
+/* ── CONFETTI ── */
+.confetti-piece {
+  position: fixed;
+  top: var(--cy, -10px);
+  left: var(--cx, 50%);
+  width: var(--cw, 8px);
+  height: var(--ch, 10px);
+  background: var(--cc, #e8a5b8);
+  border-radius: var(--cbr, 2px);
+  opacity: 0;
+  pointer-events: none;
+  z-index: 9300;
+  animation: confetti-fly var(--cd, 2.5s) var(--cdelay, 0s) ease-out forwards;
+}
+@keyframes confetti-fly {
+  0%   { opacity: 1; transform: translate(0,0) rotate(0deg) scale(1); }
+  20%  { opacity: 1; }
+  100% { opacity: 0; transform: translate(var(--cvx,40px), 80vh) rotate(var(--crot, 540deg)) scale(0.4); }
+}
+
 /* ── FLOATING SECRET COUNTER ── */
 #secret-counter {
   position: fixed;
@@ -447,10 +497,10 @@ body::after {
   pointer-events: none;
   user-select: none;
 }
-.vh-num  { font-family: var(--f-big); font-size: clamp(40px, 8vw, 80px); color: rgba(255,255,255,0.04); line-height: 1; }
-.vh-sep  { font-family: var(--f-mono); font-size: clamp(20px, 4vw, 40px); color: rgba(255,255,255,0.04); margin: 0 8px; }
-.vh-sub  { font-family: var(--f-mono); font-size: 9px; color: rgba(255,255,255,0.08); letter-spacing: 0.2em; text-transform: uppercase; }
-#vh-right { font-family: var(--f-mono); font-size: 8px; color: rgba(255,255,255,0.08); letter-spacing: 0.12em; }
+.vh-num  { font-family: var(--f-big); font-size: clamp(40px, 8vw, 80px); color: rgba(217,123,153,0.12); line-height: 1; }
+.vh-sep  { font-family: var(--f-mono); font-size: clamp(20px, 4vw, 40px); color: rgba(217,123,153,0.12); margin: 0 8px; }
+.vh-sub  { font-family: var(--f-mono); font-size: 9px; color: rgba(100,50,70,0.35); letter-spacing: 0.2em; text-transform: uppercase; }
+#vh-right { font-family: var(--f-mono); font-size: 8px; color: rgba(100,50,70,0.35); letter-spacing: 0.12em; }
 
 /* ══════════════════════════════════
    DESKTOP CANVAS
@@ -484,7 +534,7 @@ body::after {
   content: '';
   flex: 1;
   height: 1px;
-  background: rgba(255,255,255,0.05);
+  background: rgba(180,100,130,0.18);
 }
 .section-rule::before { display: none; }
 
@@ -512,7 +562,7 @@ body::after {
   font-family: var(--f-big);
   font-size: clamp(52px, 13vw, 148px);
   line-height: 0.95;
-  color: var(--c-cream);
+  color: #2a1520;
   letter-spacing: 0.01em;
   display: flex;
   flex-direction: column;
@@ -533,7 +583,7 @@ body::after {
 #hero-scroll-hint {
   font-family: var(--f-mono);
   font-size: 9px;
-  color: rgba(255,255,255,0.2);
+  color: rgba(100,50,70,0.4);
   letter-spacing: 0.3em;
   margin-top: 60px;
   animation: fade-up 0.6s 2.6s ease forwards, hint-bounce 2s 3.2s ease-in-out infinite;
@@ -909,20 +959,20 @@ body::after {
   width: 54px;
   height: 54px;
   margin: 0 auto 8px;
-  background: rgba(255,255,255,0.04);
-  border: 1px solid rgba(255,255,255,0.08);
+  background: rgba(232,165,184,0.12);
+  border: 1px solid rgba(217,123,153,0.25);
   border-radius: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 22px;
-  color: var(--c-cream);
+  color: #c4668a;
   transition: all 0.3s ease;
 }
 .file-icon:hover .fi-icon {
-  background: rgba(201,164,74,0.12);
+  background: rgba(217,123,153,0.2);
   border-color: var(--c-gold);
-  color: var(--c-gold);
+  color: var(--c-rust);
 }
 .fi-name {
   font-family: var(--f-mono);
@@ -963,7 +1013,7 @@ body::after {
   font-family: var(--f-serif);
   font-style: italic;
   font-size: clamp(15px, 2.8vw, 20px);
-  color: rgba(255,255,255,0.55);
+  color: rgba(77,46,61,0.65);
   line-height: 1.8;
   letter-spacing: 0.01em;
 }
@@ -1096,7 +1146,7 @@ body::after {
 }
 #s22-dot {
   font-size: 10px;
-  color: rgba(255,255,255,0.05);
+  color: rgba(217,123,153,0.06);
   cursor: pointer;
   display: inline-block;
   padding: 8px;
@@ -1104,8 +1154,8 @@ body::after {
   transition: color 0.4s, text-shadow 0.4s;
 }
 #s22-dot:hover {
-  color: rgba(255,255,255,0.1);
-  text-shadow: 0 0 10px rgba(201,164,74,0.5);
+  color: rgba(217,123,153,0.18);
+  text-shadow: 0 0 10px rgba(217,123,153,0.4);
 }
 
 /* ══════════════════════════════════
@@ -1127,14 +1177,14 @@ body::after {
 }
 #room-door.show { opacity: 1; pointer-events: all; }
 
-.rd-arrow { font-size: 12px; color: rgba(255,255,255,0.2); transition: color 0.3s; }
+.rd-arrow { font-size: 12px; color: rgba(196,102,138,0.5); transition: color 0.3s; }
 .rd-text {
   font-family: var(--f-mono);
   font-size: 9px;
-  color: rgba(255,255,255,0.2);
+  color: rgba(196,102,138,0.5);
   letter-spacing: 0.3em;
   text-transform: uppercase;
-  border-bottom: 1px solid rgba(255,255,255,0.1);
+  border-bottom: 1px solid rgba(196,102,138,0.25);
   padding-bottom: 1px;
   transition: color 0.3s, border-color 0.3s;
 }

@@ -71,6 +71,12 @@ function enterVault() {
   // Build particles
   buildParticles();
 
+  // Build floating petals
+  buildPetals();
+
+  // Random confetti cannon
+  scheduleConfetti();
+
   // Draw grain
   drawGrain();
 
@@ -137,11 +143,11 @@ function drawGrain() {
    STAR FIELD (hidden clickable stars)
 ══════════════════════════════════════ */
 const STAR_SECRETS = [
-  { id:'star1', message:"you are not who you used to be. this is a good thing. this is the point." },
-  { id:'star2', message:"i see everything you've grown into. i kept count." },
-  { id:'star3', message:"every bad thing you survived made you sharper, not harder. that's rare." },
-  { id:'star4', message:"the version of you that doubted everything still got here. think about that." },
-  { id:'star5', message:"you're someone's reason to keep going. i know for a fact. i'm not telling you who." },
+  { id:'star1', message:"You are not who you used to be. this is a good thing. this is the point." },
+  { id:'star2', message:"I see everything you've grown into.I kept count." },
+  { id:'star3', message:"Every bad thing you survived made you sharper, not harder." },
+  { id:'star4', message:"The version of you that doubted everything still got here.Think about that." },
+  { id:'star5', message:"You're someone's reason to keep going.I know for a fact. i'm not telling you who." },
 ];
 
 function buildStarField() {
@@ -235,6 +241,111 @@ function emitParticleBurst(x, y) {
 }
 
 /* ══════════════════════════════════════
+   FLOATING PETALS
+══════════════════════════════════════ */
+const PETAL_COLORS = ['#f5c2d3','#e8a5b8','#ffd6e8','#ffb3cc','#f9d4e1','#fce4ec'];
+const PETAL_SVG = (color) => `<svg viewBox="0 0 20 24" xmlns="http://www.w3.org/2000/svg">
+  <path d="M10 2 C14 2, 18 6, 18 11 C18 17, 14 22, 10 22 C6 22, 2 17, 2 11 C2 6, 6 2, 10 2Z"
+    fill="${color}" opacity="0.85"/>
+  <path d="M10 2 C10 2, 10 12, 10 22" stroke="${color}" stroke-width="0.5" opacity="0.4" fill="none"/>
+</svg>`;
+
+function buildPetals() {
+  const field = $('#petal-field');
+  if (!field) return;
+  const count = 18;
+  for (let i = 0; i < count; i++) {
+    spawnPetal(field, i * (14000 / count));
+  }
+}
+
+function spawnPetal(field, initialDelay) {
+  const color = PETAL_COLORS[Math.floor(Math.random() * PETAL_COLORS.length)];
+  const size  = 10 + Math.random() * 14;
+  const left  = Math.random() * 100;
+  const dur   = 9 + Math.random() * 10;
+  const sway  = (Math.random() - 0.5) * 100;
+  const rot0  = Math.random() * 360;
+  const rot1  = rot0 + 180 + Math.random() * 180;
+  const op    = 0.35 + Math.random() * 0.35;
+
+  const petal = document.createElement('div');
+  petal.className = 'petal';
+  petal.innerHTML = PETAL_SVG(color);
+  petal.style.cssText = `
+    --ps:${size}px;
+    --pf-dur:${dur}s;
+    --pf-delay:${initialDelay}ms;
+    --pf-sway:${dur * 0.4}s;
+    --pf-swing:${sway}px;
+    --pr0:${rot0}deg;
+    --pr1:${rot1}deg;
+    --pf-op:${op};
+    left:${left}%;
+  `;
+  field.appendChild(petal);
+
+  // Recycle petal after each cycle
+  petal.addEventListener('animationiteration', () => {
+    petal.style.left = Math.random() * 100 + '%';
+  });
+}
+
+/* ══════════════════════════════════════
+   CONFETTI CANNON
+══════════════════════════════════════ */
+const CONFETTI_COLORS = [
+  '#f5c2d3','#e8a5b8','#d97b99','#c4668a',
+  '#ffd6e8','#ffb3cc','#a8d5ba','#c9f0d8',
+  '#ffe8cc','#ffd4e5','#f9d4e1'
+];
+
+function fireConfetti(originX) {
+  const cx = originX !== undefined ? originX : (30 + Math.random() * 40);
+  const count = 38 + Math.floor(Math.random() * 22);
+
+  for (let i = 0; i < count; i++) {
+    const piece = document.createElement('div');
+    piece.className = 'confetti-piece';
+    const color = CONFETTI_COLORS[Math.floor(Math.random() * CONFETTI_COLORS.length)];
+    const isCircle = Math.random() > 0.6;
+    const w = isCircle ? 6 + Math.random() * 5 : 5 + Math.random() * 8;
+    const h = isCircle ? w : 4 + Math.random() * 7;
+    const vx = (Math.random() - 0.5) * 260;
+    const rot = (Math.random() - 0.5) * 900;
+    const dur = 1.8 + Math.random() * 1.2;
+    const delay = Math.random() * 0.25;
+
+    piece.style.cssText = `
+      --cy: -5px;
+      --cx: ${cx}%;
+      --cw: ${w}px;
+      --ch: ${h}px;
+      --cc: ${color};
+      --cbr: ${isCircle ? '50%' : '2px'};
+      --cvx: ${vx}px;
+      --crot: ${rot}deg;
+      --cd: ${dur}s;
+      --cdelay: ${delay}s;
+    `;
+    document.body.appendChild(piece);
+    setTimeout(() => piece.remove(), (dur + delay + 0.3) * 1000);
+  }
+}
+
+function scheduleConfetti() {
+  // Fire once shortly after vault opens
+  setTimeout(() => fireConfetti(50), 3500);
+
+  // Then randomly every 35-65 seconds
+  function randomFire() {
+    fireConfetti(20 + Math.random() * 60);
+    setTimeout(randomFire, 35000 + Math.random() * 30000);
+  }
+  setTimeout(randomFire, 40000);
+}
+
+/* ══════════════════════════════════════
    PROGRESS SYSTEM
 ══════════════════════════════════════ */
 function markFound(id) {
@@ -292,7 +403,7 @@ function initSecrets() {
   if (s1) s1.addEventListener('click', () => {
     markFound(1);
     showModal(`<span class="m-label">memory_01 / observation</span>
-    <p>the version of you that existed before you stopped apologising for taking up space was already incredible.<br><br>the version after? unfair.</p>`);
+    <p>The version of you that existed before you stopped apologising for taking up space was already incredible.<br><br>The version after?Unfair.</p>`);
   });
 
   /* ── S2: Double-click to flip ── */
@@ -318,7 +429,7 @@ function initSecrets() {
     triggerVHS();
     setTimeout(() => {
       showModal(`<span class="m-label">fragment_03 / vhs_recovered</span>
-      <p>you in your era of giving zero f*cks was one of the best things i've ever watched happen to a person in real time.</p>`);
+      <p>You in your era of giving zero f*cks was one of the best things I've ever watched happen.</p>`);
     }, 800);
   });
 
@@ -328,7 +439,7 @@ function initSecrets() {
     markFound(4);
     playChime();
     showModal(`<span class="m-label">memory_04 / sound</span>
-    <p>the laugh that makes other people start laughing. you don't realise you do it. you've never realised.</p>`);
+    <p>Your hyena laugh the one that sets everyone else off without you even trying.</p>`);
   });
 
   /* ── S5: Shake then reveal note ── */
@@ -340,7 +451,7 @@ function initSecrets() {
       s5.classList.remove('pol-shaking');
       markFound(5);
       showModal(`<span class="m-label">memory_05 / shaken_loose</span>
-      <p>you've shaken off more than i know about. i know that much. and you still show up every time. still you.</p>`);
+      <p>You’ve shaken off more than I know about.I know that much. and you still show up every time still you, just a little more gentle than before..</p>`);
     }, 550);
   });
 
@@ -365,7 +476,7 @@ function initSecrets() {
     if (!STATE.found.has('12')) {
       markFound(12);
       typewrite(s12.querySelector('.tw-output'),
-        "you have this thing where you make everyone around you feel like the most important person in the room. you do it without trying. it's a gift and you give it for free.",
+        "You have this thing where you make everyone around you feel like the most important person in the room.You do it without trying. it's a gift and you give it for free.",
         38
       );
     }
@@ -407,7 +518,7 @@ function initSecrets() {
   const s15 = $('#s15');
   if (s15) s15.addEventListener('click', () => {
     markFound(15);
-    showWin98Error("A fatal feelings.exe error has occurred.\n\n\"You scare me a little.\nIn the best possible way.\"\n\nThis file cannot be suppressed.\nPlease tell her.");
+    showWin98Error("cuteness.exe has encountered a fatal error.\n\n\"Cuteness overflow detectedfrom user.\nSystem cannot process this level\nof charm and resilience.\"\n\nPlease restart your heart.\nError code: TOO_MUCH_HER");
   });
 
   /* ── S16: Theme changer ── */
@@ -428,7 +539,7 @@ function initSecrets() {
     triggerDistortion();
     setTimeout(() => {
       showModal(`<span class="m-label">observation_17 / verified</span>
-      <p>you are not who you were two years ago. not even close. the glow-up has been physical, mental, emotional, and honestly a little bit rude to the rest of us.</p>`);
+      <p>You are not who you were two years ago. Not even close. The glow-up has been physical, mental, emotional, and honestly a little bit rude to the rest of us.</p>`);
     }, 900);
   });
 
@@ -436,7 +547,7 @@ function initSecrets() {
   const s18 = $('#s18');
   if (s18) s18.addEventListener('click', () => {
     markFound(18);
-    showCinematic("i don't know when exactly you went from figuring it out\n\nto actually living it.\n\nbut i was there.\n\nand it looked like something worth remembering.");
+    showCinematic("I don't know when exactly you went from figuring it out\n\nto actually living it.\n\nbut I was there.\n\nand it looked like something worth remembering.");
   });
 
   /* ── S19: Background colour bleed ── */
@@ -445,7 +556,7 @@ function initSecrets() {
     markFound(19);
     triggerBgBleed();
     showModal(`<span class="m-label">memory_bleed.tmp</span>
-    <p>i don't know exactly when it happened. the shift. but one day you just... landed. you became someone who felt settled in themselves. watching that happen from the outside? quietly one of my favourite things.</p>`);
+    <p>I don't know exactly when it happened. the shift. but one day you just... landed. You became someone who felt settled in themselves. Watching that happen from the outside.</p>`);
   });
 
   /* ── S20: Chaos — everything flies ── */
@@ -462,7 +573,7 @@ function initSecrets() {
     playError();
     setTimeout(() => {
       showModal(`<span class="m-label">UNKNOWN_DATA.fragment / decrypted</span>
-      <p>this file was corrupted. but the core message survived:<br><br>you are not a work in progress. you are already the work. you are already the point.</p>`);
+      <p>this file was corrupted. but the core message survived:<br><br>You are not a work in progress. You are already the work. you are already the point. Nothing about you is unfinished.</p>`);
     }, 600);
     // glitch the icon
     s21.querySelector('.fi-icon').style.animation = 'corrupt 0.3s steps(2) 4';
@@ -696,7 +807,7 @@ function triggerDistortion() {
 ══════════════════════════════════════ */
 function triggerBgBleed() {
   document.body.style.transition = 'background-color 0.5s ease';
-  document.body.style.backgroundColor = '#1a0d06';
+  document.body.style.backgroundColor = '#f0c8d8';
   setTimeout(() => {
     document.body.style.backgroundColor = '';
     setTimeout(() => document.body.style.transition = '', 1000);
@@ -929,6 +1040,11 @@ function triggerFinalReveal() {
   requestAnimationFrame(() => rev.classList.add('show'));
 
   playChime();
+
+  // Confetti celebration!
+  setTimeout(() => fireConfetti(50), 800);
+  setTimeout(() => fireConfetti(20), 1400);
+  setTimeout(() => fireConfetti(80), 1900);
 
   const lines = [
     { id:'fl1', delay: 1200 },
