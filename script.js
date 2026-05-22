@@ -141,101 +141,189 @@ function drawGrain() {
 }
 
 /* ══════════════════════════════════════
-   STAR FIELD + FLOATING COMPLIMENT STARS
+   STAR FIELD (hidden clickable stars)
 ══════════════════════════════════════ */
-const COMPLIMENT_MESSAGES = [
-  "omg you look so pretty today?? like actually unreal 🌸",
-  "CRAZY bestie energy detected. off the charts. sending u away.",
-  "the way you walk into a room and people just?? feel it?? iconic behaviour tbh 💕",
-  "ur literally that girl. not a metaphor. literally THAT girl. 🌹",
-  "bestie ur giving main character and the whole supporting cast simultaneously. how.",
+const STAR_SECRETS_POOL = [
+  "you're so beautiful 🌸",
+  "your eyes are gorgeous omg",
+  "CRAZY bestie energy. off the charts.",
+  "literally that girl. no debate. 🌹",
+  "you walked in and the whole room felt it 💕",
+  "ur so pretty it should be illegal",
+  "main character behaviour. always.",
+  "ur smile?? devastating. in the best way.",
+  "stunning. genuinely stunning.",
+  "the confidence arc?? ICONIC. 🌹",
+  "ur giving everything rn and I'm obsessed",
+  "so beautiful it's actually unfair to others",
+  "bestie ur glowing and you don't even know it",
+  "ur literally gorgeous wtf",
+  "that girl energy: confirmed 💕",
+  "your vibe is immaculate. always.",
+  "prettiest person in any room. facts.",
+  "ur so effortlessly you and it's everything 🌸",
+  "the way you exist?? a gift honestly.",
+  "obsessed with you. not taking questions.",
+  "the kindness you carry around?? unmatched 💕",
+  "smartest person in the chat. always has been.",
+  "ur laugh is literally contagious, just so you know 🌸",
+  "the way people light up around you?? that's all you.",
+  "ur brain AND ur heart?? unfair combo honestly.",
+  "radiating goodness 24/7 and you don't even notice 🌹",
+  "so funny. so real. zero competition.",
+  "ur the person everyone wants at their table 💕",
+  "genuine queen behaviour. no notes.",
+  "ur actually that rare person who makes everything better 🌸",
+  "just the most magnetic, incredible person. it's a fact.",
+  "everything about you is giving main character and best friend simultaneously 🌹",
+  "ur heart is so big it's actually a lot to handle (in the best way) 💕",
+  "the way you love people?? the world doesn't deserve you.",
+  "certified iconic. laminated. framed. 🌸",
+  "OMG ur eyes are actually insane stop it 😭",
+  "your eyes?? two of the prettiest things I've ever seen. not up for debate.",
+  "those eyes are genuinely unfair to the rest of us 🌸",
+  "ur eyes are doing WAY too much rn and I'm not okay",
+  "bestie ur eyes could end wars. this is a fact.",
+  "ur ass looks INCREDIBLE today omg 💕",
+  "the way u look today should be a crime honestly",
+  "ur body is immaculate. I said what I said. 🌹",
+  "ur literally built different and I mean that in every way",
+  "everything about the way u look today?? A SERVE. 💕",
+  "ur so gorgeous it's actually making me unwell 😭🌸",
+  "I'm normal about u. I'm SO normal about u. (I'm not normal about u)",
+  "bestie I would DIE for you and ur also just really hot so",
+  "ur giving FACE. always giving face. 💕",
+  "the audacity to be that pretty AND that funny. who gave u permission.",
+  "OMG STOP UR SO PRETTY IT'S SENDING ME 😭🌹",
+  "ur literally so hot it's actually annoying at this point",
+  "I love u so much and also ur so attractive it's genuinely offensive 🌸",
+  "bestie ur GLOWING today what is ur secret",
+  "ur so pretty I have to look away sometimes. genuinely. 💕",
+  "ur outfit + ur face + ur energy today?? LETHAL COMBINATION 🌹",
+  "the way u exist is genuinely my favourite thing. also ur hot.",
+  "ur literally that girl and also ur ass looks amazing so 💕",
+  "I am UNWELL because of how good u look. unwell. 🌸",
 ];
+
+// Secret stars pick a random compliment on every click
+const STAR_SECRETS = [
+  { id:'star1' }, { id:'star2' }, { id:'star3' },
+  { id:'star4' }, { id:'star5' },
+];
+
+function randomCompliment() {
+  return STAR_SECRETS_POOL[Math.floor(Math.random() * STAR_SECRETS_POOL.length)];
+}
+
+function spawnDecorativeStar(field) {
+  const star = document.createElement('div');
+  star.className = 'star deco-star';
+  const size = Math.random() * 2.5 + 0.8;
+  const peakOpacity = Math.random() > 0.5 ? 0.55 : 0.28;
+  const lingerMs = 3500 + Math.random() * 5000;
+  const fadeMs   = 1200;
+
+  star.style.cssText = `
+    width:${size}px; height:${size}px;
+    left:${Math.random()*100}%;
+    top:${Math.random()*100}%;
+    background: hsl(${40 + Math.random()*20}, 60%, ${45 + Math.random()*20}%);
+    opacity: 0;
+    transition: opacity ${fadeMs}ms ease;
+    pointer-events: none;
+  `;
+  field.appendChild(star);
+
+  // Fade in
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => { star.style.opacity = peakOpacity; });
+  });
+
+  // Fade out then remove
+  setTimeout(() => {
+    star.style.opacity = 0;
+    setTimeout(() => star.remove(), fadeMs + 50);
+  }, lingerMs);
+}
+
+function runLivingStarField(field) {
+  const MAX_LIVE = 2;
+  const live = () => field.querySelectorAll('.deco-star').length;
+
+  function maybeSpawn() {
+    if (live() < MAX_LIVE) spawnDecorativeStar(field);
+    setTimeout(maybeSpawn, 1500 + Math.random() * 3500);
+  }
+
+  // Seed with 1-2 stars immediately
+  spawnDecorativeStar(field);
+  setTimeout(() => spawnDecorativeStar(field), 800 + Math.random() * 1200);
+  setTimeout(maybeSpawn, 4000);
+}
 
 function buildStarField() {
   const field = $('#star-field');
 
-  // Regular decorative stars (background twinkle)
-  for (let i = 0; i < 80; i++) {
-    const star = document.createElement('div');
-    star.className = 'star ' + (Math.random() > 0.6 ? 'bright' : 'dim');
-    const size = Math.random() * 2.5 + 0.8;
-    star.style.cssText = `
-      width:${size}px; height:${size}px;
-      left:${Math.random()*100}%;
-      top:${Math.random()*100}%;
-      background: hsl(${40 + Math.random()*20}, 70%, ${60 + Math.random()*30}%);
-    `;
-    field.appendChild(star);
-  }
+  // Living decorative star system — fades in/out randomly, max ~2 at a time
+  runLivingStarField(field);
 
-  // 50 floating compliment stars — drift around, appear and disappear
-  for (let i = 0; i < 50; i++) {
-    spawnComplimentStar(field, i * 380 + Math.random() * 1200);
-  }
-}
+  // Hidden secret stars — random positions, pop in/out over time
+  STAR_SECRETS.forEach((ss, idx) => {
+    function placeSecretStar() {
+      const star = document.createElement('div');
+      star.className = 'star secret-star';
+      star.id = ss.id;
+      star.dataset.secretStar = idx;
+      const left = 5 + Math.random() * 88;
+      const top  = 5 + Math.random() * 88;
+      star.style.cssText = `
+        width: 7px; height: 7px;
+        left: ${left}%;
+        top:  ${top}%;
+        background: #f0c0d8;
+        opacity: 0;
+        box-shadow: 0 0 6px 2px rgba(240,192,216,0.4);
+        transition: opacity 1s ease;
+      `;
+      star.addEventListener('click', () => handleStarSecret(ss, star));
+      field.appendChild(star);
 
-function spawnComplimentStar(field, initialDelay) {
-  const size = 4 + Math.random() * 5;
-  const driftX = (Math.random() - 0.5) * 55;
-  const driftY = (Math.random() - 0.5) * 40;
-  const driftDur = 5 + Math.random() * 9;
-  const pulseDur = 2 + Math.random() * 2.5;
+      // Fade in after short delay
+      setTimeout(() => { star.style.opacity = '0.35'; }, 100);
 
-  const star = document.createElement('div');
-  star.className = 'float-compliment-star';
-  star.style.cssText = `
-    width: ${size}px; height: ${size}px;
-    --fsdx: ${driftX}px;
-    --fsdy: ${driftY}px;
-    --fsd: ${driftDur}s;
-    --fsp: ${pulseDur}s;
-  `;
-  field.appendChild(star);
-
-  // Click: show compliment, star fades, respawns later
-  star.addEventListener('click', () => {
-    if (star.dataset.clicked) return;
-    star.dataset.clicked = '1';
-    clearTimeout(star._hideTimer);
-
-    const msg = COMPLIMENT_MESSAGES[Math.floor(Math.random() * COMPLIMENT_MESSAGES.length)];
-    playPing();
-    showStarCompliment(msg, star);
-    emitParticleBurst(
-      parseFloat(star.style.left) / 100 * window.innerWidth,
-      parseFloat(star.style.top)  / 100 * window.innerHeight
-    );
-
-    // Fade out when compliment fades (~3.2s), respawn fresh later
-    setTimeout(() => {
-      star.classList.remove('fcs-visible');
-      setTimeout(() => {
-        delete star.dataset.clicked;
-        scheduleStarAppearance(star, 8000 + Math.random() * 12000);
-      }, 1200);
-    }, 3200);
-  });
-
-  scheduleStarAppearance(star, initialDelay);
-}
-
-function scheduleStarAppearance(star, delay) {
-  setTimeout(() => {
-    // Pick a fresh random position each time it appears
-    star.style.left = (2 + Math.random() * 93) + '%';
-    star.style.top  = (2 + Math.random() * 88) + '%';
-    star.classList.add('fcs-visible');
-
-    // Schedule disappearance
-    const stayFor = 4500 + Math.random() * 7000;
-    star._hideTimer = setTimeout(() => {
-      if (!star.dataset.clicked) {
-        star.classList.remove('fcs-visible');
-        // Go dormant then reappear
-        scheduleStarAppearance(star, 3000 + Math.random() * 9000);
+      if (!star.classList.contains('discovered')) {
+        // Fade out and relocate after random interval
+        const linger = 5000 + Math.random() * 8000;
+        setTimeout(() => {
+          if (star.classList.contains('discovered')) return;
+          star.style.opacity = '0';
+          setTimeout(() => {
+            if (star.classList.contains('discovered')) return;
+            star.remove();
+            // Reappear after random gap
+            setTimeout(placeSecretStar, 2000 + Math.random() * 6000);
+          }, 1100);
+        }, linger);
       }
-    }, stayFor);
-  }, delay);
+    }
+
+    // Stagger initial appearances
+    setTimeout(placeSecretStar, idx * 800 + Math.random() * 1500);
+  });
+}
+
+function handleStarSecret(ss, starEl) {
+  if (starEl.classList.contains('discovered')) return;
+  starEl.classList.add('discovered');
+  playPing();
+
+  // Show a random compliment toast each time
+  showStarCompliment(randomCompliment(), starEl);
+
+  emitParticleBurst(
+    parseFloat(starEl.style.left) / 100 * window.innerWidth,
+    parseFloat(starEl.style.top)  / 100 * window.innerHeight
+  );
 }
 
 function showStarCompliment(msg, starEl) {
@@ -243,18 +331,19 @@ function showStarCompliment(msg, starEl) {
   toast.className = 'star-toast';
   toast.textContent = msg;
 
+  // Position near the star
   const x = parseFloat(starEl.style.left);
   const y = parseFloat(starEl.style.top);
-  toast.style.left = Math.min(Math.max(x, 5), 62) + '%';
-  toast.style.top  = Math.max(y - 12, 4) + '%';
+  toast.style.left = Math.min(Math.max(x, 5), 60) + '%';
+  toast.style.top  = Math.max(y - 12, 5) + '%';
 
   document.body.appendChild(toast);
   requestAnimationFrame(() => toast.classList.add('show'));
 
   setTimeout(() => {
     toast.classList.remove('show');
-    setTimeout(() => toast.remove(), 600);
-  }, 3200);
+    setTimeout(() => toast.remove(), 500);
+  }, 5000);
 }
 
 /* ══════════════════════════════════════
@@ -300,49 +389,89 @@ function emitParticleBurst(x, y) {
 /* ══════════════════════════════════════
    FLOATING PETALS
 ══════════════════════════════════════ */
-const PETAL_COLORS = ['#f5c2d3','#e8a5b8','#ffd6e8','#ffb3cc','#f9d4e1','#fce4ec'];
+const PETAL_COLORS = ['#c0152a','#a81020','#d42035','#8b0e1a','#e0243a','#b5182e'];
 const PETAL_SVG = (color) => `<svg viewBox="0 0 20 24" xmlns="http://www.w3.org/2000/svg">
   <path d="M10 2 C14 2, 18 6, 18 11 C18 17, 14 22, 10 22 C6 22, 2 17, 2 11 C2 6, 6 2, 10 2Z"
-    fill="${color}" opacity="0.85"/>
-  <path d="M10 2 C10 2, 10 12, 10 22" stroke="${color}" stroke-width="0.5" opacity="0.4" fill="none"/>
+    fill="${color}" opacity="1"/>
+  <path d="M10 2 C10 2, 10 12, 10 22" stroke="rgba(255,255,255,0.35)" stroke-width="0.7" fill="none"/>
 </svg>`;
 
+function injectPetalStyles() {
+  if (document.getElementById('petal-keyframes')) return;
+  const style = document.createElement('style');
+  style.id = 'petal-keyframes';
+  style.textContent = `
+    #petal-field {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 10;
+      overflow: hidden;
+    }
+    .petal {
+      position: absolute;
+      top: -60px;
+      width: var(--ps, 18px);
+      height: var(--ps, 18px);
+      opacity: var(--pf-op, 0.85);
+      animation:
+        petalFall var(--pf-dur, 12s) var(--pf-delay, 0ms) linear infinite,
+        petalSway var(--pf-sway, 5s) var(--pf-delay, 0ms) ease-in-out infinite alternate;
+      will-change: transform, opacity;
+    }
+    .petal svg {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+    @keyframes petalFall {
+      0%   { transform: translateY(-60px) translateX(0px) rotate(var(--pr0, 0deg)); }
+      100% { transform: translateY(110vh)  translateX(var(--pf-swing, 40px)) rotate(var(--pr1, 360deg)); }
+    }
+    @keyframes petalSway {
+      0%   { margin-left: 0px; }
+      100% { margin-left: var(--pf-swing, 60px); }
+    }
+  `;
+  document.head.appendChild(style);
+}
+
 function buildPetals() {
+  injectPetalStyles();
   const field = $('#petal-field');
   if (!field) return;
-  const count = 18;
+  const count = 22;
   for (let i = 0; i < count; i++) {
-    spawnPetal(field, i * (14000 / count));
+    spawnPetal(field, i * (13000 / count));
   }
 }
 
 function spawnPetal(field, initialDelay) {
   const color = PETAL_COLORS[Math.floor(Math.random() * PETAL_COLORS.length)];
-  const size  = 10 + Math.random() * 14;
+  const size  = 14 + Math.random() * 18;
   const left  = Math.random() * 100;
-  const dur   = 9 + Math.random() * 10;
-  const sway  = (Math.random() - 0.5) * 100;
+  const dur   = 8 + Math.random() * 9;
+  const sway  = (Math.random() - 0.5) * 140;
   const rot0  = Math.random() * 360;
-  const rot1  = rot0 + 180 + Math.random() * 180;
-  const op    = 0.35 + Math.random() * 0.35;
+  const rot1  = rot0 + 200 + Math.random() * 240;
+  const op    = 0.75 + Math.random() * 0.22;
 
   const petal = document.createElement('div');
   petal.className = 'petal';
   petal.innerHTML = PETAL_SVG(color);
   petal.style.cssText = `
-    --ps:${size}px;
-    --pf-dur:${dur}s;
-    --pf-delay:${initialDelay}ms;
-    --pf-sway:${dur * 0.4}s;
-    --pf-swing:${sway}px;
-    --pr0:${rot0}deg;
-    --pr1:${rot1}deg;
-    --pf-op:${op};
-    left:${left}%;
+    --ps: ${size}px;
+    --pf-dur: ${dur}s;
+    --pf-delay: -${Math.random() * dur}s;
+    --pf-sway: ${dur * 0.38}s;
+    --pf-swing: ${sway}px;
+    --pr0: ${rot0}deg;
+    --pr1: ${rot1}deg;
+    --pf-op: ${op};
+    left: ${left}%;
   `;
   field.appendChild(petal);
 
-  // Recycle petal after each cycle
   petal.addEventListener('animationiteration', () => {
     petal.style.left = Math.random() * 100 + '%';
   });
@@ -358,32 +487,7 @@ const CONFETTI_COLORS = [
 ];
 
 function fireConfetti(originX) {
-  // Pick a launch style each time for variety
-  const mode = Math.random();
-  let cx, cy, cvy;
-
-  if (mode < 0.35) {
-    // Classic top fall — from random X across the top
-    cx = originX !== undefined ? originX : (5 + Math.random() * 90);
-    cy = '-10px';
-    cvy = (72 + Math.random() * 22) + 'vh';
-  } else if (mode < 0.6) {
-    // Mid-screen burst — spreads in all directions from a central point
-    cx = 20 + Math.random() * 60;
-    cy = (20 + Math.random() * 45) + 'vh';
-    cvy = ((Math.random() - 0.5) * 90) + 'vh';
-  } else if (mode < 0.8) {
-    // Low burst — pops up from lower screen area
-    cx = 10 + Math.random() * 80;
-    cy = (55 + Math.random() * 30) + 'vh';
-    cvy = (-(30 + Math.random() * 50)) + 'vh';
-  } else {
-    // Corner cannon — from a random corner area
-    cx = Math.random() > 0.5 ? (Math.random() * 15) : (85 + Math.random() * 15);
-    cy = (Math.random() * 30) + 'vh';
-    cvy = (30 + Math.random() * 50) + 'vh';
-  }
-
+  const cx = originX !== undefined ? originX : (30 + Math.random() * 40);
   const count = 38 + Math.floor(Math.random() * 22);
 
   for (let i = 0; i < count; i++) {
@@ -399,14 +503,13 @@ function fireConfetti(originX) {
     const delay = Math.random() * 0.25;
 
     piece.style.cssText = `
-      --cy: ${cy};
+      --cy: -5px;
       --cx: ${cx}%;
       --cw: ${w}px;
       --ch: ${h}px;
       --cc: ${color};
       --cbr: ${isCircle ? '50%' : '2px'};
       --cvx: ${vx}px;
-      --cvy: ${cvy};
       --crot: ${rot}deg;
       --cd: ${dur}s;
       --cdelay: ${delay}s;
@@ -417,15 +520,15 @@ function fireConfetti(originX) {
 }
 
 function scheduleConfetti() {
-  // First burst shortly after vault opens
-  setTimeout(() => fireConfetti(), 3500);
+  // Fire once shortly after vault opens
+  setTimeout(() => fireConfetti(50), 3500);
 
-  // Then randomly every 5–20 seconds
+  // Then randomly every 35-65 seconds
   function randomFire() {
-    fireConfetti();
-    setTimeout(randomFire, 5000 + Math.random() * 15000);
+    fireConfetti(20 + Math.random() * 60);
+    setTimeout(randomFire, 35000 + Math.random() * 30000);
   }
-  setTimeout(randomFire, 8000);
+  setTimeout(randomFire, 40000);
 }
 
 /* ══════════════════════════════════════
