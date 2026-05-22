@@ -318,7 +318,7 @@ function spawnComplimentStar(field, initialDelay) {
       parseFloat(star.style.top)  / 100 * window.innerHeight
     );
 
-    // Pop-vanish: scale up then disappear
+    // Vanish: just fade out, no size change
     star.classList.add('fcs-vanishing');
     setTimeout(() => {
       star.classList.remove('fcs-visible', 'fcs-vanishing');
@@ -347,7 +347,7 @@ function scheduleStarAppearance(star, delay) {
     star.classList.add('fcs-visible');
 
     // Schedule disappearance
-    const stayFor = 4500 + Math.random() * 7000;
+    const stayFor = 700 + Math.random() * 600;
     star._hideTimer = setTimeout(() => {
       if (!star.dataset.clicked) {
         star.classList.remove('fcs-visible');
