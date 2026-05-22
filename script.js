@@ -14,6 +14,7 @@ const STATE = {
   themes: ['', 'theme-warm', 'theme-cold', 'theme-void', 'theme-bloom'],
   themeIdx: 0,
   roomUnlocked: false,
+  letterUnlocked: false,
   roomLetterShown: false,
   audioCtx: null,
 };
@@ -144,47 +145,92 @@ function drawGrain() {
    STAR FIELD + FLOATING COMPLIMENT STARS
 ══════════════════════════════════════ */
 const COMPLIMENT_MESSAGES = [
-  "omg you look so pretty today?? like actually unreal 🌸",
-  "CRAZY bestie energy detected. off the charts. sending u away.",
-  "the way you walk into a room and people just?? feel it?? iconic behaviour tbh 💕",
-  "ur literally that girl. not a metaphor. literally THAT girl. 🌹",
-  "bestie ur giving main character and the whole supporting cast simultaneously. how.",
+  "omg ur eyes are GORGEOUS what the actual hell 😍",
+  "ur ass looks incredible today and honestly every day tbh",
+  "BESTIE UR SKIN IS GLOWING rn like hello?? dermatologist who",
+  "the way u exist is genuinely offensive to everyone less pretty 🌹",
+  "ur literally the prettiest person in every room always no exceptions",
+  "omg ur smile just did something to my whole heart bestie 💕",
+  "ur hair today?? actually illegal. someone call the police.",
+  "the AUDACITY of ur cheekbones i cannot even begin",
+  "ur so funny it makes u 10x more attractive which isn't fair",
+  "bestie ur body is literally a WORK OF ART hello???",
+  "the way u laugh makes everyone else want to laugh too. it's contagious. ur contagious.",
+  "ur literally that girl. not metaphorically. LITERALLY. her.",
+  "omg ur lips?? 👄 bestie. BESTIE. hello. are u there.",
+  "ur energy walks in before u do and honestly so does ur prettiness",
+  "the fact that u exist and i get to know u is actually my biggest W in life",
+  "ur eyelashes r so long what do u eat i need to know immediately",
+  "ur voice is so cute it should be illegal to sound that good",
+  "u have the best taste in literally everything clothes food music people (me)",
+  "bestie ur so magnetic people just orbit u without even knowing why",
+  "ur figure?? hello?? who gave u permission to look like THAT",
+  "the way u carry urself is so confident it makes my brain malfunction a little",
+  "ur literally glowing rn like a main character in the good part of the movie",
+  "ur so smart AND pretty AND funny it's genuinely rude to everyone else",
+  "ur hands are so pretty btw random but i noticed and i'm saying it",
+  "the way u dress is always RIGHT. never wrong. impeccable. elite.",
+  "ur so warm and cozy to be around like a human weighted blanket but hot",
+  "bestie ur literally getting more beautiful every single day how does that work",
+  "omg ur collar bones!!! a crime!!! absolutely criminal!!!! 🌸",
+  "ur so effortlessly cool it makes me want to be a better person honestly",
+  "the combination of ur personality and ur face is unfair to the rest of us",
+  "ur genuinely so interesting to talk to. ur brain is so sexy actually.",
+  "bestie ur aura is IMMACULATE. people feel it. i feel it. everyone feels it.",
+  "ur literally made differently. like they ran out of regular and had to go premium.",
+  "the way u walk?? HELLO?? who taught u that?? give me lessons immediately.",
+  "ur nose is so cute btw i think about it. that's normal. ur welcome.",
+  "bestie ur literally 10/10 on ur worst day which means on a good day ur a 47",
+  "ur so passionate about things u care about and it makes u so attractive i can't",
+  "ur hips?? ur waist?? ur everything?? i'm sending a complaint to the universe.",
+  "u have the best laugh of anyone i have ever heard in my entire life no cap",
+  "omg ur so soft and kind but also will destroy anyone who messes with ur people. hot.",
+  "the fact that u exist as ur specific self is genuinely one of my fav things about life",
+  "ur so beautiful it sometimes catches me off guard even tho i already know",
+  "bestie ur a whole vibe and a whole look and a whole personality all at once how",
+  "ur literally living proof that god has a fav and it's u sorry everyone else 🌹",
+  "the way u make people feel seen?? it's a superpower. ur a superhero. in heels.",
+  "ur eyes do this thing when ur happy where they go all crinkly and it's everything",
+  "bestie ur so iconic that future generations will study u in school i'm not joking",
+  "u are so deeply loved by so many people and u deserve every bit of it 💕",
+  "omg ur literally the moment. not IN the moment. U ARE THE MOMENT.",
+  "paige. bestie. angel. ur so beautiful it makes me want to cry a little. that's love.",
 ];
+
+// Track which compliments have been shown so we don't repeat until cycling
+let _complimentIdx = 0;
+const _complimentPool = [...COMPLIMENT_MESSAGES].sort(() => Math.random() - 0.5);
+function getNextCompliment() {
+  const msg = _complimentPool[_complimentIdx % _complimentPool.length];
+  _complimentIdx++;
+  return msg;
+}
 
 function buildStarField() {
   const field = $('#star-field');
+  if (!field) return;
 
-  // Regular decorative stars (background twinkle)
-  for (let i = 0; i < 80; i++) {
-    const star = document.createElement('div');
-    star.className = 'star ' + (Math.random() > 0.6 ? 'bright' : 'dim');
-    const size = Math.random() * 2.5 + 0.8;
-    star.style.cssText = `
-      width:${size}px; height:${size}px;
-      left:${Math.random()*100}%;
-      top:${Math.random()*100}%;
-      background: hsl(${40 + Math.random()*20}, 70%, ${60 + Math.random()*30}%);
-    `;
-    field.appendChild(star);
-  }
-
-  // 50 floating compliment stars — drift around, appear and disappear
+  // Spawn 50 floating compliment stars with staggered delays
   for (let i = 0; i < 50; i++) {
-    spawnComplimentStar(field, i * 380 + Math.random() * 1200);
+    spawnComplimentStar(field, i * 220 + Math.random() * 800);
   }
 }
 
 function spawnComplimentStar(field, initialDelay) {
-  const size = 4 + Math.random() * 5;
-  const driftX = (Math.random() - 0.5) * 55;
-  const driftY = (Math.random() - 0.5) * 40;
-  const driftDur = 5 + Math.random() * 9;
-  const pulseDur = 2 + Math.random() * 2.5;
+  // Size: noticeable but not huge — 8 to 16px
+  const size = 8 + Math.random() * 8;
+
+  // Big wild drift — stars really move around
+  const driftX = (Math.random() - 0.5) * 140;
+  const driftY = (Math.random() - 0.5) * 100;
+  const driftDur = 4 + Math.random() * 7;   // faster drift
+  const pulseDur = 1.5 + Math.random() * 2;
 
   const star = document.createElement('div');
   star.className = 'float-compliment-star';
   star.style.cssText = `
-    width: ${size}px; height: ${size}px;
+    width: ${size}px;
+    height: ${size}px;
     --fsdx: ${driftX}px;
     --fsdy: ${driftY}px;
     --fsd: ${driftDur}s;
@@ -192,13 +238,13 @@ function spawnComplimentStar(field, initialDelay) {
   `;
   field.appendChild(star);
 
-  // Click: show compliment, star fades, respawns later
-  star.addEventListener('click', () => {
+  star.addEventListener('click', (e) => {
+    e.stopPropagation();
     if (star.dataset.clicked) return;
     star.dataset.clicked = '1';
     clearTimeout(star._hideTimer);
 
-    const msg = COMPLIMENT_MESSAGES[Math.floor(Math.random() * COMPLIMENT_MESSAGES.length)];
+    const msg = getNextCompliment();
     playPing();
     showStarCompliment(msg, star);
     emitParticleBurst(
@@ -206,33 +252,33 @@ function spawnComplimentStar(field, initialDelay) {
       parseFloat(star.style.top)  / 100 * window.innerHeight
     );
 
-    // Fade out when compliment fades (~3.2s), respawn fresh later
+    // Fade out after compliment, respawn at new location
     setTimeout(() => {
       star.classList.remove('fcs-visible');
       setTimeout(() => {
         delete star.dataset.clicked;
-        scheduleStarAppearance(star, 8000 + Math.random() * 12000);
-      }, 1200);
-    }, 3200);
+        scheduleStarAppearance(star, 5000 + Math.random() * 10000);
+      }, 1000);
+    }, 3400);
   });
 
   scheduleStarAppearance(star, initialDelay);
 }
 
 function scheduleStarAppearance(star, delay) {
+  clearTimeout(star._hideTimer);
   setTimeout(() => {
-    // Pick a fresh random position each time it appears
-    star.style.left = (2 + Math.random() * 93) + '%';
-    star.style.top  = (2 + Math.random() * 88) + '%';
+    // Fresh random position all over the page including scroll area
+    star.style.left = (3 + Math.random() * 91) + '%';
+    star.style.top  = (2 + Math.random() * 280) + 'vh'; // spreads over full scroll height
     star.classList.add('fcs-visible');
 
-    // Schedule disappearance
-    const stayFor = 4500 + Math.random() * 7000;
+    // Stay visible for a random duration, then vanish and reappear elsewhere
+    const stayFor = 3500 + Math.random() * 6000;
     star._hideTimer = setTimeout(() => {
       if (!star.dataset.clicked) {
         star.classList.remove('fcs-visible');
-        // Go dormant then reappear
-        scheduleStarAppearance(star, 3000 + Math.random() * 9000);
+        scheduleStarAppearance(star, 2000 + Math.random() * 7000);
       }
     }, stayFor);
   }, delay);
@@ -468,9 +514,17 @@ function markFound(id) {
     $('#room-door').classList.add('show');
   }
 
-  // All 22 found
-  if (count >= STATE.total) {
-    setTimeout(triggerFinalReveal, 800);
+  // All 22 found — show the letter button instead of auto-triggering
+  if (count >= STATE.total && !STATE.letterUnlocked) {
+    STATE.letterUnlocked = true;
+    setTimeout(() => {
+      const btn = $('#letter-door');
+      if (btn) {
+        btn.classList.add('show');
+        // little pulse to draw her attention
+        setTimeout(() => btn.classList.add('pulse'), 600);
+      }
+    }, 800);
   }
 
   playPing();
@@ -960,6 +1014,9 @@ function buildRoomWall() {
 }
 
 $('#room-door') && $('#room-door').addEventListener('click', openRoom);
+$('#letter-door') && $('#letter-door').addEventListener('click', () => {
+  triggerFinalReveal();
+});
 $('#close-room') && $('#close-room').addEventListener('click', closeRoom);
 
 function openRoom() {
