@@ -144,41 +144,37 @@ function drawGrain() {
    STAR FIELD (hidden clickable stars)
 ══════════════════════════════════════ */
 const STAR_SECRETS_POOL = [
-  "omg you look so pretty today?? like actually unreal 🌸",
-  "CRAZY bestie energy detected. off the charts. sending u away.",
-  "the way you walk into a room and people just?? feel it?? iconic behaviour tbh 💕",
-  "ur literally that girl. not a metaphor. literally THAT girl. 🌹",
-  "bestie ur giving main character and the whole supporting cast simultaneously. how.",
-  "you have that thing where you don't even realise how much people want to be around you. devastating honestly.",
-  "the softness you carry without letting anyone trample it?? that's strength. unmatched.",
-  "ur brain is so funny and so sharp and it's a crime more people don't see it working in real time.",
-  "the fact that you remember the little things about everyone?? ur so quietly thoughtful it's embarrassing for the rest of us.",
-  "you radiate warmth without even trying. people feel safe around you. that's rare. that's you.",
-  "not to be dramatic but you could start a religion based on your fits alone. 🌹",
-  "the way you laugh at your own jokes before you even finish telling them. peak behaviour. never change.",
-  "you care so deeply about the people you love and it shows in everything you do. it's beautiful tbh.",
-  "ur one of those people who makes everything feel like it matters more. a gift. an actual gift.",
-  "bestie the confidence arc you've been on?? STUNNING. growth of the century.",
-  "you have the best taste and you don't even fully clock it. very frustrating. very iconic.",
-  "the version of you that doubts herself is lying. the rest of you knows. listen to the rest.",
-  "you show up for people in ways they don't forget. quiet legend behaviour.",
-  "ur so effortlessly yourself and that is the hardest thing to be. most people never get there.",
-  "the way your eyes light up when you talk about things you love?? it's contagious. it's everything.",
-  "you make people feel seen without making it a whole thing. that's a superpower. yours specifically.",
-  "lowkey obsessed with how genuine you are. no performance. just actually that person. insane.",
+  "you're so beautiful 🌸",
+  "your eyes are gorgeous omg",
+  "CRAZY bestie energy. off the charts.",
+  "literally that girl. no debate. 🌹",
+  "you walked in and the whole room felt it 💕",
+  "ur so pretty it should be illegal",
+  "main character behaviour. always.",
+  "ur smile?? devastating. in the best way.",
+  "stunning. genuinely stunning.",
+  "the confidence arc?? ICONIC. 🌹",
+  "ur giving everything rn and I'm obsessed",
+  "so beautiful it's actually unfair to others",
+  "bestie ur glowing and you don't even know it",
+  "ur literally gorgeous wtf",
+  "that girl energy: confirmed 💕",
+  "your vibe is immaculate. always.",
+  "prettiest person in any room. facts.",
+  "ur so effortlessly you and it's everything 🌸",
+  "the way you exist?? a gift honestly.",
+  "obsessed with you. not taking questions.",
 ];
 
-// Shuffle pool and pick 5 for this session
-const STAR_SECRETS = (function() {
-  const shuffled = [...STAR_SECRETS_POOL].sort(() => Math.random() - 0.5);
-  return [
-    { id:'star1', message: shuffled[0] },
-    { id:'star2', message: shuffled[1] },
-    { id:'star3', message: shuffled[2] },
-    { id:'star4', message: shuffled[3] },
-    { id:'star5', message: shuffled[4] },
-  ];
-})();
+// Secret stars pick a random compliment on every click
+const STAR_SECRETS = [
+  { id:'star1' }, { id:'star2' }, { id:'star3' },
+  { id:'star4' }, { id:'star5' },
+];
+
+function randomCompliment() {
+  return STAR_SECRETS_POOL[Math.floor(Math.random() * STAR_SECRETS_POOL.length)];
+}
 
 function spawnDecorativeStar(field) {
   const star = document.createElement('div');
@@ -232,22 +228,48 @@ function buildStarField() {
   // Living decorative star system — fades in/out randomly, max ~2 at a time
   runLivingStarField(field);
 
-  // Hidden secret stars (slightly larger, visible enough to find)
+  // Hidden secret stars — random positions, pop in/out over time
   STAR_SECRETS.forEach((ss, idx) => {
-    const star = document.createElement('div');
-    star.className = 'star secret-star';
-    star.id = ss.id;
-    star.dataset.secretStar = idx;
-    star.style.cssText = `
-      width: 7px; height: 7px;
-      left: ${10 + idx * 18}%;
-      top:  ${20 + (idx % 3) * 22}%;
-      background: #f0c0d8;
-      opacity: 0.35;
-      box-shadow: 0 0 6px 2px rgba(240,192,216,0.4);
-    `;
-    star.addEventListener('click', () => handleStarSecret(ss, star));
-    field.appendChild(star);
+    function placeSecretStar() {
+      const star = document.createElement('div');
+      star.className = 'star secret-star';
+      star.id = ss.id;
+      star.dataset.secretStar = idx;
+      const left = 5 + Math.random() * 88;
+      const top  = 5 + Math.random() * 88;
+      star.style.cssText = `
+        width: 7px; height: 7px;
+        left: ${left}%;
+        top:  ${top}%;
+        background: #f0c0d8;
+        opacity: 0;
+        box-shadow: 0 0 6px 2px rgba(240,192,216,0.4);
+        transition: opacity 1s ease;
+      `;
+      star.addEventListener('click', () => handleStarSecret(ss, star));
+      field.appendChild(star);
+
+      // Fade in after short delay
+      setTimeout(() => { star.style.opacity = '0.35'; }, 100);
+
+      if (!star.classList.contains('discovered')) {
+        // Fade out and relocate after random interval
+        const linger = 5000 + Math.random() * 8000;
+        setTimeout(() => {
+          if (star.classList.contains('discovered')) return;
+          star.style.opacity = '0';
+          setTimeout(() => {
+            if (star.classList.contains('discovered')) return;
+            star.remove();
+            // Reappear after random gap
+            setTimeout(placeSecretStar, 2000 + Math.random() * 6000);
+          }, 1100);
+        }, linger);
+      }
+    }
+
+    // Stagger initial appearances
+    setTimeout(placeSecretStar, idx * 800 + Math.random() * 1500);
   });
 }
 
@@ -256,8 +278,8 @@ function handleStarSecret(ss, starEl) {
   starEl.classList.add('discovered');
   playPing();
 
-  // Show a fun floating compliment toast
-  showStarCompliment(ss.message, starEl);
+  // Show a random compliment toast each time
+  showStarCompliment(randomCompliment(), starEl);
 
   emitParticleBurst(
     parseFloat(starEl.style.left) / 100 * window.innerWidth,
@@ -281,8 +303,8 @@ function showStarCompliment(msg, starEl) {
 
   setTimeout(() => {
     toast.classList.remove('show');
-    setTimeout(() => toast.remove(), 600);
-  }, 3200);
+    setTimeout(() => toast.remove(), 500);
+  }, 5000);
 }
 
 /* ══════════════════════════════════════
