@@ -130,30 +130,36 @@ body::after {
   border-radius: 50%;
   pointer-events: all;
   cursor: pointer;
-  background: #f0c0d8;
+  background: #a78bfa;               /* overridden per-star via inline style */
   opacity: 0;
-  box-shadow: 0 0 4px 1px rgba(240,192,216,0.2);
+  box-shadow: 0 0 6px 2px rgba(167,139,250,0.3);
   transition: opacity 1.4s ease;
   animation:
     fcs-drift var(--fsd, 7s) ease-in-out infinite alternate,
     fcs-pulse var(--fsp, 3s) ease-in-out infinite;
 }
 .float-compliment-star.fcs-visible {
-  opacity: 0.5;
+  opacity: 0.75;
 }
 .float-compliment-star:hover {
   opacity: 1 !important;
-  transform: scale(2.8) !important;
-  box-shadow: 0 0 12px 4px rgba(240,192,216,0.75);
+  box-shadow: 0 0 18px 6px var(--star-colour, #a78bfa);
   z-index: 200;
+  transition: opacity 0.2s ease, box-shadow 0.2s ease;
+}
+/* Vanish: just fade out at same size */
+.float-compliment-star.fcs-vanishing {
+  opacity: 0 !important;
+  transition:
+    opacity 0.4s ease !important;
 }
 @keyframes fcs-drift {
   0%   { transform: translate(0, 0); }
   100% { transform: translate(var(--fsdx, 14px), var(--fsdy, 9px)); }
 }
 @keyframes fcs-pulse {
-  0%, 100% { box-shadow: 0 0 3px 1px rgba(240,192,216,0.2); }
-  50%       { box-shadow: 0 0 9px 3px rgba(240,192,216,0.55); }
+  0%, 100% { box-shadow: 0 0 4px 1px var(--star-colour, #a78bfa); }
+  50%       { box-shadow: 0 0 14px 5px var(--star-colour, #a78bfa); }
 }
 
 /* ── STAR COMPLIMENT TOAST ── */
