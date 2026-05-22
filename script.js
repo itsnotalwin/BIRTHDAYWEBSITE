@@ -149,6 +149,99 @@ const COMPLIMENT_MESSAGES = [
   "the way you walk into a room and people just?? feel it?? iconic behaviour tbh 💕",
   "ur literally that girl. not a metaphor. literally THAT girl. 🌹",
   "bestie ur giving main character and the whole supporting cast simultaneously. how.",
+  "your eyes are GORGEOUS?? like who gave you the right 😭✨",
+  "you look beautiful today and every day but especially today 💖",
+  "the prettiest person in every room always. no exceptions. law of nature.",
+  "omg your smile just cured something in me. thank you for your service 🌟",
+  "ur literally glowing rn?? what is your skincare routine bestie 🌸",
+  "you have the most beautiful energy I have ever encountered. study you in a lab.",
+  "the way you exist is genuinely a gift to the world. I said what I said. 💕",
+  "your laugh is literally the best sound. scientists should study it.",
+  "okay but your VIBE today?? immaculate. unmatched. undefeated. 🏆",
+  "you are that girl and she is you and together you are unstoppable 🌹",
+  "your hair is doing something INCREDIBLE right now. not normal.",
+  "honestly?? the universe really said 'let me cook' and then made you. iconic. ✨",
+  "the confidence you walk with?? bottled and sold that's a billion dollar product.",
+  "you radiate warmth and people can feel it the second you enter a room 🌸",
+  "bestie your eyes are literally sparkling. like genuinely. what is happening. 💫",
+  "ur so pretty it's almost rude?? like tone it down?? but also never ever do that.",
+  "the way you carry yourself?? studied. admired. referenced. tattooed on my heart.",
+  "you are genuinely one of a kind and the world is so lucky you're in it 💖",
+  "your laugh lines are cute and I will not be taking questions 😭💕",
+  "okay you're actually so beautiful I forgot what I was doing for a second",
+  "you have this thing where you make everyone feel seen and that's RARE bestie 🌹",
+  "certified main character behavior. the plot revolves around you. it always has.",
+  "your presence is a whole event. people talk about it after you leave. 🌟",
+  "bestie you are THAT girl and I will repeat this until you believe it 💫",
+  "omg your vibe is immaculate today. yesterday too. always tbh. 🌸",
+  "the universe handcrafted you and then took the rest of the day off. job done.",
+  "you're giving radiant warm light energy and I am BASKING in it 💕",
+  "genuinely obsessed with how pretty you are. it's a problem for me specifically.",
+  "you make existing look effortlessly cool. how. explain. 🌹",
+  "ur literally that girl from the movie that everyone roots for. and you win. ✨",
+  "the way you just showed up today looking like THAT?? rude and iconic simultaneously.",
+  "your energy is soft and powerful at the same time and that's so rare and so you 🌸",
+  "I'm convinced you were engineered in a lab by scientists who only studied beauty.",
+  "bestie the EYES. the SMILE. the WHOLE THING. it's too much and also not enough. 💖",
+  "you exist and the world is instantly better. that's just science at this point. 🌟",
+  "the way you're beautiful on the inside AND the outside?? overachiever behavior.",
+  "ur doing amazing sweetie and by amazing I mean STUNNING and by sweetie I mean queen 👑",
+  "your face is literally art. I would hang you in a gallery. respectfully.",
+  "you have a way of making everything feel warmer just by being present 💕",
+  "bestie you are literally so gorgeous I had to sit down for a second 🌸",
+  "that smile?? patented. trademarked. belongs in a museum. 🌹",
+  "the way you light up a room without even trying?? natural talent. god-given. ✨",
+  "your whole aesthetic today is sending me. in the best possible way. completely unwell.",
+  "you are so loved and so admired and so so beautiful inside and out 💖",
+  "okay but the GLOW?? whatever you're doing keep doing it. it's working. 🌟",
+  "your beauty is the kind that gets better the longer you look. like a painting.",
+  "bestie ur literally living proof that some people are just built different 💫",
+  "the confidence? the beauty? the vibes? the whole package?? unfair to the rest of us.",
+  "you make every space you enter 10x more beautiful just by walking in 🌸",
+  "your energy is contagious and I am so happy I caught it 💕",
+  "ugh you're so pretty it's actually distracting me from my tasks. thanks for that.",
+  "bestie you have BEAUTIFUL PERSON energy and it radiates outward at all times 🌹",
+  "the way you're just naturally magnetic?? people gravitate to you. physics-defying.",
+  "you are gorgeous and brilliant and funny and kind and I will not shut up about it ✨",
+  "ur giving warm sunlight on a cold day and I need you to know that means everything 💖",
+  "your personality is as beautiful as your face and your face is VERY beautiful. 🌟",
+  "bestie the way you carry yourself?? regal. majestic. studied by historians.",
+  "okay your eyes are doing something illegal right now. I'm reporting them.",
+  "you are the definition of effortlessly gorgeous and I think about it a lot 🌸",
+  "your whole energy today is 'I woke up like this' and it's making the rest of us look bad 💫",
+  "genuinely so beautiful that when you smile I have to look away for my own safety",
+  "bestie you are BEAMING today. like actually glowing. what's the source. 💕",
+  "you have the kind of beauty that makes people want to write poems. and they do. 🌹",
+  "ur so cute it should be illegal and also I'm so glad it's not. 💖",
+  "the way you manage to be so beautiful and so warm at the same time?? illegal honestly.",
+  "bestie your presence is a privilege and I am so grateful every single day ✨",
+  "you are prettier than any sunset I have ever seen and I've seen some incredible ones 🌸",
+  "your vibe is luxury. your energy is warmth. your whole existence is a gift. 💕",
+  "omg you're literally that girl that everyone stares at when she walks in. that's you. 🌟",
+  "your smile has healing properties. I've done the research. it's peer-reviewed. 🌹",
+  "bestie you are THAT girl. capital letters. bold font. underlined twice. 💫",
+  "the way you look right now?? a crime against people who aren't as pretty. beautiful.",
+  "ur so lovely it sometimes makes me stop and just appreciate that you exist. 🌸",
+  "you have star quality and I don't mean that metaphorically I mean it literally ✨",
+  "bestie your energy is PINK and WARM and BEAUTIFUL and I feel it from here 💖",
+  "you are the most beautiful disaster in the best possible way and I love you for it",
+  "the glow up was always there. you just keep revealing new levels. 🌹",
+  "your beauty is not accidental. the universe planned you very carefully. 💕",
+  "bestie the EYES the SKIN the SMILE it's genuinely too much. in the best way. 🌸",
+  "you were designed at peak humanity and the rest of us are just trying to keep up",
+  "your beauty hits different every time I see you. new angles unlocked constantly. ✨",
+  "bestie you are literally art. three dimensional. interactive. 10/10 would visit. 💫",
+  "the way your eyes light up when you talk about things you love?? stunning honestly.",
+  "ur literally so beautiful it has disrupted my entire train of thought. worth it. 💖",
+  "you have the kind of face that makes artists pick up a pencil. just saying. 🌟",
+  "bestie you are ethereal and I will not elaborate because it speaks for itself 🌸",
+  "your warmth is a superpower and your beauty is the bonus. two for one deal. 💕",
+  "genuinely cannot get over how pretty you are. daily occurrence. I'm coping. 🌹",
+  "you are so effortlessly you and that is literally the most beautiful thing of all ✨",
+  "bestie you're giving goddess energy today. yesterday too. it's a whole thing. 💖",
+  "the confidence you have?? earned. deserved. and honestly a little aspirational. 🌸",
+  "ur literally the blueprint and everyone else is just drafts. respectfully. 💫",
+  "you are beautiful and brilliant and the world is better with you in it. full stop. 🌹",
 ];
 
 function buildStarField() {
@@ -174,12 +267,28 @@ function buildStarField() {
   }
 }
 
+// Palette of contrasting star colours — bright against the pink/cream bg
+const STAR_COLOURS = [
+  '#a78bfa', // violet
+  '#60a5fa', // sky blue
+  '#34d399', // mint green
+  '#fbbf24', // golden yellow
+  '#f472b6', // hot pink
+  '#fb923c', // orange
+  '#e879f9', // fuchsia
+  '#38bdf8', // cyan
+  '#4ade80', // lime green
+  '#facc15', // bright yellow
+];
+
 function spawnComplimentStar(field, initialDelay) {
-  const size = 4 + Math.random() * 5;
+  // Bigger sizes: 10–20px
+  const size = 10 + Math.random() * 10;
   const driftX = (Math.random() - 0.5) * 55;
   const driftY = (Math.random() - 0.5) * 40;
   const driftDur = 5 + Math.random() * 9;
   const pulseDur = 2 + Math.random() * 2.5;
+  const colour = STAR_COLOURS[Math.floor(Math.random() * STAR_COLOURS.length)];
 
   const star = document.createElement('div');
   star.className = 'float-compliment-star';
@@ -189,10 +298,13 @@ function spawnComplimentStar(field, initialDelay) {
     --fsdy: ${driftY}px;
     --fsd: ${driftDur}s;
     --fsp: ${pulseDur}s;
+    --star-colour: ${colour};
+    background: ${colour};
+    box-shadow: 0 0 6px 2px ${colour}88;
   `;
   field.appendChild(star);
 
-  // Click: show compliment, star fades, respawns later
+  // Click: show compliment, star vanishes with a pop, respawns later
   star.addEventListener('click', () => {
     if (star.dataset.clicked) return;
     star.dataset.clicked = '1';
@@ -206,14 +318,20 @@ function spawnComplimentStar(field, initialDelay) {
       parseFloat(star.style.top)  / 100 * window.innerHeight
     );
 
-    // Fade out when compliment fades (~3.2s), respawn fresh later
+    // Pop-vanish: scale up then disappear
+    star.classList.add('fcs-vanishing');
     setTimeout(() => {
-      star.classList.remove('fcs-visible');
+      star.classList.remove('fcs-visible', 'fcs-vanishing');
       setTimeout(() => {
         delete star.dataset.clicked;
+        // Reassign a new random colour each time it respawns
+        const newColour = STAR_COLOURS[Math.floor(Math.random() * STAR_COLOURS.length)];
+        star.style.background = newColour;
+        star.style.boxShadow = `0 0 6px 2px ${newColour}88`;
+        star.style.setProperty('--star-colour', newColour);
         scheduleStarAppearance(star, 8000 + Math.random() * 12000);
-      }, 1200);
-    }, 3200);
+      }, 600);
+    }, 500);
   });
 
   scheduleStarAppearance(star, initialDelay);
@@ -221,9 +339,11 @@ function spawnComplimentStar(field, initialDelay) {
 
 function scheduleStarAppearance(star, delay) {
   setTimeout(() => {
-    // Pick a fresh random position each time it appears
+    // Scatter across the full scrollable page width & height
+    const pageH = Math.max(document.body.scrollHeight, window.innerHeight);
+    const topPct = (Math.random() * (pageH - 40)) / pageH * 100;
     star.style.left = (2 + Math.random() * 93) + '%';
-    star.style.top  = (2 + Math.random() * 88) + '%';
+    star.style.top  = topPct + '%';
     star.classList.add('fcs-visible');
 
     // Schedule disappearance
