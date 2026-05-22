@@ -216,14 +216,87 @@ function buildStarField() {
   }
 }
 
+// SVG shapes for the cute stars — sparkles, roses, hearts
+const STAR_SHAPES = [
+  // 4-pointed sparkle ✦
+  (c) => `<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+    <path d="M12 2 C12 2, 13.2 8.8, 22 12 C13.2 15.2, 12 22, 12 22 C12 22, 10.8 15.2, 2 12 C10.8 8.8, 12 2, 12 2Z" fill="${c}"/>
+  </svg>`,
+  // 6-pointed star sparkle ✶
+  (c) => `<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+    <path d="M12 1 L13.5 9.5 L22 12 L13.5 14.5 L12 23 L10.5 14.5 L2 12 L10.5 9.5Z" fill="${c}"/>
+    <path d="M5 5 L10.5 10.5 M19 5 L13.5 10.5 M5 19 L10.5 13.5 M19 19 L13.5 13.5" stroke="${c}" stroke-width="0.8" opacity="0.5"/>
+  </svg>`,
+  // Small rose ✿
+  (c) => `<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="12" cy="12" r="3.5" fill="${c}"/>
+    <ellipse cx="12" cy="5.5" rx="2.5" ry="4" fill="${c}" opacity="0.75"/>
+    <ellipse cx="18.5" cy="12" rx="4" ry="2.5" fill="${c}" opacity="0.75"/>
+    <ellipse cx="12" cy="18.5" rx="2.5" ry="4" fill="${c}" opacity="0.75"/>
+    <ellipse cx="5.5" cy="12" rx="4" ry="2.5" fill="${c}" opacity="0.75"/>
+    <ellipse cx="16.8" cy="7.2" rx="2.2" ry="3.5" fill="${c}" opacity="0.55" transform="rotate(45 16.8 7.2)"/>
+    <ellipse cx="16.8" cy="16.8" rx="2.2" ry="3.5" fill="${c}" opacity="0.55" transform="rotate(-45 16.8 16.8)"/>
+    <ellipse cx="7.2" cy="16.8" rx="2.2" ry="3.5" fill="${c}" opacity="0.55" transform="rotate(45 7.2 16.8)"/>
+    <ellipse cx="7.2" cy="7.2" rx="2.2" ry="3.5" fill="${c}" opacity="0.55" transform="rotate(-45 7.2 7.2)"/>
+  </svg>`,
+  // Tiny heart ♡
+  (c) => `<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+    <path d="M12 20 C12 20, 2 13, 2 7.5 C2 4.5, 4.5 2, 7.5 2 C9.5 2, 11 3, 12 4.5 C13 3, 14.5 2, 16.5 2 C19.5 2, 22 4.5, 22 7.5 C22 13, 12 20, 12 20Z" fill="${c}"/>
+  </svg>`,
+  // Three-dot sparkle cluster
+  (c) => `<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+    <path d="M12 3 C12 3, 12.8 7.5, 21 12 C12.8 16.5, 12 21, 12 21 C12 21, 11.2 16.5, 3 12 C11.2 7.5, 12 3, 12 3Z" fill="${c}"/>
+    <circle cx="5" cy="5" r="1.8" fill="${c}" opacity="0.6"/>
+    <circle cx="19" cy="5" r="1.2" fill="${c}" opacity="0.45"/>
+  </svg>`,
+];
+
+const STAR_COLORS = [
+  '#e8a5b8', '#f5c2d3', '#d97b99', '#f9d0e0',
+  '#e8b4c8', '#f0c0d4', '#c4668a', '#fce4ec',
+];
+
 function spawnComplimentStar(field, initialDelay) {
-  // Slightly bigger than original (was 4–9px, now 9–14px)
-  const size = 9 + Math.random() * 5;
+  const size   = 16 + Math.random() * 14; // 16–30px — cute and visible
+  const shape  = STAR_SHAPES[Math.floor(Math.random() * STAR_SHAPES.length)];
+  const color  = STAR_COLORS[Math.floor(Math.random() * STAR_COLORS.length)];
+  const rotate = Math.floor(Math.random() * 360);
 
   const star = document.createElement('div');
   star.className = 'float-compliment-star';
-  star.style.cssText = `width:${size}px; height:${size}px;`;
+  star.style.cssText = `width:${size}px; height:${size}px; transform:rotate(${rotate}deg);`;
+  star.innerHTML = shape(color);
   field.appendChild(star);
+
+  star.addEventListener('click', (e) => {
+    e.stopPropagation();
+    if (star.dataset.clicked) return;
+    star.dataset.clicked = '1';
+    clearTimeout(star._hideTimer);
+
+    // Show compliment toast
+    const msg = getNextCompliment();
+    playPing();
+    showStarCompliment(msg, star);
+    emitParticleBurst(
+      parseFloat(star.style.left) / 100 * window.innerWidth,
+      parseFloat(star.style.top)  / 100 * window.innerHeight
+    );
+
+    // Turn lighter pink immediately, then fade out after 1.2s
+    star.classList.add('fcs-clicked');
+    setTimeout(() => {
+      star.classList.remove('fcs-visible');
+      star.classList.remove('fcs-clicked');
+      setTimeout(() => {
+        delete star.dataset.clicked;
+        scheduleStarAppearance(star, 6000 + Math.random() * 10000);
+      }, 900);
+    }, 1200);
+  });
+
+  scheduleStarAppearance(star, initialDelay);
+}
 
   star.addEventListener('click', (e) => {
     e.stopPropagation();
