@@ -336,14 +336,13 @@ function handleStarSecret(ss, starEl) {
     parseFloat(starEl.style.top)  / 100 * window.innerHeight
   );
 
-  // Fade out and remove after the toast has gone (≈6s), then reappear elsewhere
+  // Fade out immediately — remove 'discovered' first so CSS !important doesn't block it
   setTimeout(() => {
-    starEl.style.transition = 'opacity 1.2s ease';
+    starEl.classList.remove('discovered');
+    starEl.style.transition = 'opacity 1s ease';
     starEl.style.opacity = '0';
-    setTimeout(() => {
-      starEl.remove();
-    }, 1300);
-  }, 5800);
+    setTimeout(() => starEl.remove(), 1100);
+  }, 100);
 }
 
 function showStarCompliment(msg, starEl) {
@@ -409,35 +408,31 @@ function emitParticleBurst(x, y) {
 /* ══════════════════════════════════════
    FLOATING PETALS
 ══════════════════════════════════════ */
-const PETAL_COLORS = [
-  '#9b2d46','#7d1e35','#b8405a','#c25570',
-  '#8c2a42','#a33350','#6b1a2e','#be4d65',
-  '#7a243c','#a63048'
-];
+const PETAL_COLORS = ['#f5c2d3','#e8a5b8','#ffd6e8','#ffb3cc','#f9d4e1','#fce4ec'];
 const PETAL_SVG = (color) => `<svg viewBox="0 0 20 24" xmlns="http://www.w3.org/2000/svg">
-  <path d="M10 1 C15 1, 19 6, 19 11 C19 18, 14 23, 10 23 C6 23, 1 18, 1 11 C1 6, 5 1, 10 1Z"
+  <path d="M10 2 C14 2, 18 6, 18 11 C18 17, 14 22, 10 22 C6 22, 2 17, 2 11 C2 6, 6 2, 10 2Z"
     fill="${color}" opacity="1"/>
-  <path d="M10 1 C10 1, 10 12, 10 23" stroke="rgba(255,255,255,0.25)" stroke-width="0.8" fill="none"/>
+  <path d="M10 2 C10 2, 10 12, 10 22" stroke="white" stroke-width="0.6" opacity="0.5" fill="none"/>
 </svg>`;
 
 function buildPetals() {
   const field = $('#petal-field');
   if (!field) return;
-  const count = 30;
+  const count = 18;
   for (let i = 0; i < count; i++) {
-    spawnPetal(field, i * (20000 / count));
+    spawnPetal(field, i * (14000 / count));
   }
 }
 
 function spawnPetal(field, initialDelay) {
   const color = PETAL_COLORS[Math.floor(Math.random() * PETAL_COLORS.length)];
-  const size  = 12 + Math.random() * 16;
+  const size  = 10 + Math.random() * 14;
   const left  = Math.random() * 100;
-  const dur   = 8 + Math.random() * 10;
-  const sway  = (Math.random() > 0.5 ? 1 : -1) * (50 + Math.random() * 80);
+  const dur   = 9 + Math.random() * 10;
+  const sway  = (Math.random() - 0.5) * 100;
   const rot0  = Math.random() * 360;
-  const rot1  = rot0 + 180 + Math.random() * 200;
-  const op    = 0.70 + Math.random() * 0.20;
+  const rot1  = rot0 + 180 + Math.random() * 180;
+  const op    = 0.65 + Math.random() * 0.30;
 
   const petal = document.createElement('div');
   petal.className = 'petal';
@@ -446,16 +441,19 @@ function spawnPetal(field, initialDelay) {
     --ps:${size}px;
     --pf-dur:${dur}s;
     --pf-delay:${initialDelay}ms;
-    --pf-sway:${dur * 0.45}s;
+    --pf-sway:${dur * 0.4}s;
     --pf-swing:${sway}px;
     --pr0:${rot0}deg;
     --pr1:${rot1}deg;
     --pf-op:${op};
     left:${left}%;
-    filter: drop-shadow(0 1px 3px rgba(80,0,20,0.25));
   `;
   field.appendChild(petal);
-  // No animationiteration listener — CSS infinite loop handles recycling cleanly
+
+  // Recycle petal after each cycle
+  petal.addEventListener('animationiteration', () => {
+    petal.style.left = Math.random() * 100 + '%';
+  });
 }
 
 /* ══════════════════════════════════════
