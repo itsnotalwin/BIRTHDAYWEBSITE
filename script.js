@@ -180,23 +180,57 @@ const STAR_SECRETS = (function() {
   ];
 })();
 
+function spawnDecorativeStar(field) {
+  const star = document.createElement('div');
+  star.className = 'star deco-star';
+  const size = Math.random() * 2.5 + 0.8;
+  const peakOpacity = Math.random() > 0.5 ? 0.55 : 0.28;
+  const lingerMs = 3500 + Math.random() * 5000;
+  const fadeMs   = 1200;
+
+  star.style.cssText = `
+    width:${size}px; height:${size}px;
+    left:${Math.random()*100}%;
+    top:${Math.random()*100}%;
+    background: hsl(${40 + Math.random()*20}, 60%, ${45 + Math.random()*20}%);
+    opacity: 0;
+    transition: opacity ${fadeMs}ms ease;
+    pointer-events: none;
+  `;
+  field.appendChild(star);
+
+  // Fade in
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => { star.style.opacity = peakOpacity; });
+  });
+
+  // Fade out then remove
+  setTimeout(() => {
+    star.style.opacity = 0;
+    setTimeout(() => star.remove(), fadeMs + 50);
+  }, lingerMs);
+}
+
+function runLivingStarField(field) {
+  const MAX_LIVE = 2;
+  const live = () => field.querySelectorAll('.deco-star').length;
+
+  function maybeSpawn() {
+    if (live() < MAX_LIVE) spawnDecorativeStar(field);
+    setTimeout(maybeSpawn, 1500 + Math.random() * 3500);
+  }
+
+  // Seed with 1-2 stars immediately
+  spawnDecorativeStar(field);
+  setTimeout(() => spawnDecorativeStar(field), 800 + Math.random() * 1200);
+  setTimeout(maybeSpawn, 4000);
+}
+
 function buildStarField() {
   const field = $('#star-field');
-  const count = 2;
 
-  // Regular decorative stars
-  for (let i = 0; i < count; i++) {
-    const star = document.createElement('div');
-    star.className = 'star ' + (Math.random() > 0.6 ? 'bright' : 'dim');
-    const size = Math.random() * 2.5 + 0.8;
-    star.style.cssText = `
-      width:${size}px; height:${size}px;
-      left:${Math.random()*100}%;
-      top:${Math.random()*100}%;
-      background: hsl(${40 + Math.random()*20}, 60%, ${45 + Math.random()*20}%);
-    `;
-    field.appendChild(star);
-  }
+  // Living decorative star system — fades in/out randomly, max ~2 at a time
+  runLivingStarField(field);
 
   // Hidden secret stars (slightly larger, visible enough to find)
   STAR_SECRETS.forEach((ss, idx) => {
