@@ -95,6 +95,12 @@ function enterVault() {
 
   // Init sound
   initSound();
+
+  // Wire room door
+  const roomDoor = $('#room-door');
+  const closeRoomBtn = $('#close-room');
+  if (roomDoor) roomDoor.addEventListener('click', openRoom);
+  if (closeRoomBtn) closeRoomBtn.addEventListener('click', closeRoom);
 }
 
 /* ── TIMESTAMP ── */
@@ -1071,16 +1077,16 @@ function buildRoomWall() {
     `;
 
     pol.addEventListener('click', () => {
-      // Lightbox-style zoom
-      pol.style.zIndex = '999';
+      // Reset any previously elevated polaroid
+      wall.querySelectorAll('.room-pol').forEach(p => { if (p !== pol) p.style.zIndex = ''; });
+      pol.style.zIndex = pol.style.zIndex === '999' ? '' : '999';
     });
 
     wall.appendChild(pol);
   }
 }
 
-$('#room-door') && $('#room-door').addEventListener('click', openRoom);
-$('#close-room') && $('#close-room').addEventListener('click', closeRoom);
+// Room door listeners are wired in enterVault() after DOM is fully live
 
 function openRoom() {
   // Secret lock check — she doesn't know, just gets a hint if not enough
@@ -1108,10 +1114,11 @@ function revealRoomLetter() {
   const existing = $('#room-final-letter');
   if (existing) return; // already shown
 
-  // Fade out the wall
+  // Fade out the wall, then remove from layout
   if (wall) {
     wall.style.transition = 'opacity 2s ease';
     wall.style.opacity = '0';
+    setTimeout(() => { wall.style.display = 'none'; }, 2000);
   }
 
   // Create and show the letter
@@ -1150,6 +1157,18 @@ function closeRoom() {
   setTimeout(() => {
     room.classList.add('hidden');
     document.body.style.overflow = '';
+
+    // Reset wall so it's visible again if room is reopened
+    const wall = $('#room-wall');
+    if (wall) {
+      wall.style.transition = '';
+      wall.style.opacity = '1';
+      wall.style.display = '';
+    }
+    // Remove the letter so it can be re-triggered on next visit
+    const letter = $('#room-final-letter');
+    if (letter) letter.remove();
+    STATE.roomLetterShown = false;
   }, 900);
 }
 
