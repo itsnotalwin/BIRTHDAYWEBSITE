@@ -352,7 +352,7 @@ function scheduleStarAppearance(star, delay) {
       if (!star.dataset.clicked) {
         star.classList.remove('fcs-visible');
         // Go dormant then reappear
-        scheduleStarAppearance(star, 6000 + Math.random() * 10000);
+        scheduleStarAppearance(star, 18000 + Math.random() * 8000);
       }
     }, stayFor);
   }, delay);
