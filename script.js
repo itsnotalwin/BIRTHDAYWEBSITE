@@ -141,21 +141,51 @@ function drawGrain() {
 }
 
 /* ══════════════════════════════════════
-   STAR FIELD + FLOATING COMPLIMENT STARS
+   STAR FIELD (hidden clickable stars)
 ══════════════════════════════════════ */
-const COMPLIMENT_MESSAGES = [
+const STAR_SECRETS_POOL = [
   "omg you look so pretty today?? like actually unreal 🌸",
   "CRAZY bestie energy detected. off the charts. sending u away.",
   "the way you walk into a room and people just?? feel it?? iconic behaviour tbh 💕",
   "ur literally that girl. not a metaphor. literally THAT girl. 🌹",
   "bestie ur giving main character and the whole supporting cast simultaneously. how.",
+  "you have that thing where you don't even realise how much people want to be around you. devastating honestly.",
+  "the softness you carry without letting anyone trample it?? that's strength. unmatched.",
+  "ur brain is so funny and so sharp and it's a crime more people don't see it working in real time.",
+  "the fact that you remember the little things about everyone?? ur so quietly thoughtful it's embarrassing for the rest of us.",
+  "you radiate warmth without even trying. people feel safe around you. that's rare. that's you.",
+  "not to be dramatic but you could start a religion based on your fits alone. 🌹",
+  "the way you laugh at your own jokes before you even finish telling them. peak behaviour. never change.",
+  "you care so deeply about the people you love and it shows in everything you do. it's beautiful tbh.",
+  "ur one of those people who makes everything feel like it matters more. a gift. an actual gift.",
+  "bestie the confidence arc you've been on?? STUNNING. growth of the century.",
+  "you have the best taste and you don't even fully clock it. very frustrating. very iconic.",
+  "the version of you that doubts herself is lying. the rest of you knows. listen to the rest.",
+  "you show up for people in ways they don't forget. quiet legend behaviour.",
+  "ur so effortlessly yourself and that is the hardest thing to be. most people never get there.",
+  "the way your eyes light up when you talk about things you love?? it's contagious. it's everything.",
+  "you make people feel seen without making it a whole thing. that's a superpower. yours specifically.",
+  "lowkey obsessed with how genuine you are. no performance. just actually that person. insane.",
 ];
+
+// Shuffle pool and pick 5 for this session
+const STAR_SECRETS = (function() {
+  const shuffled = [...STAR_SECRETS_POOL].sort(() => Math.random() - 0.5);
+  return [
+    { id:'star1', message: shuffled[0] },
+    { id:'star2', message: shuffled[1] },
+    { id:'star3', message: shuffled[2] },
+    { id:'star4', message: shuffled[3] },
+    { id:'star5', message: shuffled[4] },
+  ];
+})();
 
 function buildStarField() {
   const field = $('#star-field');
+  const count = 2;
 
-  // Regular decorative stars (background twinkle)
-  for (let i = 0; i < 80; i++) {
+  // Regular decorative stars
+  for (let i = 0; i < count; i++) {
     const star = document.createElement('div');
     star.className = 'star ' + (Math.random() > 0.6 ? 'bright' : 'dim');
     const size = Math.random() * 2.5 + 0.8;
@@ -163,79 +193,42 @@ function buildStarField() {
       width:${size}px; height:${size}px;
       left:${Math.random()*100}%;
       top:${Math.random()*100}%;
-      background: hsl(${40 + Math.random()*20}, 70%, ${60 + Math.random()*30}%);
+      background: hsl(${40 + Math.random()*20}, 60%, ${45 + Math.random()*20}%);
     `;
     field.appendChild(star);
   }
 
-  // 50 floating compliment stars — drift around, appear and disappear
-  for (let i = 0; i < 50; i++) {
-    spawnComplimentStar(field, i * 380 + Math.random() * 1200);
-  }
-}
-
-function spawnComplimentStar(field, initialDelay) {
-  const size = 4 + Math.random() * 5;
-  const driftX = (Math.random() - 0.5) * 55;
-  const driftY = (Math.random() - 0.5) * 40;
-  const driftDur = 5 + Math.random() * 9;
-  const pulseDur = 2 + Math.random() * 2.5;
-
-  const star = document.createElement('div');
-  star.className = 'float-compliment-star';
-  star.style.cssText = `
-    width: ${size}px; height: ${size}px;
-    --fsdx: ${driftX}px;
-    --fsdy: ${driftY}px;
-    --fsd: ${driftDur}s;
-    --fsp: ${pulseDur}s;
-  `;
-  field.appendChild(star);
-
-  // Click: show compliment, star fades, respawns later
-  star.addEventListener('click', () => {
-    if (star.dataset.clicked) return;
-    star.dataset.clicked = '1';
-    clearTimeout(star._hideTimer);
-
-    const msg = COMPLIMENT_MESSAGES[Math.floor(Math.random() * COMPLIMENT_MESSAGES.length)];
-    playPing();
-    showStarCompliment(msg, star);
-    emitParticleBurst(
-      parseFloat(star.style.left) / 100 * window.innerWidth,
-      parseFloat(star.style.top)  / 100 * window.innerHeight
-    );
-
-    // Fade out when compliment fades (~3.2s), respawn fresh later
-    setTimeout(() => {
-      star.classList.remove('fcs-visible');
-      setTimeout(() => {
-        delete star.dataset.clicked;
-        scheduleStarAppearance(star, 8000 + Math.random() * 12000);
-      }, 1200);
-    }, 3200);
+  // Hidden secret stars (slightly larger, visible enough to find)
+  STAR_SECRETS.forEach((ss, idx) => {
+    const star = document.createElement('div');
+    star.className = 'star secret-star';
+    star.id = ss.id;
+    star.dataset.secretStar = idx;
+    star.style.cssText = `
+      width: 7px; height: 7px;
+      left: ${10 + idx * 18}%;
+      top:  ${20 + (idx % 3) * 22}%;
+      background: #f0c0d8;
+      opacity: 0.35;
+      box-shadow: 0 0 6px 2px rgba(240,192,216,0.4);
+    `;
+    star.addEventListener('click', () => handleStarSecret(ss, star));
+    field.appendChild(star);
   });
-
-  scheduleStarAppearance(star, initialDelay);
 }
 
-function scheduleStarAppearance(star, delay) {
-  setTimeout(() => {
-    // Pick a fresh random position each time it appears
-    star.style.left = (2 + Math.random() * 93) + '%';
-    star.style.top  = (2 + Math.random() * 88) + '%';
-    star.classList.add('fcs-visible');
+function handleStarSecret(ss, starEl) {
+  if (starEl.classList.contains('discovered')) return;
+  starEl.classList.add('discovered');
+  playPing();
 
-    // Schedule disappearance
-    const stayFor = 4500 + Math.random() * 7000;
-    star._hideTimer = setTimeout(() => {
-      if (!star.dataset.clicked) {
-        star.classList.remove('fcs-visible');
-        // Go dormant then reappear
-        scheduleStarAppearance(star, 3000 + Math.random() * 9000);
-      }
-    }, stayFor);
-  }, delay);
+  // Show a fun floating compliment toast
+  showStarCompliment(ss.message, starEl);
+
+  emitParticleBurst(
+    parseFloat(starEl.style.left) / 100 * window.innerWidth,
+    parseFloat(starEl.style.top)  / 100 * window.innerHeight
+  );
 }
 
 function showStarCompliment(msg, starEl) {
@@ -243,10 +236,11 @@ function showStarCompliment(msg, starEl) {
   toast.className = 'star-toast';
   toast.textContent = msg;
 
+  // Position near the star
   const x = parseFloat(starEl.style.left);
   const y = parseFloat(starEl.style.top);
-  toast.style.left = Math.min(Math.max(x, 5), 62) + '%';
-  toast.style.top  = Math.max(y - 12, 4) + '%';
+  toast.style.left = Math.min(Math.max(x, 5), 60) + '%';
+  toast.style.top  = Math.max(y - 12, 5) + '%';
 
   document.body.appendChild(toast);
   requestAnimationFrame(() => toast.classList.add('show'));
@@ -358,32 +352,7 @@ const CONFETTI_COLORS = [
 ];
 
 function fireConfetti(originX) {
-  // Pick a launch style each time for variety
-  const mode = Math.random();
-  let cx, cy, cvy;
-
-  if (mode < 0.35) {
-    // Classic top fall — from random X across the top
-    cx = originX !== undefined ? originX : (5 + Math.random() * 90);
-    cy = '-10px';
-    cvy = (72 + Math.random() * 22) + 'vh';
-  } else if (mode < 0.6) {
-    // Mid-screen burst — spreads in all directions from a central point
-    cx = 20 + Math.random() * 60;
-    cy = (20 + Math.random() * 45) + 'vh';
-    cvy = ((Math.random() - 0.5) * 90) + 'vh';
-  } else if (mode < 0.8) {
-    // Low burst — pops up from lower screen area
-    cx = 10 + Math.random() * 80;
-    cy = (55 + Math.random() * 30) + 'vh';
-    cvy = (-(30 + Math.random() * 50)) + 'vh';
-  } else {
-    // Corner cannon — from a random corner area
-    cx = Math.random() > 0.5 ? (Math.random() * 15) : (85 + Math.random() * 15);
-    cy = (Math.random() * 30) + 'vh';
-    cvy = (30 + Math.random() * 50) + 'vh';
-  }
-
+  const cx = originX !== undefined ? originX : (30 + Math.random() * 40);
   const count = 38 + Math.floor(Math.random() * 22);
 
   for (let i = 0; i < count; i++) {
@@ -399,14 +368,13 @@ function fireConfetti(originX) {
     const delay = Math.random() * 0.25;
 
     piece.style.cssText = `
-      --cy: ${cy};
+      --cy: -5px;
       --cx: ${cx}%;
       --cw: ${w}px;
       --ch: ${h}px;
       --cc: ${color};
       --cbr: ${isCircle ? '50%' : '2px'};
       --cvx: ${vx}px;
-      --cvy: ${cvy};
       --crot: ${rot}deg;
       --cd: ${dur}s;
       --cdelay: ${delay}s;
@@ -417,15 +385,15 @@ function fireConfetti(originX) {
 }
 
 function scheduleConfetti() {
-  // First burst shortly after vault opens
-  setTimeout(() => fireConfetti(), 3500);
+  // Fire once shortly after vault opens
+  setTimeout(() => fireConfetti(50), 3500);
 
-  // Then randomly every 5–20 seconds
+  // Then randomly every 35-65 seconds
   function randomFire() {
-    fireConfetti();
-    setTimeout(randomFire, 5000 + Math.random() * 15000);
+    fireConfetti(20 + Math.random() * 60);
+    setTimeout(randomFire, 35000 + Math.random() * 30000);
   }
-  setTimeout(randomFire, 8000);
+  setTimeout(randomFire, 40000);
 }
 
 /* ══════════════════════════════════════
