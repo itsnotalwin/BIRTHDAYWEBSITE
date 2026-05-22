@@ -448,8 +448,8 @@ function spawnPetal(field, initialDelay) {
   const color = PETAL_COLORS[Math.floor(Math.random() * PETAL_COLORS.length)];
   const size  = 10 + Math.random() * 14;
   const left  = Math.random() * 100;
-  const dur   = 9 + Math.random() * 10;
-  const sway  = (Math.random() - 0.5) * 100;
+  const dur   = 10 + Math.random() * 10;
+  const sway  = (Math.random() - 0.5) * 120;
   const rot0  = Math.random() * 360;
   const rot1  = rot0 + 180 + Math.random() * 180;
   const op    = 0.35 + Math.random() * 0.35;
@@ -461,7 +461,6 @@ function spawnPetal(field, initialDelay) {
     --ps:${size}px;
     --pf-dur:${dur}s;
     --pf-delay:${initialDelay}ms;
-    --pf-sway:${dur * 0.4}s;
     --pf-swing:${sway}px;
     --pr0:${rot0}deg;
     --pr1:${rot1}deg;
@@ -512,7 +511,7 @@ function fireConfetti(originX) {
     cvy = (30 + Math.random() * 50) + 'vh';
   }
 
-  const count = 38 + Math.floor(Math.random() * 22);
+  const count = 24 + Math.floor(Math.random() * 14); // was 38–60, cut in half for smoothness
 
   const frag = document.createDocumentFragment();
   for (let i = 0; i < count; i++) {
@@ -598,9 +597,9 @@ function markFound(id) {
     $('#room-door').classList.add('show');
   }
 
-  // All 22 found
+  // All 22 found — show the final reveal button instead of auto-triggering
   if (count >= STATE.total) {
-    setTimeout(triggerFinalReveal, 800);
+    setTimeout(showFinalRevealButton, 800);
   }
 
   playPing();
@@ -1294,6 +1293,43 @@ function playError() {
     osc.start(t);
     osc.stop(t + 0.22);
   });
+}
+
+/* ══════════════════════════════════════
+   FINAL REVEAL BUTTON
+══════════════════════════════════════ */
+function showFinalRevealButton() {
+  // Inject the button wrap into the page if it doesn't exist yet
+  let wrap = $('#final-reveal-btn-wrap');
+  if (!wrap) {
+    wrap = document.createElement('div');
+    wrap.id = 'final-reveal-btn-wrap';
+
+    const btn = document.createElement('button');
+    btn.id = 'final-reveal-btn';
+    btn.textContent = 'open the last one';
+    btn.addEventListener('click', () => {
+      wrap.style.pointerEvents = 'none';
+      wrap.style.opacity = '0';
+      wrap.style.transition = 'opacity 0.6s ease';
+      setTimeout(triggerFinalReveal, 500);
+    });
+
+    wrap.appendChild(btn);
+
+    // Append to the desktop scroll container so it sits at the very bottom
+    const desktop = $('#desktop') || document.body;
+    desktop.appendChild(wrap);
+  }
+
+  // Scroll to it then fade it in
+  setTimeout(() => {
+    wrap.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    setTimeout(() => wrap.classList.add('show'), 400);
+  }, 200);
+
+  playChime();
+  fireConfetti(50);
 }
 
 /* ══════════════════════════════════════
