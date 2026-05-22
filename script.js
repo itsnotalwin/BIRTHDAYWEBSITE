@@ -217,25 +217,12 @@ function buildStarField() {
 }
 
 function spawnComplimentStar(field, initialDelay) {
-  // Size: noticeable but not huge — 8 to 16px
-  const size = 8 + Math.random() * 8;
-
-  // Big wild drift — stars really move around
-  const driftX = (Math.random() - 0.5) * 140;
-  const driftY = (Math.random() - 0.5) * 100;
-  const driftDur = 4 + Math.random() * 7;   // faster drift
-  const pulseDur = 1.5 + Math.random() * 2;
+  // Slightly bigger than original (was 4–9px, now 9–14px)
+  const size = 9 + Math.random() * 5;
 
   const star = document.createElement('div');
   star.className = 'float-compliment-star';
-  star.style.cssText = `
-    width: ${size}px;
-    height: ${size}px;
-    --fsdx: ${driftX}px;
-    --fsdy: ${driftY}px;
-    --fsd: ${driftDur}s;
-    --fsp: ${pulseDur}s;
-  `;
+  star.style.cssText = `width:${size}px; height:${size}px;`;
   field.appendChild(star);
 
   star.addEventListener('click', (e) => {
@@ -244,6 +231,7 @@ function spawnComplimentStar(field, initialDelay) {
     star.dataset.clicked = '1';
     clearTimeout(star._hideTimer);
 
+    // Show compliment toast
     const msg = getNextCompliment();
     playPing();
     showStarCompliment(msg, star);
@@ -252,14 +240,16 @@ function spawnComplimentStar(field, initialDelay) {
       parseFloat(star.style.top)  / 100 * window.innerHeight
     );
 
-    // Fade out after compliment, respawn at new location
+    // Turn lighter pink immediately, then fade out after 1.2s
+    star.classList.add('fcs-clicked');
     setTimeout(() => {
       star.classList.remove('fcs-visible');
+      star.classList.remove('fcs-clicked');
       setTimeout(() => {
         delete star.dataset.clicked;
-        scheduleStarAppearance(star, 5000 + Math.random() * 10000);
-      }, 1000);
-    }, 3400);
+        scheduleStarAppearance(star, 6000 + Math.random() * 10000);
+      }, 900);
+    }, 1200);
   });
 
   scheduleStarAppearance(star, initialDelay);
@@ -268,19 +258,18 @@ function spawnComplimentStar(field, initialDelay) {
 function scheduleStarAppearance(star, delay) {
   clearTimeout(star._hideTimer);
   setTimeout(() => {
-    // Fresh random position all over the page including scroll area
+    // Fresh random position across the full scroll height
     star.style.left = (3 + Math.random() * 91) + '%';
-    star.style.top  = (2 + Math.random() * 280) + 'vh'; // spreads over full scroll height
+    star.style.top  = (2 + Math.random() * 280) + 'vh';
     star.classList.add('fcs-visible');
 
-    // Stay visible for a random duration, then vanish and reappear elsewhere
-    const stayFor = 3500 + Math.random() * 6000;
+    // Visible for exactly 3 seconds, then fade and reappear elsewhere
     star._hideTimer = setTimeout(() => {
       if (!star.dataset.clicked) {
         star.classList.remove('fcs-visible');
-        scheduleStarAppearance(star, 2000 + Math.random() * 7000);
+        scheduleStarAppearance(star, 2000 + Math.random() * 8000);
       }
-    }, stayFor);
+    }, 3000);
   }, delay);
 }
 

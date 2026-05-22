@@ -130,53 +130,27 @@ body::after {
   border-radius: 50%;
   pointer-events: all;
   cursor: pointer;
-  /* Warm rose pink — visible but soft */
-  background: radial-gradient(circle at 35% 35%, #f8d0e4, #d97b99);
+  background: #e8a5b8;
   opacity: 0;
-  /* Smooth fade in/out */
-  transition: opacity 1.2s ease, transform 0.25s var(--ease-spring);
-  /* Drift AND pulse running simultaneously */
-  animation:
-    fcs-drift var(--fsd, 6s) ease-in-out infinite alternate,
-    fcs-pulse var(--fsp, 2.5s) ease-in-out infinite;
-  box-shadow: 0 0 6px 2px rgba(217,123,153,0.35);
-  /* Minimum touch target for iOS */
+  box-shadow: 0 0 5px 2px rgba(232,165,184,0.4);
+  /* Only fade — no movement whatsoever */
+  transition: opacity 0.9s ease, background 0.3s ease, box-shadow 0.3s ease;
   min-width: 20px;
   min-height: 20px;
   z-index: 60;
 }
 .float-compliment-star.fcs-visible {
-  opacity: 0.82;
+  opacity: 0.75;
+}
+.float-compliment-star.fcs-clicked {
+  background: #f9a8c0;
+  box-shadow: 0 0 12px 4px rgba(249,168,192,0.65);
+  opacity: 0.5;
 }
 .float-compliment-star:hover {
   opacity: 1 !important;
-  transform: scale(2.2) !important;
-  box-shadow: 0 0 18px 6px rgba(217,123,153,0.65), 0 0 0 3px rgba(245,194,211,0.3) !important;
+  box-shadow: 0 0 14px 5px rgba(232,165,184,0.7) !important;
   z-index: 200;
-  cursor: pointer;
-}
-.float-compliment-star:active {
-  transform: scale(0.9) !important;
-  transition: transform 0.1s ease !important;
-}
-/* Wild multi-direction drift */
-@keyframes fcs-drift {
-  0%   { transform: translate(0, 0) rotate(0deg); }
-  25%  { transform: translate(calc(var(--fsdx, 30px) * 0.4), calc(var(--fsdy, 20px) * -0.6)) rotate(12deg); }
-  50%  { transform: translate(var(--fsdx, 30px), var(--fsdy, 20px)) rotate(-8deg); }
-  75%  { transform: translate(calc(var(--fsdx, 30px) * 0.7), calc(var(--fsdy, 20px) * 1.3)) rotate(5deg); }
-  100% { transform: translate(calc(var(--fsdx, 30px) * -0.2), calc(var(--fsdy, 20px) * 0.8)) rotate(-3deg); }
-}
-/* Glow pulse — brightens the glow */
-@keyframes fcs-pulse {
-  0%, 100% {
-    box-shadow: 0 0 5px 1px rgba(217,123,153,0.3);
-    filter: brightness(0.9);
-  }
-  50% {
-    box-shadow: 0 0 16px 5px rgba(217,123,153,0.65), 0 0 30px 8px rgba(245,194,211,0.2);
-    filter: brightness(1.2);
-  }
 }
 
 /* ── STAR COMPLIMENT TOAST ── */
