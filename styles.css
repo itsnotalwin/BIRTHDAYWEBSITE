@@ -121,39 +121,21 @@ body::after {
   cursor: pointer;
   transition: transform 0.3s var(--ease-spring), opacity 0.3s ease, box-shadow 0.3s ease;
 }
-.star.dim { opacity: 0.18; }
-.star.bright { opacity: 0.65; }
-
-/* ── FLOATING COMPLIMENT STARS ── */
-.float-compliment-star {
-  position: absolute;
-  border-radius: 50%;
-  pointer-events: all;
-  cursor: pointer;
-  background: #f0c0d8;
-  opacity: 0;
-  box-shadow: 0 0 4px 1px rgba(240,192,216,0.2);
-  transition: opacity 1.4s ease;
-  animation:
-    fcs-drift var(--fsd, 7s) ease-in-out infinite alternate,
-    fcs-pulse var(--fsp, 3s) ease-in-out infinite;
-}
-.float-compliment-star.fcs-visible {
-  opacity: 0.5;
-}
-.float-compliment-star:hover {
+.star.dim { opacity: 0.25; }
+.star.bright { opacity: 0.7; }
+.star:hover {
+  transform: scale(3.5) !important;
   opacity: 1 !important;
-  transform: scale(2.8) !important;
-  box-shadow: 0 0 12px 4px rgba(240,192,216,0.75);
-  z-index: 200;
+  box-shadow: 0 0 12px 4px rgba(232,165,184,0.7);
 }
-@keyframes fcs-drift {
-  0%   { transform: translate(0, 0); }
-  100% { transform: translate(var(--fsdx, 14px), var(--fsdy, 9px)); }
+.star.discovered {
+  opacity: 0.9 !important;
+  box-shadow: 0 0 8px 3px rgba(240,192,216,0.7);
+  animation: star-pulse 2s ease-in-out infinite;
 }
-@keyframes fcs-pulse {
-  0%, 100% { box-shadow: 0 0 3px 1px rgba(240,192,216,0.2); }
-  50%       { box-shadow: 0 0 9px 3px rgba(240,192,216,0.55); }
+@keyframes star-pulse {
+  0%,100% { box-shadow: 0 0 8px 3px rgba(240,192,216,0.5); }
+  50%      { box-shadow: 0 0 18px 6px rgba(240,192,216,0.9); }
 }
 
 /* ── STAR COMPLIMENT TOAST ── */
@@ -314,7 +296,7 @@ body::after {
 @keyframes confetti-fly {
   0%   { opacity: 1; transform: translate(0,0) rotate(0deg) scale(1); }
   20%  { opacity: 1; }
-  100% { opacity: 0; transform: translate(var(--cvx,40px), var(--cvy, 80vh)) rotate(var(--crot, 540deg)) scale(0.4); }
+  100% { opacity: 0; transform: translate(var(--cvx,40px), 80vh) rotate(var(--crot, 540deg)) scale(0.4); }
 }
 
 /* ── FLOATING SECRET COUNTER ── */
