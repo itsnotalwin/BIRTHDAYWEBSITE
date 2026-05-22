@@ -144,7 +144,7 @@ function drawGrain() {
    STAR FIELD (hidden clickable stars)
 ══════════════════════════════════════ */
 const STAR_SECRETS_POOL = [
-  "you're so beautiful 🌸",
+  "you're so beautiful 🌹",
   "your eyes are gorgeous omg",
   "CRAZY bestie energy. off the charts.",
   "literally that girl. no debate. 🌹",
@@ -161,27 +161,27 @@ const STAR_SECRETS_POOL = [
   "that girl energy: confirmed 💕",
   "your vibe is immaculate. always.",
   "prettiest person in any room. facts.",
-  "ur so effortlessly you and it's everything 🌸",
+  "ur so effortlessly you and it's everything 🌹",
   "the way you exist?? a gift honestly.",
   "obsessed with you. not taking questions.",
   "the kindness you carry around?? unmatched 💕",
   "smartest person in the chat. always has been.",
-  "ur laugh is literally contagious, just so you know 🌸",
+  "ur laugh is literally contagious, just so you know 🌹",
   "the way people light up around you?? that's all you.",
   "ur brain AND ur heart?? unfair combo honestly.",
   "radiating goodness 24/7 and you don't even notice 🌹",
   "so funny. so real. zero competition.",
   "ur the person everyone wants at their table 💕",
   "genuine queen behaviour. no notes.",
-  "ur actually that rare person who makes everything better 🌸",
+  "ur actually that rare person who makes everything better 🌹",
   "just the most magnetic, incredible person. it's a fact.",
   "everything about you is giving main character and best friend simultaneously 🌹",
   "ur heart is so big it's actually a lot to handle (in the best way) 💕",
   "the way you love people?? the world doesn't deserve you.",
-  "certified iconic. laminated. framed. 🌸",
+  "certified iconic. laminated. framed. 🌹",
   "OMG ur eyes are actually insane stop it 😭",
   "your eyes?? two of the prettiest things I've ever seen. not up for debate.",
-  "those eyes are genuinely unfair to the rest of us 🌸",
+  "those eyes are genuinely unfair to the rest of us 🌹",
   "ur eyes are doing WAY too much rn and I'm not okay",
   "bestie ur eyes could end wars. this is a fact.",
   "ur ass looks INCREDIBLE today omg 💕",
@@ -189,20 +189,31 @@ const STAR_SECRETS_POOL = [
   "ur body is immaculate. I said what I said. 🌹",
   "ur literally built different and I mean that in every way",
   "everything about the way u look today?? A SERVE. 💕",
-  "ur so gorgeous it's actually making me unwell 😭🌸",
+  "ur so gorgeous it's actually making me unwell 😭🌹",
   "I'm normal about u. I'm SO normal about u. (I'm not normal about u)",
   "bestie I would DIE for you and ur also just really hot so",
   "ur giving FACE. always giving face. 💕",
   "the audacity to be that pretty AND that funny. who gave u permission.",
   "OMG STOP UR SO PRETTY IT'S SENDING ME 😭🌹",
   "ur literally so hot it's actually annoying at this point",
-  "I love u so much and also ur so attractive it's genuinely offensive 🌸",
+  "I love u so much and also ur so attractive it's genuinely offensive 🌹",
   "bestie ur GLOWING today what is ur secret",
   "ur so pretty I have to look away sometimes. genuinely. 💕",
   "ur outfit + ur face + ur energy today?? LETHAL COMBINATION 🌹",
   "the way u exist is genuinely my favourite thing. also ur hot.",
   "ur literally that girl and also ur ass looks amazing so 💕",
-  "I am UNWELL because of how good u look. unwell. 🌸",
+  "I am UNWELL because of how good u look. unwell. 🌹",
+  "you make every room better just by walking into it. every single one.",
+  "ur that person people write songs about. genuinely.",
+  "the way you carry yourself?? an entire era. I'm taking notes. 🌹",
+  "u have no idea how much people think about u after they meet u.",
+  "everything about you is intentional and it shows. 💕",
+  "ur honestly one of the most real people I know and that's rare.",
+  "the way ur energy is completely yours and no one else's?? iconic.",
+  "ur not just pretty ur the kind of pretty that makes people trip on things. 🌹",
+  "ur so gorgeous it genuinely interrupts my thoughts sometimes.",
+  "bestie you deserve every good thing that's ever been said about you. all of it. 💕",
+  "you're the kind of person people hope to be when they grow up. 🌹",
 ];
 
 // Secret stars pick a random compliment on every click
@@ -277,19 +288,19 @@ function buildStarField() {
       const left = 5 + Math.random() * 88;
       const top  = 5 + Math.random() * 88;
       star.style.cssText = `
-        width: 7px; height: 7px;
+        width: 9px; height: 9px;
         left: ${left}%;
         top:  ${top}%;
-        background: #f0c0d8;
+        background: #cc001e;
         opacity: 0;
-        box-shadow: 0 0 6px 2px rgba(240,192,216,0.4);
+        box-shadow: 0 0 8px 3px rgba(200,0,30,0.55);
         transition: opacity 1s ease;
       `;
       star.addEventListener('click', () => handleStarSecret(ss, star));
       field.appendChild(star);
 
       // Fade in after short delay
-      setTimeout(() => { star.style.opacity = '0.35'; }, 100);
+      setTimeout(() => { star.style.opacity = '0.65'; }, 100);
 
       if (!star.classList.contains('discovered')) {
         // Fade out and relocate after random interval
@@ -389,31 +400,38 @@ function emitParticleBurst(x, y) {
 /* ══════════════════════════════════════
    FLOATING PETALS
 ══════════════════════════════════════ */
-const PETAL_COLORS = ['#f5c2d3','#e8a5b8','#ffd6e8','#ffb3cc','#f9d4e1','#fce4ec'];
+const PETAL_COLORS = [
+  '#c0001a','#a80015','#d4002b','#8b0010',
+  '#bf1122','#cc0020','#e8002e','#990018',
+  '#b50020','#d63038'
+];
 const PETAL_SVG = (color) => `<svg viewBox="0 0 20 24" xmlns="http://www.w3.org/2000/svg">
-  <path d="M10 2 C14 2, 18 6, 18 11 C18 17, 14 22, 10 22 C6 22, 2 17, 2 11 C2 6, 6 2, 10 2Z"
+  <path d="M10 1 C15 1, 19 6, 19 11 C19 18, 14 23, 10 23 C6 23, 1 18, 1 11 C1 6, 5 1, 10 1Z"
     fill="${color}" opacity="1"/>
-  <path d="M10 2 C10 2, 10 12, 10 22" stroke="white" stroke-width="0.6" opacity="0.5" fill="none"/>
+  <path d="M10 1 C10 1, 10 12, 10 23" stroke="rgba(255,255,255,0.35)" stroke-width="0.8" fill="none"/>
+  <path d="M10 11 C6 8, 3 9, 1 11" stroke="rgba(255,255,255,0.2)" stroke-width="0.5" fill="none"/>
+  <path d="M10 11 C14 8, 17 9, 19 11" stroke="rgba(255,255,255,0.2)" stroke-width="0.5" fill="none"/>
 </svg>`;
 
 function buildPetals() {
   const field = $('#petal-field');
   if (!field) return;
-  const count = 18;
+  const count = 40;
   for (let i = 0; i < count; i++) {
-    spawnPetal(field, i * (14000 / count));
+    spawnPetal(field, i * (18000 / count));
   }
 }
 
 function spawnPetal(field, initialDelay) {
   const color = PETAL_COLORS[Math.floor(Math.random() * PETAL_COLORS.length)];
-  const size  = 10 + Math.random() * 14;
+  const size  = 12 + Math.random() * 18;
   const left  = Math.random() * 100;
-  const dur   = 9 + Math.random() * 10;
-  const sway  = (Math.random() - 0.5) * 100;
+  const dur   = 6 + Math.random() * 8;
+  const swayAmount = 60 + Math.random() * 120;
+  const sway  = (Math.random() > 0.5 ? 1 : -1) * swayAmount;
   const rot0  = Math.random() * 360;
-  const rot1  = rot0 + 180 + Math.random() * 180;
-  const op    = 0.65 + Math.random() * 0.30;
+  const rot1  = rot0 + 200 + Math.random() * 250;
+  const op    = 0.80 + Math.random() * 0.18;
 
   const petal = document.createElement('div');
   petal.className = 'petal';
@@ -422,18 +440,22 @@ function spawnPetal(field, initialDelay) {
     --ps:${size}px;
     --pf-dur:${dur}s;
     --pf-delay:${initialDelay}ms;
-    --pf-sway:${dur * 0.4}s;
+    --pf-sway:${dur * 0.35}s;
     --pf-swing:${sway}px;
     --pr0:${rot0}deg;
     --pr1:${rot1}deg;
     --pf-op:${op};
     left:${left}%;
+    filter: drop-shadow(0 2px 4px rgba(160,0,20,0.35));
   `;
   field.appendChild(petal);
 
-  // Recycle petal after each cycle
+  // Recycle petal: new random position every fall cycle
   petal.addEventListener('animationiteration', () => {
     petal.style.left = Math.random() * 100 + '%';
+    // Randomise the sway direction each loop so no two petals look the same
+    const newSway = (Math.random() > 0.5 ? 1 : -1) * (60 + Math.random() * 120);
+    petal.style.setProperty('--pf-swing', newSway + 'px');
   });
 }
 
