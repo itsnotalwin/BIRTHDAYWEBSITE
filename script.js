@@ -258,9 +258,9 @@ function spawnComplimentStar(field, initialDelay) {
 function scheduleStarAppearance(star, delay) {
   clearTimeout(star._hideTimer);
   setTimeout(() => {
-    // Fresh random position across the full scroll height
+    // Position within the fixed viewport — no vh beyond 100
     star.style.left = (3 + Math.random() * 91) + '%';
-    star.style.top  = (2 + Math.random() * 280) + 'vh';
+    star.style.top  = (3 + Math.random() * 88) + '%';
     star.classList.add('fcs-visible');
 
     // Visible for exactly 3 seconds, then fade and reappear elsewhere
