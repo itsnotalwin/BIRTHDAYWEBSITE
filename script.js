@@ -96,7 +96,7 @@ function enterVault() {
   // Init sound
   initSound();
 
-  // Wire room door
+  // Wire room door listeners now that DOM is live
   const roomDoor = $('#room-door');
   const closeRoomBtn = $('#close-room');
   if (roomDoor) roomDoor.addEventListener('click', openRoom);
@@ -122,7 +122,8 @@ function drawGrain() {
   const canvas = $('#grain-canvas');
   if (!canvas) return;
   const ctx = canvas.getContext('2d');
-  let frame;
+  let frame, lastGrain = 0;
+  const GRAIN_INTERVAL = 1000 / 12; // ~12fps — was 60fps, huge CPU saving
 
   function resize() {
     canvas.width  = window.innerWidth;
@@ -131,7 +132,10 @@ function drawGrain() {
   resize();
   window.addEventListener('resize', resize);
 
-  function renderGrain() {
+  function renderGrain(ts) {
+    frame = requestAnimationFrame(renderGrain);
+    if (ts - lastGrain < GRAIN_INTERVAL) return;
+    lastGrain = ts;
     const { width, height } = canvas;
     const img = ctx.createImageData(width, height);
     const d = img.data;
@@ -141,9 +145,8 @@ function drawGrain() {
       d[i+3] = 12; // very subtle
     }
     ctx.putImageData(img, 0, 0);
-    frame = requestAnimationFrame(renderGrain);
   }
-  renderGrain();
+  renderGrain(0);
 }
 
 /* ══════════════════════════════════════
@@ -319,10 +322,9 @@ function spawnComplimentStar(field, initialDelay) {
     const msg = COMPLIMENT_MESSAGES[Math.floor(Math.random() * COMPLIMENT_MESSAGES.length)];
     playPing();
     showStarCompliment(msg, star);
-    emitParticleBurst(
-      parseFloat(star.style.left) / 100 * window.innerWidth,
-      parseFloat(star.style.top)  / 100 * window.innerHeight
-    );
+    // Use viewport-relative position for the burst
+    const sr = star.getBoundingClientRect();
+    emitParticleBurst(sr.left + sr.width / 2, sr.top + sr.height / 2);
 
     // Vanish: just fade out, no size change
     star.classList.add('fcs-vanishing');
@@ -335,7 +337,7 @@ function spawnComplimentStar(field, initialDelay) {
         star.style.background = newColour;
         star.style.boxShadow = `0 0 6px 2px ${newColour}88`;
         star.style.setProperty('--star-colour', newColour);
-        scheduleStarAppearance(star, 8000 + Math.random() * 12000);
+        scheduleStarAppearance(star, 18000 + Math.random() * 8000);
       }, 600);
     }, 500);
   });
@@ -512,6 +514,7 @@ function fireConfetti(originX) {
 
   const count = 38 + Math.floor(Math.random() * 22);
 
+  const frag = document.createDocumentFragment();
   for (let i = 0; i < count; i++) {
     const piece = document.createElement('div');
     piece.className = 'confetti-piece';
@@ -537,9 +540,10 @@ function fireConfetti(originX) {
       --cd: ${dur}s;
       --cdelay: ${delay}s;
     `;
-    document.body.appendChild(piece);
+    frag.appendChild(piece);
     setTimeout(() => piece.remove(), (dur + delay + 0.3) * 1000);
   }
+  document.body.appendChild(frag);
 }
 
 function scheduleConfetti() {
@@ -585,7 +589,7 @@ function markFound(id) {
 
   // Warmth level
   const warm = Math.min(4, Math.floor(count / 6));
-  document.body.className = document.body.className.replace(/warmth-\d/,'');
+  [1,2,3,4].forEach(n => document.body.classList.remove(`warmth-${n}`));
   if (warm > 0) document.body.classList.add(`warmth-${warm}`);
 
   // Unlock room door at 10 secrets
@@ -803,8 +807,6 @@ function initSecrets() {
     // delay then final
   });
 
-  /* ── Scroll-triggered poems ── */
-  initScrollObserver();
 }
 
 /* ══════════════════════════════════════
@@ -982,7 +984,6 @@ function showCinematic(text) {
 
   setTimeout(() => {
     overlay.classList.add('hidden');
-    requestAnimationFrame(() => window.scrollTo(0, scrollY));
   }, 5800);
 }
 
@@ -1015,12 +1016,8 @@ function triggerDistortion() {
    BG COLOUR BLEED
 ══════════════════════════════════════ */
 function triggerBgBleed() {
-  document.body.style.transition = 'background-color 0.5s ease';
-  document.body.style.backgroundColor = '#f0c8d8';
-  setTimeout(() => {
-    document.body.style.backgroundColor = '';
-    setTimeout(() => document.body.style.transition = '', 1000);
-  }, 2500);
+  document.body.classList.add('bg-bleed');
+  setTimeout(() => document.body.classList.remove('bg-bleed'), 3000);
 }
 
 /* ══════════════════════════════════════
@@ -1077,7 +1074,6 @@ function buildRoomWall() {
     `;
 
     pol.addEventListener('click', () => {
-      // Reset any previously elevated polaroid
       wall.querySelectorAll('.room-pol').forEach(p => { if (p !== pol) p.style.zIndex = ''; });
       pol.style.zIndex = pol.style.zIndex === '999' ? '' : '999';
     });
@@ -1086,8 +1082,8 @@ function buildRoomWall() {
   }
 }
 
-// Room door listeners are wired in enterVault() after DOM is fully live
-
+$('#room-door') && $('#room-door').addEventListener('click', openRoom);
+$('#close-room') && $('#close-room').addEventListener('click', closeRoom);
 function openRoom() {
   // Secret lock check — she doesn't know, just gets a hint if not enough
   if (!STATE.roomUnlocked) {
@@ -1114,7 +1110,7 @@ function revealRoomLetter() {
   const existing = $('#room-final-letter');
   if (existing) return; // already shown
 
-  // Fade out the wall, then remove from layout
+  // Fade out the wall, then remove from layout so letter centres cleanly
   if (wall) {
     wall.style.transition = 'opacity 2s ease';
     wall.style.opacity = '0';
@@ -1157,15 +1153,10 @@ function closeRoom() {
   setTimeout(() => {
     room.classList.add('hidden');
     document.body.style.overflow = '';
-
-    // Reset wall so it's visible again if room is reopened
+    // Reset wall so it shows on reopen
     const wall = $('#room-wall');
-    if (wall) {
-      wall.style.transition = '';
-      wall.style.opacity = '1';
-      wall.style.display = '';
-    }
-    // Remove the letter so it can be re-triggered on next visit
+    if (wall) { wall.style.transition = ''; wall.style.opacity = '1'; wall.style.display = ''; }
+    // Remove letter so it re-triggers next visit
     const letter = $('#room-final-letter');
     if (letter) letter.remove();
     STATE.roomLetterShown = false;

@@ -65,6 +65,18 @@ body.theme-cold  { filter: hue-rotate(195deg) saturate(0.45) brightness(0.88); -
 body.theme-void  { filter: saturate(0.06) brightness(0.92); }
 body.theme-bloom { filter: saturate(1.4) brightness(1.04); --c-bg: #ffe8f5; }
 
+/* ── WARMTH LEVELS (progressive ambient tint as secrets found) ── */
+body.warmth-1 { --c-bg: #f7e8ef; }
+body.warmth-2 { --c-bg: #f5e0eb; filter: sepia(4%) brightness(1.01); }
+body.warmth-3 { --c-bg: #f2d8e6; filter: sepia(8%) brightness(1.02); }
+body.warmth-4 { --c-bg: #efd0e0; filter: sepia(12%) brightness(1.03); }
+
+/* ── BG BLEED (secret 19) ── */
+body.bg-bleed {
+  background-color: #f0c8d8 !important;
+  transition: background-color 0.5s ease !important;
+}
+
 /* ── ROSE DECORATIONS ── */
 body::before {
   content: '';
@@ -130,36 +142,37 @@ body::after {
   border-radius: 50%;
   pointer-events: all;
   cursor: pointer;
-  background: #a78bfa;               /* overridden per-star via inline style */
+  background: #a78bfa; /* overridden per-star via inline style */
   opacity: 0;
   box-shadow: 0 0 6px 2px rgba(167,139,250,0.3);
-  transition: opacity 1.4s ease;
+  transition: opacity 1.4s ease, box-shadow 0.3s ease;
+}
+/* Only animate drift when visible — prevents animation fighting hover/vanish transforms */
+.float-compliment-star.fcs-visible {
+  opacity: 0.75;
   animation:
     fcs-drift var(--fsd, 7s) ease-in-out infinite alternate,
     fcs-pulse var(--fsp, 3s) ease-in-out infinite;
 }
-.float-compliment-star.fcs-visible {
-  opacity: 0.75;
-}
 .float-compliment-star:hover {
   opacity: 1 !important;
-  box-shadow: 0 0 18px 6px var(--star-colour, #a78bfa);
+  box-shadow: 0 0 18px 6px var(--star-colour, #a78bfa) !important;
   z-index: 200;
+  animation-play-state: paused !important;
   transition: opacity 0.2s ease, box-shadow 0.2s ease;
 }
-/* Vanish: just fade out at same size */
 .float-compliment-star.fcs-vanishing {
   opacity: 0 !important;
-  transition:
-    opacity 0.4s ease !important;
+  animation-play-state: paused !important;
+  transition: opacity 0.4s ease !important;
 }
 @keyframes fcs-drift {
   0%   { transform: translate(0, 0); }
   100% { transform: translate(var(--fsdx, 14px), var(--fsdy, 9px)); }
 }
 @keyframes fcs-pulse {
-  0%, 100% { box-shadow: 0 0 4px 1px var(--star-colour, #a78bfa); }
-  50%       { box-shadow: 0 0 14px 5px var(--star-colour, #a78bfa); }
+  0%, 100% { filter: brightness(1); }
+  50%       { filter: brightness(1.6); }
 }
 
 /* ── STAR COMPLIMENT TOAST ── */
@@ -1116,7 +1129,8 @@ body::after {
   text-align: center;
   opacity: 0;
   transform: translateY(22px);
-  transition: opacity 1s calc(var(--spd, 0s)) ease, transform 1s calc(var(--spd, 0s)) var(--ease-out);
+  will-change: opacity, transform;
+  transition: opacity 1s calc(var(--spd, 0s) + 0.05s) ease, transform 1s calc(var(--spd, 0s) + 0.05s) var(--ease-out);
 }
 .sp.visible {
   opacity: 1;
@@ -1318,10 +1332,16 @@ body::after {
 #the-room.open { opacity: 1; }
 
 #room-backdrop {
+  display: none; /* replaced by ::before pseudo on #the-room */
+}
+/* Vignette that stays fixed while room scrolls */
+#the-room::before {
+  content: '';
   position: fixed;
   inset: 0;
-  background: radial-gradient(ellipse at center, rgba(40,25,12,0.8) 0%, #080604 70%);
+  background: radial-gradient(ellipse at center, rgba(40,25,12,0.5) 0%, #080604 72%);
   pointer-events: none;
+  z-index: 0;
 }
 #close-room {
   position: fixed;
