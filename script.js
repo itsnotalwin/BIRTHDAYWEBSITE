@@ -164,6 +164,45 @@ const STAR_SECRETS_POOL = [
   "ur so effortlessly you and it's everything 🌸",
   "the way you exist?? a gift honestly.",
   "obsessed with you. not taking questions.",
+  "the kindness you carry around?? unmatched 💕",
+  "smartest person in the chat. always has been.",
+  "ur laugh is literally contagious, just so you know 🌸",
+  "the way people light up around you?? that's all you.",
+  "ur brain AND ur heart?? unfair combo honestly.",
+  "radiating goodness 24/7 and you don't even notice 🌹",
+  "so funny. so real. zero competition.",
+  "ur the person everyone wants at their table 💕",
+  "genuine queen behaviour. no notes.",
+  "ur actually that rare person who makes everything better 🌸",
+  "just the most magnetic, incredible person. it's a fact.",
+  "everything about you is giving main character and best friend simultaneously 🌹",
+  "ur heart is so big it's actually a lot to handle (in the best way) 💕",
+  "the way you love people?? the world doesn't deserve you.",
+  "certified iconic. laminated. framed. 🌸",
+  "OMG ur eyes are actually insane stop it 😭",
+  "your eyes?? two of the prettiest things I've ever seen. not up for debate.",
+  "those eyes are genuinely unfair to the rest of us 🌸",
+  "ur eyes are doing WAY too much rn and I'm not okay",
+  "bestie ur eyes could end wars. this is a fact.",
+  "ur ass looks INCREDIBLE today omg 💕",
+  "the way u look today should be a crime honestly",
+  "ur body is immaculate. I said what I said. 🌹",
+  "ur literally built different and I mean that in every way",
+  "everything about the way u look today?? A SERVE. 💕",
+  "ur so gorgeous it's actually making me unwell 😭🌸",
+  "I'm normal about u. I'm SO normal about u. (I'm not normal about u)",
+  "bestie I would DIE for you and ur also just really hot so",
+  "ur giving FACE. always giving face. 💕",
+  "the audacity to be that pretty AND that funny. who gave u permission.",
+  "OMG STOP UR SO PRETTY IT'S SENDING ME 😭🌹",
+  "ur literally so hot it's actually annoying at this point",
+  "I love u so much and also ur so attractive it's genuinely offensive 🌸",
+  "bestie ur GLOWING today what is ur secret",
+  "ur so pretty I have to look away sometimes. genuinely. 💕",
+  "ur outfit + ur face + ur energy today?? LETHAL COMBINATION 🌹",
+  "the way u exist is genuinely my favourite thing. also ur hot.",
+  "ur literally that girl and also ur ass looks amazing so 💕",
+  "I am UNWELL because of how good u look. unwell. 🌸",
 ];
 
 // Secret stars pick a random compliment on every click
@@ -353,8 +392,8 @@ function emitParticleBurst(x, y) {
 const PETAL_COLORS = ['#f5c2d3','#e8a5b8','#ffd6e8','#ffb3cc','#f9d4e1','#fce4ec'];
 const PETAL_SVG = (color) => `<svg viewBox="0 0 20 24" xmlns="http://www.w3.org/2000/svg">
   <path d="M10 2 C14 2, 18 6, 18 11 C18 17, 14 22, 10 22 C6 22, 2 17, 2 11 C2 6, 6 2, 10 2Z"
-    fill="${color}" opacity="0.85"/>
-  <path d="M10 2 C10 2, 10 12, 10 22" stroke="${color}" stroke-width="0.5" opacity="0.4" fill="none"/>
+    fill="${color}" opacity="1"/>
+  <path d="M10 2 C10 2, 10 12, 10 22" stroke="white" stroke-width="0.6" opacity="0.5" fill="none"/>
 </svg>`;
 
 function buildPetals() {
@@ -374,7 +413,7 @@ function spawnPetal(field, initialDelay) {
   const sway  = (Math.random() - 0.5) * 100;
   const rot0  = Math.random() * 360;
   const rot1  = rot0 + 180 + Math.random() * 180;
-  const op    = 0.35 + Math.random() * 0.35;
+  const op    = 0.65 + Math.random() * 0.30;
 
   const petal = document.createElement('div');
   petal.className = 'petal';
