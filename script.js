@@ -261,9 +261,9 @@ function buildStarField() {
     field.appendChild(star);
   }
 
-  // 50 floating compliment stars — drift around, appear and disappear
-  for (let i = 0; i < 50; i++) {
-    spawnComplimentStar(field, i * 380 + Math.random() * 1200);
+  // 20 floating compliment stars — drift around, appear and disappear
+  for (let i = 0; i < 20; i++) {
+    spawnComplimentStar(field, i * 1800 + Math.random() * 2000);
   }
 }
 
@@ -352,7 +352,7 @@ function scheduleStarAppearance(star, delay) {
       if (!star.dataset.clicked) {
         star.classList.remove('fcs-visible');
         // Go dormant then reappear
-        scheduleStarAppearance(star, 3000 + Math.random() * 9000);
+        scheduleStarAppearance(star, 6000 + Math.random() * 10000);
       }
     }, stayFor);
   }, delay);
