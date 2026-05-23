@@ -14,7 +14,6 @@ const STATE = {
   themes: ['', 'theme-warm', 'theme-cold', 'theme-void', 'theme-bloom'],
   themeIdx: 0,
   roomUnlocked: false,
-  roomLetterShown: false,
   audioCtx: null,
 };
 
@@ -57,11 +56,6 @@ function enterVault() {
 
   // Show progress bar
   setTimeout(() => $('#progress-bar-wrap').classList.add('show'), 600);
-  // Show floating secret counter
-  setTimeout(() => {
-    const counter = $('#secret-counter');
-    if (counter) counter.classList.add('show');
-  }, 900);
 
   // Start timestamp
   startTimestamp();
@@ -71,12 +65,6 @@ function enterVault() {
 
   // Build particles
   buildParticles();
-
-  // Build floating petals
-  buildPetals();
-
-  // Random confetti cannon
-  scheduleConfetti();
 
   // Draw grain
   drawGrain();
@@ -95,12 +83,6 @@ function enterVault() {
 
   // Init sound
   initSound();
-
-  // Wire room door listeners now that DOM is live
-  const roomDoor = $('#room-door');
-  const closeRoomBtn = $('#close-room');
-  if (roomDoor) roomDoor.addEventListener('click', openRoom);
-  if (closeRoomBtn) closeRoomBtn.addEventListener('click', closeRoom);
 }
 
 /* ── TIMESTAMP ── */
@@ -122,8 +104,7 @@ function drawGrain() {
   const canvas = $('#grain-canvas');
   if (!canvas) return;
   const ctx = canvas.getContext('2d');
-  let frame, lastGrain = 0;
-  const GRAIN_INTERVAL = 1000 / 12; // ~12fps — was 60fps, huge CPU saving
+  let frame;
 
   function resize() {
     canvas.width  = window.innerWidth;
@@ -132,10 +113,7 @@ function drawGrain() {
   resize();
   window.addEventListener('resize', resize);
 
-  function renderGrain(ts) {
-    frame = requestAnimationFrame(renderGrain);
-    if (ts - lastGrain < GRAIN_INTERVAL) return;
-    lastGrain = ts;
+  function renderGrain() {
     const { width, height } = canvas;
     const img = ctx.createImageData(width, height);
     const d = img.data;
@@ -145,244 +123,71 @@ function drawGrain() {
       d[i+3] = 12; // very subtle
     }
     ctx.putImageData(img, 0, 0);
+    frame = requestAnimationFrame(renderGrain);
   }
-  renderGrain(0);
+  renderGrain();
 }
 
 /* ══════════════════════════════════════
-   STAR FIELD + FLOATING COMPLIMENT STARS
+   STAR FIELD (hidden clickable stars)
 ══════════════════════════════════════ */
-const COMPLIMENT_MESSAGES = [
-  "omg you look so pretty today?? like actually unreal 🌸",
-  "CRAZY bestie energy detected. off the charts. sending u away.",
-  "the way you walk into a room and people just?? feel it?? iconic behaviour tbh 💕",
-  "ur literally that girl. not a metaphor. literally THAT girl. 🌹",
-  "bestie ur giving main character and the whole supporting cast simultaneously. how.",
-  "your eyes are GORGEOUS?? like who gave you the right 😭✨",
-  "you look beautiful today and every day but especially today 💖",
-  "the prettiest person in every room always. no exceptions. law of nature.",
-  "omg your smile just cured something in me. thank you for your service 🌟",
-  "ur literally glowing rn?? what is your skincare routine bestie 🌸",
-  "you have the most beautiful energy I have ever encountered. study you in a lab.",
-  "the way you exist is genuinely a gift to the world. I said what I said. 💕",
-  "your laugh is literally the best sound. scientists should study it.",
-  "okay but your VIBE today?? immaculate. unmatched. undefeated. 🏆",
-  "you are that girl and she is you and together you are unstoppable 🌹",
-  "your hair is doing something INCREDIBLE right now. not normal.",
-  "honestly?? the universe really said 'let me cook' and then made you. iconic. ✨",
-  "the confidence you walk with?? bottled and sold that's a billion dollar product.",
-  "you radiate warmth and people can feel it the second you enter a room 🌸",
-  "bestie your eyes are literally sparkling. like genuinely. what is happening. 💫",
-  "ur so pretty it's almost rude?? like tone it down?? but also never ever do that.",
-  "the way you carry yourself?? studied. admired. referenced. tattooed on my heart.",
-  "you are genuinely one of a kind and the world is so lucky you're in it 💖",
-  "your laugh lines are cute and I will not be taking questions 😭💕",
-  "okay you're actually so beautiful I forgot what I was doing for a second",
-  "you have this thing where you make everyone feel seen and that's RARE bestie 🌹",
-  "certified main character behavior. the plot revolves around you. it always has.",
-  "your presence is a whole event. people talk about it after you leave. 🌟",
-  "bestie you are THAT girl and I will repeat this until you believe it 💫",
-  "omg your vibe is immaculate today. yesterday too. always tbh. 🌸",
-  "the universe handcrafted you and then took the rest of the day off. job done.",
-  "you're giving radiant warm light energy and I am BASKING in it 💕",
-  "genuinely obsessed with how pretty you are. it's a problem for me specifically.",
-  "you make existing look effortlessly cool. how. explain. 🌹",
-  "ur literally that girl from the movie that everyone roots for. and you win. ✨",
-  "the way you just showed up today looking like THAT?? rude and iconic simultaneously.",
-  "your energy is soft and powerful at the same time and that's so rare and so you 🌸",
-  "I'm convinced you were engineered in a lab by scientists who only studied beauty.",
-  "bestie the EYES. the SMILE. the WHOLE THING. it's too much and also not enough. 💖",
-  "you exist and the world is instantly better. that's just science at this point. 🌟",
-  "the way you're beautiful on the inside AND the outside?? overachiever behavior.",
-  "ur doing amazing sweetie and by amazing I mean STUNNING and by sweetie I mean queen 👑",
-  "your face is literally art. I would hang you in a gallery. respectfully.",
-  "you have a way of making everything feel warmer just by being present 💕",
-  "bestie you are literally so gorgeous I had to sit down for a second 🌸",
-  "that smile?? patented. trademarked. belongs in a museum. 🌹",
-  "the way you light up a room without even trying?? natural talent. god-given. ✨",
-  "your whole aesthetic today is sending me. in the best possible way. completely unwell.",
-  "you are so loved and so admired and so so beautiful inside and out 💖",
-  "okay but the GLOW?? whatever you're doing keep doing it. it's working. 🌟",
-  "your beauty is the kind that gets better the longer you look. like a painting.",
-  "bestie ur literally living proof that some people are just built different 💫",
-  "the confidence? the beauty? the vibes? the whole package?? unfair to the rest of us.",
-  "you make every space you enter 10x more beautiful just by walking in 🌸",
-  "your energy is contagious and I am so happy I caught it 💕",
-  "ugh you're so pretty it's actually distracting me from my tasks. thanks for that.",
-  "bestie you have BEAUTIFUL PERSON energy and it radiates outward at all times 🌹",
-  "the way you're just naturally magnetic?? people gravitate to you. physics-defying.",
-  "you are gorgeous and brilliant and funny and kind and I will not shut up about it ✨",
-  "ur giving warm sunlight on a cold day and I need you to know that means everything 💖",
-  "your personality is as beautiful as your face and your face is VERY beautiful. 🌟",
-  "bestie the way you carry yourself?? regal. majestic. studied by historians.",
-  "okay your eyes are doing something illegal right now. I'm reporting them.",
-  "you are the definition of effortlessly gorgeous and I think about it a lot 🌸",
-  "your whole energy today is 'I woke up like this' and it's making the rest of us look bad 💫",
-  "genuinely so beautiful that when you smile I have to look away for my own safety",
-  "bestie you are BEAMING today. like actually glowing. what's the source. 💕",
-  "you have the kind of beauty that makes people want to write poems. and they do. 🌹",
-  "ur so cute it should be illegal and also I'm so glad it's not. 💖",
-  "the way you manage to be so beautiful and so warm at the same time?? illegal honestly.",
-  "bestie your presence is a privilege and I am so grateful every single day ✨",
-  "you are prettier than any sunset I have ever seen and I've seen some incredible ones 🌸",
-  "your vibe is luxury. your energy is warmth. your whole existence is a gift. 💕",
-  "omg you're literally that girl that everyone stares at when she walks in. that's you. 🌟",
-  "your smile has healing properties. I've done the research. it's peer-reviewed. 🌹",
-  "bestie you are THAT girl. capital letters. bold font. underlined twice. 💫",
-  "the way you look right now?? a crime against people who aren't as pretty. beautiful.",
-  "ur so lovely it sometimes makes me stop and just appreciate that you exist. 🌸",
-  "you have star quality and I don't mean that metaphorically I mean it literally ✨",
-  "bestie your energy is PINK and WARM and BEAUTIFUL and I feel it from here 💖",
-  "you are the most beautiful disaster in the best possible way and I love you for it",
-  "the glow up was always there. you just keep revealing new levels. 🌹",
-  "your beauty is not accidental. the universe planned you very carefully. 💕",
-  "bestie the EYES the SKIN the SMILE it's genuinely too much. in the best way. 🌸",
-  "you were designed at peak humanity and the rest of us are just trying to keep up",
-  "your beauty hits different every time I see you. new angles unlocked constantly. ✨",
-  "bestie you are literally art. three dimensional. interactive. 10/10 would visit. 💫",
-  "the way your eyes light up when you talk about things you love?? stunning honestly.",
-  "ur literally so beautiful it has disrupted my entire train of thought. worth it. 💖",
-  "you have the kind of face that makes artists pick up a pencil. just saying. 🌟",
-  "bestie you are ethereal and I will not elaborate because it speaks for itself 🌸",
-  "your warmth is a superpower and your beauty is the bonus. two for one deal. 💕",
-  "genuinely cannot get over how pretty you are. daily occurrence. I'm coping. 🌹",
-  "you are so effortlessly you and that is literally the most beautiful thing of all ✨",
-  "bestie you're giving goddess energy today. yesterday too. it's a whole thing. 💖",
-  "the confidence you have?? earned. deserved. and honestly a little aspirational. 🌸",
-  "ur literally the blueprint and everyone else is just drafts. respectfully. 💫",
-  "you are beautiful and brilliant and the world is better with you in it. full stop. 🌹",
+const STAR_SECRETS = [
+  { id:'star1', message:"you are not who you used to be. this is a good thing. this is the point." },
+  { id:'star2', message:"i see everything you've grown into. i kept count." },
+  { id:'star3', message:"every bad thing you survived made you sharper, not harder. that's rare." },
+  { id:'star4', message:"the version of you that doubted everything still got here. think about that." },
+  { id:'star5', message:"you're someone's reason to keep going. i know for a fact. i'm not telling you who." },
 ];
 
 function buildStarField() {
   const field = $('#star-field');
+  const count = 20; // reduced from 80
 
-  // Regular decorative stars (background twinkle)
-  for (let i = 0; i < 80; i++) {
+  // Pastel sparkles only
+  for (let i = 0; i < count; i++) {
     const star = document.createElement('div');
     star.className = 'star ' + (Math.random() > 0.6 ? 'bright' : 'dim');
     const size = Math.random() * 2.5 + 0.8;
+    const hue = 330 + Math.random() * 30; // pink/rose range
     star.style.cssText = `
       width:${size}px; height:${size}px;
       left:${Math.random()*100}%;
       top:${Math.random()*100}%;
-      background: hsl(${40 + Math.random()*20}, 70%, ${60 + Math.random()*30}%);
+      background: hsl(${hue}, 60%, 72%);
     `;
     field.appendChild(star);
   }
 
-  // 20 floating compliment stars — drift around, appear and disappear
-  for (let i = 0; i < 20; i++) {
-    spawnComplimentStar(field, i * 1800 + Math.random() * 2000);
-  }
-}
-
-// Palette of contrasting star colours — bright against the pink/cream bg
-const STAR_COLOURS = [
-  '#a78bfa', // violet
-  '#60a5fa', // sky blue
-  '#34d399', // mint green
-  '#fbbf24', // golden yellow
-  '#f472b6', // hot pink
-  '#fb923c', // orange
-  '#e879f9', // fuchsia
-  '#38bdf8', // cyan
-  '#4ade80', // lime green
-  '#facc15', // bright yellow
-];
-
-function spawnComplimentStar(field, initialDelay) {
-  // Bigger sizes: 10–20px
-  const size = 10 + Math.random() * 10;
-  const driftX = (Math.random() - 0.5) * 55;
-  const driftY = (Math.random() - 0.5) * 40;
-  const driftDur = 5 + Math.random() * 9;
-  const pulseDur = 2 + Math.random() * 2.5;
-  const colour = STAR_COLOURS[Math.floor(Math.random() * STAR_COLOURS.length)];
-
-  const star = document.createElement('div');
-  star.className = 'float-compliment-star';
-  star.style.cssText = `
-    width: ${size}px; height: ${size}px;
-    --fsdx: ${driftX}px;
-    --fsdy: ${driftY}px;
-    --fsd: ${driftDur}s;
-    --fsp: ${pulseDur}s;
-    --star-colour: ${colour};
-    background: ${colour};
-    box-shadow: 0 0 6px 2px ${colour}88;
-  `;
-  field.appendChild(star);
-
-  // Click: show compliment, star vanishes with a pop, respawns later
-  star.addEventListener('click', () => {
-    if (star.dataset.clicked) return;
-    star.dataset.clicked = '1';
-    clearTimeout(star._hideTimer);
-
-    const msg = COMPLIMENT_MESSAGES[Math.floor(Math.random() * COMPLIMENT_MESSAGES.length)];
-    playPing();
-    showStarCompliment(msg, star);
-    // Use viewport-relative position for the burst
-    const sr = star.getBoundingClientRect();
-    emitParticleBurst(sr.left + sr.width / 2, sr.top + sr.height / 2);
-
-    // Vanish: just fade out, no size change
-    star.classList.add('fcs-vanishing');
-    setTimeout(() => {
-      star.classList.remove('fcs-visible', 'fcs-vanishing');
-      setTimeout(() => {
-        delete star.dataset.clicked;
-        // Reassign a new random colour each time it respawns
-        const newColour = STAR_COLOURS[Math.floor(Math.random() * STAR_COLOURS.length)];
-        star.style.background = newColour;
-        star.style.boxShadow = `0 0 6px 2px ${newColour}88`;
-        star.style.setProperty('--star-colour', newColour);
-        scheduleStarAppearance(star, 18000 + Math.random() * 8000);
-      }, 600);
-    }, 500);
+  // Hidden secret stars (slightly larger, very dim)
+  STAR_SECRETS.forEach((ss, idx) => {
+    const star = document.createElement('div');
+    star.className = 'star secret-star';
+    star.id = ss.id;
+    star.dataset.secretStar = idx;
+    star.style.cssText = `
+      width: 5px; height: 5px;
+      left: ${10 + idx * 18}%;
+      top:  ${20 + (idx % 3) * 22}%;
+      background: #c9a44a;
+      opacity: 0.07;
+    `;
+    star.addEventListener('click', () => handleStarSecret(ss, star));
+    field.appendChild(star);
   });
-
-  scheduleStarAppearance(star, initialDelay);
 }
 
-function scheduleStarAppearance(star, delay) {
-  setTimeout(() => {
-    // Scatter across the full scrollable page width & height
-    const pageH = Math.max(document.body.scrollHeight, window.innerHeight);
-    const topPct = (Math.random() * (pageH - 40)) / pageH * 100;
-    star.style.left = (2 + Math.random() * 93) + '%';
-    star.style.top  = topPct + '%';
-    star.classList.add('fcs-visible');
+function handleStarSecret(ss, starEl) {
+  if (starEl.classList.contains('discovered')) return;
+  starEl.classList.add('discovered');
+  playPing();
+  showModal(`<span class="m-label">★ star fragment</span><p>${ss.message}</p>`);
 
-    // Schedule disappearance
-    const stayFor = 700 + Math.random() * 600;
-    star._hideTimer = setTimeout(() => {
-      if (!star.dataset.clicked) {
-        star.classList.remove('fcs-visible');
-        // Go dormant then reappear
-        scheduleStarAppearance(star, 18000 + Math.random() * 8000);
-      }
-    }, stayFor);
-  }, delay);
-}
-
-function showStarCompliment(msg, starEl) {
-  const toast = document.createElement('div');
-  toast.className = 'star-toast';
-  toast.textContent = msg;
-
-  const x = parseFloat(starEl.style.left);
-  const y = parseFloat(starEl.style.top);
-  toast.style.left = Math.min(Math.max(x, 5), 62) + '%';
-  toast.style.top  = Math.max(y - 12, 4) + '%';
-
-  document.body.appendChild(toast);
-  requestAnimationFrame(() => toast.classList.add('show'));
-
-  setTimeout(() => {
-    toast.classList.remove('show');
-    setTimeout(() => toast.remove(), 600);
-  }, 3200);
+  // Count star discoveries towards progress (max 5 stars = 1 secret slot each)
+  // We'll track stars separately but they contribute to atmosphere
+  emitParticleBurst(
+    parseFloat(starEl.style.left) / 100 * window.innerWidth,
+    parseFloat(starEl.style.top)  / 100 * window.innerHeight
+  );
 }
 
 /* ══════════════════════════════════════
@@ -426,138 +231,6 @@ function emitParticleBurst(x, y) {
 }
 
 /* ══════════════════════════════════════
-   FLOATING PETALS
-══════════════════════════════════════ */
-const PETAL_COLORS = ['#f5c2d3','#e8a5b8','#ffd6e8','#ffb3cc','#f9d4e1','#fce4ec'];
-const PETAL_SVG = (color) => `<svg viewBox="0 0 20 24" xmlns="http://www.w3.org/2000/svg">
-  <path d="M10 2 C14 2, 18 6, 18 11 C18 17, 14 22, 10 22 C6 22, 2 17, 2 11 C2 6, 6 2, 10 2Z"
-    fill="${color}" opacity="0.85"/>
-  <path d="M10 2 C10 2, 10 12, 10 22" stroke="${color}" stroke-width="0.5" opacity="0.4" fill="none"/>
-</svg>`;
-
-function buildPetals() {
-  const field = $('#petal-field');
-  if (!field) return;
-  const count = 18;
-  for (let i = 0; i < count; i++) {
-    spawnPetal(field, i * (14000 / count));
-  }
-}
-
-function spawnPetal(field, initialDelay) {
-  const color = PETAL_COLORS[Math.floor(Math.random() * PETAL_COLORS.length)];
-  const size  = 10 + Math.random() * 14;
-  const left  = Math.random() * 100;
-  const dur   = 10 + Math.random() * 10;
-  const sway  = (Math.random() - 0.5) * 120;
-  const rot0  = Math.random() * 360;
-  const rot1  = rot0 + 180 + Math.random() * 180;
-  const op    = 0.35 + Math.random() * 0.35;
-
-  const petal = document.createElement('div');
-  petal.className = 'petal';
-  petal.innerHTML = PETAL_SVG(color);
-  petal.style.cssText = `
-    --ps:${size}px;
-    --pf-dur:${dur}s;
-    --pf-delay:${initialDelay}ms;
-    --pf-swing:${sway}px;
-    --pr0:${rot0}deg;
-    --pr1:${rot1}deg;
-    --pf-op:${op};
-    left:${left}%;
-  `;
-  field.appendChild(petal);
-
-  // Recycle petal after each cycle
-  petal.addEventListener('animationiteration', () => {
-    petal.style.left = Math.random() * 100 + '%';
-  });
-}
-
-/* ══════════════════════════════════════
-   CONFETTI CANNON
-══════════════════════════════════════ */
-const CONFETTI_COLORS = [
-  '#f5c2d3','#e8a5b8','#d97b99','#c4668a',
-  '#ffd6e8','#ffb3cc','#a8d5ba','#c9f0d8',
-  '#ffe8cc','#ffd4e5','#f9d4e1'
-];
-
-function fireConfetti(originX) {
-  // Pick a launch style each time for variety
-  const mode = Math.random();
-  let cx, cy, cvy;
-
-  if (mode < 0.35) {
-    // Classic top fall — from random X across the top
-    cx = originX !== undefined ? originX : (5 + Math.random() * 90);
-    cy = '-10px';
-    cvy = (72 + Math.random() * 22) + 'vh';
-  } else if (mode < 0.6) {
-    // Mid-screen burst — spreads in all directions from a central point
-    cx = 20 + Math.random() * 60;
-    cy = (20 + Math.random() * 45) + 'vh';
-    cvy = ((Math.random() - 0.5) * 90) + 'vh';
-  } else if (mode < 0.8) {
-    // Low burst — pops up from lower screen area
-    cx = 10 + Math.random() * 80;
-    cy = (55 + Math.random() * 30) + 'vh';
-    cvy = (-(30 + Math.random() * 50)) + 'vh';
-  } else {
-    // Corner cannon — from a random corner area
-    cx = Math.random() > 0.5 ? (Math.random() * 15) : (85 + Math.random() * 15);
-    cy = (Math.random() * 30) + 'vh';
-    cvy = (30 + Math.random() * 50) + 'vh';
-  }
-
-  const count = 24 + Math.floor(Math.random() * 14); // was 38–60, cut in half for smoothness
-
-  const frag = document.createDocumentFragment();
-  for (let i = 0; i < count; i++) {
-    const piece = document.createElement('div');
-    piece.className = 'confetti-piece';
-    const color = CONFETTI_COLORS[Math.floor(Math.random() * CONFETTI_COLORS.length)];
-    const isCircle = Math.random() > 0.6;
-    const w = isCircle ? 6 + Math.random() * 5 : 5 + Math.random() * 8;
-    const h = isCircle ? w : 4 + Math.random() * 7;
-    const vx = (Math.random() - 0.5) * 260;
-    const rot = (Math.random() - 0.5) * 900;
-    const dur = 1.8 + Math.random() * 1.2;
-    const delay = Math.random() * 0.25;
-
-    piece.style.cssText = `
-      --cy: ${cy};
-      --cx: ${cx}%;
-      --cw: ${w}px;
-      --ch: ${h}px;
-      --cc: ${color};
-      --cbr: ${isCircle ? '50%' : '2px'};
-      --cvx: ${vx}px;
-      --cvy: ${cvy};
-      --crot: ${rot}deg;
-      --cd: ${dur}s;
-      --cdelay: ${delay}s;
-    `;
-    frag.appendChild(piece);
-    setTimeout(() => piece.remove(), (dur + delay + 0.3) * 1000);
-  }
-  document.body.appendChild(frag);
-}
-
-function scheduleConfetti() {
-  // First burst shortly after vault opens
-  setTimeout(() => fireConfetti(), 3500);
-
-  // Then randomly every 5–20 seconds
-  function randomFire() {
-    fireConfetti();
-    setTimeout(randomFire, 5000 + Math.random() * 15000);
-  }
-  setTimeout(randomFire, 8000);
-}
-
-/* ══════════════════════════════════════
    PROGRESS SYSTEM
 ══════════════════════════════════════ */
 function markFound(id) {
@@ -575,20 +248,9 @@ function markFound(id) {
   $('#progress-fill').style.width = pct + '%';
   $('#progress-count').textContent = `${count} / ${STATE.total}`;
 
-  // Update floating secret counter
-  const scFound = $('#sc-found');
-  const counter = $('#secret-counter');
-  if (scFound) scFound.textContent = count;
-  if (counter) {
-    counter.classList.remove('pop');
-    void counter.offsetWidth; // reflow to restart animation
-    counter.classList.add('pop');
-    counter.classList.add('show');
-  }
-
   // Warmth level
   const warm = Math.min(4, Math.floor(count / 6));
-  [1,2,3,4].forEach(n => document.body.classList.remove(`warmth-${n}`));
+  document.body.className = document.body.className.replace(/warmth-\d/,'');
   if (warm > 0) document.body.classList.add(`warmth-${warm}`);
 
   // Unlock room door at 10 secrets
@@ -597,9 +259,9 @@ function markFound(id) {
     $('#room-door').classList.add('show');
   }
 
-  // All 22 found — show the final reveal button instead of auto-triggering
+  // All 22 found
   if (count >= STATE.total) {
-    setTimeout(showFinalRevealButton, 800);
+    setTimeout(triggerFinalReveal, 800);
   }
 
   playPing();
@@ -615,7 +277,7 @@ function initSecrets() {
   if (s1) s1.addEventListener('click', () => {
     markFound(1);
     showModal(`<span class="m-label">memory_01 / observation</span>
-    <p>The version of you that existed before you stopped apologising for taking up space was already incredible.<br><br>The version after?Unfair.</p>`);
+    <p>the version of you that existed before you stopped apologising for taking up space was already incredible.<br><br>the version after? unfair.</p>`);
   });
 
   /* ── S2: Double-click to flip ── */
@@ -641,7 +303,7 @@ function initSecrets() {
     triggerVHS();
     setTimeout(() => {
       showModal(`<span class="m-label">fragment_03 / vhs_recovered</span>
-      <p>You in your era of giving zero f*cks was one of the best things I've ever watched happen.</p>`);
+      <p>you in your era of giving zero f*cks was one of the best things i've ever watched happen to a person in real time.</p>`);
     }, 800);
   });
 
@@ -651,7 +313,7 @@ function initSecrets() {
     markFound(4);
     playChime();
     showModal(`<span class="m-label">memory_04 / sound</span>
-    <p>Your hyena laugh the one that sets everyone else off without you even trying.</p>`);
+    <p>the laugh that makes other people start laughing. you don't realise you do it. you've never realised.</p>`);
   });
 
   /* ── S5: Shake then reveal note ── */
@@ -663,7 +325,7 @@ function initSecrets() {
       s5.classList.remove('pol-shaking');
       markFound(5);
       showModal(`<span class="m-label">memory_05 / shaken_loose</span>
-      <p>You’ve shaken off more than I know about.I know that much. and you still show up every time still you, just a little more gentle than before..</p>`);
+      <p>you've shaken off more than i know about. i know that much. and you still show up every time. still you.</p>`);
     }, 550);
   });
 
@@ -688,7 +350,7 @@ function initSecrets() {
     if (!STATE.found.has('12')) {
       markFound(12);
       typewrite(s12.querySelector('.tw-output'),
-        "You have this thing where you make everyone around you feel like the most important person in the room.You do it without trying. it's a gift and you give it for free.",
+        "you have this thing where you make everyone around you feel like the most important person in the room. you do it without trying. it's a gift and you give it for free.",
         38
       );
     }
@@ -730,7 +392,7 @@ function initSecrets() {
   const s15 = $('#s15');
   if (s15) s15.addEventListener('click', () => {
     markFound(15);
-    showWin98Error("cuteness.exe has encountered a fatal error.\n\n\"Cuteness overflow detectedfrom user.\nSystem cannot process this level\nof charm and resilience.\"\n\nPlease restart your heart.\nError code: TOO_MUCH_HER");
+    showWin98Error("A fatal feelings.exe error has occurred.\n\n\"You scare me a little.\nIn the best possible way.\"\n\nThis file cannot be suppressed.\nPlease tell her.");
   });
 
   /* ── S16: Theme changer ── */
@@ -751,7 +413,7 @@ function initSecrets() {
     triggerDistortion();
     setTimeout(() => {
       showModal(`<span class="m-label">observation_17 / verified</span>
-      <p>You are not who you were two years ago. Not even close. The glow-up has been physical, mental, emotional, and honestly a little bit rude to the rest of us.</p>`);
+      <p>you are not who you were two years ago. not even close. the glow-up has been physical, mental, emotional, and honestly a little bit rude to the rest of us.</p>`);
     }, 900);
   });
 
@@ -759,7 +421,7 @@ function initSecrets() {
   const s18 = $('#s18');
   if (s18) s18.addEventListener('click', () => {
     markFound(18);
-    showCinematic("I don't know when exactly you went from figuring it out\n\nto actually living it.\n\nbut I was there.\n\nand it looked like something worth remembering.");
+    showCinematic("i don't know when exactly you went from figuring it out\n\nto actually living it.\n\nbut i was there.\n\nand it looked like something worth remembering.");
   });
 
   /* ── S19: Background colour bleed ── */
@@ -768,7 +430,7 @@ function initSecrets() {
     markFound(19);
     triggerBgBleed();
     showModal(`<span class="m-label">memory_bleed.tmp</span>
-    <p>I don't know exactly when it happened. the shift. but one day you just... landed. You became someone who felt settled in themselves. Watching that happen from the outside.</p>`);
+    <p>i don't know exactly when it happened. the shift. but one day you just... landed. you became someone who felt settled in themselves. watching that happen from the outside? quietly one of my favourite things.</p>`);
   });
 
   /* ── S20: Chaos — everything flies ── */
@@ -785,7 +447,7 @@ function initSecrets() {
     playError();
     setTimeout(() => {
       showModal(`<span class="m-label">UNKNOWN_DATA.fragment / decrypted</span>
-      <p>this file was corrupted. but the core message survived:<br><br>You are not a work in progress. You are already the work. you are already the point. Nothing about you is unfinished.</p>`);
+      <p>this file was corrupted. but the core message survived:<br><br>you are not a work in progress. you are already the work. you are already the point.</p>`);
     }, 600);
     // glitch the icon
     s21.querySelector('.fi-icon').style.animation = 'corrupt 0.3s steps(2) 4';
@@ -806,6 +468,8 @@ function initSecrets() {
     // delay then final
   });
 
+  /* ── Scroll-triggered poems ── */
+  initScrollObserver();
 }
 
 /* ══════════════════════════════════════
@@ -924,12 +588,8 @@ function showModal(html) {
   const content = $('#modal-content');
   if (!overlay || !content) return;
 
-  // Save scroll position so page doesn't jump
-  const scrollY = window.scrollY;
   content.innerHTML = html;
   overlay.classList.remove('hidden');
-  // Restore scroll position after DOM update
-  requestAnimationFrame(() => window.scrollTo(0, scrollY));
 
   $('#modal-close').onclick = closeModal;
   overlay.onclick = (e) => { if (e.target === overlay) closeModal(); };
@@ -937,9 +597,7 @@ function showModal(html) {
 }
 
 function closeModal() {
-  const scrollY = window.scrollY;
   $('#modal-overlay').classList.add('hidden');
-  requestAnimationFrame(() => window.scrollTo(0, scrollY));
   document.removeEventListener('keydown', escModal);
 }
 
@@ -976,10 +634,8 @@ function showCinematic(text) {
   const textEl   = $('#cinematic-text');
   if (!overlay || !textEl) return;
 
-  const scrollY = window.scrollY;
   textEl.innerHTML = text.split('\n').map(l => l ? `<span>${l}</span>` : `<br>`).join('');
   overlay.classList.remove('hidden');
-  requestAnimationFrame(() => window.scrollTo(0, scrollY));
 
   setTimeout(() => {
     overlay.classList.add('hidden');
@@ -1015,8 +671,12 @@ function triggerDistortion() {
    BG COLOUR BLEED
 ══════════════════════════════════════ */
 function triggerBgBleed() {
-  document.body.classList.add('bg-bleed');
-  setTimeout(() => document.body.classList.remove('bg-bleed'), 3000);
+  document.body.style.transition = 'background-color 0.5s ease';
+  document.body.style.backgroundColor = '#1a0d06';
+  setTimeout(() => {
+    document.body.style.backgroundColor = '';
+    setTimeout(() => document.body.style.transition = '', 1000);
+  }, 2500);
 }
 
 /* ══════════════════════════════════════
@@ -1073,8 +733,8 @@ function buildRoomWall() {
     `;
 
     pol.addEventListener('click', () => {
-      wall.querySelectorAll('.room-pol').forEach(p => { if (p !== pol) p.style.zIndex = ''; });
-      pol.style.zIndex = pol.style.zIndex === '999' ? '' : '999';
+      // Lightbox-style zoom
+      pol.style.zIndex = '999';
     });
 
     wall.appendChild(pol);
@@ -1083,68 +743,14 @@ function buildRoomWall() {
 
 $('#room-door') && $('#room-door').addEventListener('click', openRoom);
 $('#close-room') && $('#close-room').addEventListener('click', closeRoom);
-function openRoom() {
-  // Secret lock check — she doesn't know, just gets a hint if not enough
-  if (!STATE.roomUnlocked) {
-    showModal(`<span class="m-label">locked 🌹</span><p>some things aren't ready yet.<br><br>keep looking. you'll know when.</p>`);
-    playError();
-    return;
-  }
 
+function openRoom() {
   const room = $('#the-room');
   if (!room) return;
   room.classList.remove('hidden');
   requestAnimationFrame(() => room.classList.add('open'));
   document.body.style.overflow = 'hidden';
-
-  // After 60 seconds, fade out polaroids and reveal the final letter
-  if (!STATE.roomLetterShown) {
-    STATE.roomLetterShown = true;
-    setTimeout(() => revealRoomLetter(), 60000);
-  }
 }
-
-function revealRoomLetter() {
-  const wall = $('#room-wall');
-  const existing = $('#room-final-letter');
-  if (existing) return; // already shown
-
-  // Fade out the wall, then remove from layout so letter centres cleanly
-  if (wall) {
-    wall.style.transition = 'opacity 2s ease';
-    wall.style.opacity = '0';
-    setTimeout(() => { wall.style.display = 'none'; }, 2000);
-  }
-
-  // Create and show the letter
-  const letter = document.createElement('div');
-  letter.id = 'room-final-letter';
-  letter.innerHTML = `
-    <div class="rfl-tape"></div>
-    <div class="rfl-body">
-      <p class="rfl-to">to: tannie 🌹</p>
-      <p>if you found this room it means you looked for everything.</p>
-      <p>that's so you.</p>
-      <p>you don't half-do anything. never have. that's the thing about you that I've always loved most.</p>
-      <p>you show up fully. for everything. for everyone.</p>
-      <p class="rfl-big">show up for yourself that way too. 💕</p>
-      <p>happy birthday, tannie.</p>
-      <p class="rfl-sig">— oomie 🌹<br><span>(your biggest fan. still denying it.)</span></p>
-    </div>
-  `;
-
-  const roomInner = $('#room-inner');
-  if (roomInner) {
-    roomInner.appendChild(letter);
-    requestAnimationFrame(() => {
-      requestAnimationFrame(() => letter.classList.add('show'));
-    });
-  }
-
-  playChime();
-  setTimeout(() => fireConfetti(50), 600);
-}
-
 function closeRoom() {
   const room = $('#the-room');
   if (!room) return;
@@ -1152,13 +758,6 @@ function closeRoom() {
   setTimeout(() => {
     room.classList.add('hidden');
     document.body.style.overflow = '';
-    // Reset wall so it shows on reopen
-    const wall = $('#room-wall');
-    if (wall) { wall.style.transition = ''; wall.style.opacity = '1'; wall.style.display = ''; }
-    // Remove letter so it re-triggers next visit
-    const letter = $('#room-final-letter');
-    if (letter) letter.remove();
-    STATE.roomLetterShown = false;
   }, 900);
 }
 
@@ -1296,43 +895,6 @@ function playError() {
 }
 
 /* ══════════════════════════════════════
-   FINAL REVEAL BUTTON
-══════════════════════════════════════ */
-function showFinalRevealButton() {
-  // Inject the button wrap into the page if it doesn't exist yet
-  let wrap = $('#final-reveal-btn-wrap');
-  if (!wrap) {
-    wrap = document.createElement('div');
-    wrap.id = 'final-reveal-btn-wrap';
-
-    const btn = document.createElement('button');
-    btn.id = 'final-reveal-btn';
-    btn.textContent = 'open the last one';
-    btn.addEventListener('click', () => {
-      wrap.style.pointerEvents = 'none';
-      wrap.style.opacity = '0';
-      wrap.style.transition = 'opacity 0.6s ease';
-      setTimeout(triggerFinalReveal, 500);
-    });
-
-    wrap.appendChild(btn);
-
-    // Append to the desktop scroll container so it sits at the very bottom
-    const desktop = $('#desktop') || document.body;
-    desktop.appendChild(wrap);
-  }
-
-  // Scroll to it then fade it in
-  setTimeout(() => {
-    wrap.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    setTimeout(() => wrap.classList.add('show'), 400);
-  }, 200);
-
-  playChime();
-  fireConfetti(50);
-}
-
-/* ══════════════════════════════════════
    FINAL REVEAL
 ══════════════════════════════════════ */
 function triggerFinalReveal() {
@@ -1343,11 +905,6 @@ function triggerFinalReveal() {
   requestAnimationFrame(() => rev.classList.add('show'));
 
   playChime();
-
-  // Confetti celebration!
-  setTimeout(() => fireConfetti(50), 800);
-  setTimeout(() => fireConfetti(20), 1400);
-  setTimeout(() => fireConfetti(80), 1900);
 
   const lines = [
     { id:'fl1', delay: 1200 },
