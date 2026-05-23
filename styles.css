@@ -1439,9 +1439,6 @@ body::after {
   justify-content: center;
   padding: 20px;
   animation: modal-in 0.3s ease;
-  /* Prevent touch events reaching background on iOS */
-  touch-action: none;
-  -webkit-overflow-scrolling: auto;
 }
 @keyframes modal-in { from{opacity:0} to{opacity:1} }
 
@@ -1454,11 +1451,9 @@ body::after {
   position: relative;
   box-shadow: 0 20px 60px rgba(0,0,0,0.4), 0 0 0 1px rgba(232,165,184,0.1);
   animation: modal-box-in 0.4s var(--ease-spring);
-  /* Scrollable internally on mobile; touch-action auto so it doesn't fight */
   max-height: 85vh;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
-  touch-action: pan-y;
 }
 @keyframes modal-box-in {
   from { opacity:0; transform: translateY(24px) scale(0.97); }
@@ -1505,8 +1500,6 @@ body::after {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  /* Block all touch interaction with background */
-  touch-action: none;
 }
 .cine-bar {
   position: absolute;
@@ -1653,17 +1646,6 @@ body.vhs-active {
   font-family: 'Courier New', monospace;
 }
 #w98-ok:active { border-color: #808080 #fff #fff #808080; }
-
-/* Win98 transparent backdrop — blocks taps to background while popup is open */
-#win98-error::before {
-  content: '';
-  position: fixed;
-  inset: 0;
-  z-index: -1;
-  background: transparent;
-  touch-action: none;
-  pointer-events: none; /* backdrop itself is visual-only; popup element handles blocking */
-}
 
 /* DISTORT FLASH */
 #distort-flash {
