@@ -23,6 +23,49 @@ const $ = (sel) => document.querySelector(sel);
 const $$ = (sel) => [...document.querySelectorAll(sel)];
 
 /* ══════════════════════════════════════
+   SCROLL LOCK UTILITY
+   Works on iPhone Safari (position:fixed trick),
+   Android Chrome, and desktop.
+══════════════════════════════════════ */
+const ScrollLock = (() => {
+  let _locked = 0;   // ref-count so nested open/close calls stay balanced
+  let _savedY  = 0;
+
+  function lock() {
+    _locked++;
+    if (_locked > 1) return;   // already locked
+
+    _savedY = window.scrollY;
+
+    // The only reliable cross-browser scroll-lock on iOS Safari:
+    // fix the body at the current scroll position.
+    document.body.style.overflow   = 'hidden';
+    document.body.style.position   = 'fixed';
+    document.body.style.top        = `-${_savedY}px`;
+    document.body.style.left       = '0';
+    document.body.style.right      = '0';
+    document.body.style.width      = '100%';
+  }
+
+  function unlock() {
+    if (_locked <= 0) return;
+    _locked--;
+    if (_locked > 0) return;   // still have an open layer
+
+    // Restore body to normal and jump back to saved position.
+    document.body.style.overflow   = '';
+    document.body.style.position   = '';
+    document.body.style.top        = '';
+    document.body.style.left       = '';
+    document.body.style.right      = '';
+    document.body.style.width      = '';
+    window.scrollTo(0, _savedY);
+  }
+
+  return { lock, unlock };
+})();
+
+/* ══════════════════════════════════════
    BOOT SEQUENCE
 ══════════════════════════════════════ */
 function runBoot() {
@@ -95,12 +138,6 @@ function enterVault() {
 
   // Init sound
   initSound();
-
-  // Wire room door listeners now that DOM is live
-  const roomDoor = $('#room-door');
-  const closeRoomBtn = $('#close-room');
-  if (roomDoor) roomDoor.addEventListener('click', openRoom);
-  if (closeRoomBtn) closeRoomBtn.addEventListener('click', closeRoom);
 }
 
 /* ── TIMESTAMP ── */
@@ -122,8 +159,7 @@ function drawGrain() {
   const canvas = $('#grain-canvas');
   if (!canvas) return;
   const ctx = canvas.getContext('2d');
-  let frame, lastGrain = 0;
-  const GRAIN_INTERVAL = 1000 / 12; // ~12fps — was 60fps, huge CPU saving
+  let frame;
 
   function resize() {
     canvas.width  = window.innerWidth;
@@ -132,10 +168,7 @@ function drawGrain() {
   resize();
   window.addEventListener('resize', resize);
 
-  function renderGrain(ts) {
-    frame = requestAnimationFrame(renderGrain);
-    if (ts - lastGrain < GRAIN_INTERVAL) return;
-    lastGrain = ts;
+  function renderGrain() {
     const { width, height } = canvas;
     const img = ctx.createImageData(width, height);
     const d = img.data;
@@ -145,8 +178,9 @@ function drawGrain() {
       d[i+3] = 12; // very subtle
     }
     ctx.putImageData(img, 0, 0);
+    frame = requestAnimationFrame(renderGrain);
   }
-  renderGrain(0);
+  renderGrain();
 }
 
 /* ══════════════════════════════════════
@@ -322,9 +356,10 @@ function spawnComplimentStar(field, initialDelay) {
     const msg = COMPLIMENT_MESSAGES[Math.floor(Math.random() * COMPLIMENT_MESSAGES.length)];
     playPing();
     showStarCompliment(msg, star);
-    // Use viewport-relative position for the burst
-    const sr = star.getBoundingClientRect();
-    emitParticleBurst(sr.left + sr.width / 2, sr.top + sr.height / 2);
+    emitParticleBurst(
+      parseFloat(star.style.left) / 100 * window.innerWidth,
+      parseFloat(star.style.top)  / 100 * window.innerHeight
+    );
 
     // Vanish: just fade out, no size change
     star.classList.add('fcs-vanishing');
@@ -337,7 +372,7 @@ function spawnComplimentStar(field, initialDelay) {
         star.style.background = newColour;
         star.style.boxShadow = `0 0 6px 2px ${newColour}88`;
         star.style.setProperty('--star-colour', newColour);
-        scheduleStarAppearance(star, 18000 + Math.random() * 8000);
+        scheduleStarAppearance(star, 8000 + Math.random() * 12000);
       }, 600);
     }, 500);
   });
@@ -360,7 +395,7 @@ function scheduleStarAppearance(star, delay) {
       if (!star.dataset.clicked) {
         star.classList.remove('fcs-visible');
         // Go dormant then reappear
-        scheduleStarAppearance(star, 18000 + Math.random() * 8000);
+        scheduleStarAppearance(star, 6000 + Math.random() * 10000);
       }
     }, stayFor);
   }, delay);
@@ -448,8 +483,8 @@ function spawnPetal(field, initialDelay) {
   const color = PETAL_COLORS[Math.floor(Math.random() * PETAL_COLORS.length)];
   const size  = 10 + Math.random() * 14;
   const left  = Math.random() * 100;
-  const dur   = 10 + Math.random() * 10;
-  const sway  = (Math.random() - 0.5) * 120;
+  const dur   = 9 + Math.random() * 10;
+  const sway  = (Math.random() - 0.5) * 100;
   const rot0  = Math.random() * 360;
   const rot1  = rot0 + 180 + Math.random() * 180;
   const op    = 0.35 + Math.random() * 0.35;
@@ -461,6 +496,7 @@ function spawnPetal(field, initialDelay) {
     --ps:${size}px;
     --pf-dur:${dur}s;
     --pf-delay:${initialDelay}ms;
+    --pf-sway:${dur * 0.4}s;
     --pf-swing:${sway}px;
     --pr0:${rot0}deg;
     --pr1:${rot1}deg;
@@ -511,9 +547,8 @@ function fireConfetti(originX) {
     cvy = (30 + Math.random() * 50) + 'vh';
   }
 
-  const count = 24 + Math.floor(Math.random() * 14); // was 38–60, cut in half for smoothness
+  const count = 38 + Math.floor(Math.random() * 22);
 
-  const frag = document.createDocumentFragment();
   for (let i = 0; i < count; i++) {
     const piece = document.createElement('div');
     piece.className = 'confetti-piece';
@@ -539,10 +574,9 @@ function fireConfetti(originX) {
       --cd: ${dur}s;
       --cdelay: ${delay}s;
     `;
-    frag.appendChild(piece);
+    document.body.appendChild(piece);
     setTimeout(() => piece.remove(), (dur + delay + 0.3) * 1000);
   }
-  document.body.appendChild(frag);
 }
 
 function scheduleConfetti() {
@@ -588,7 +622,7 @@ function markFound(id) {
 
   // Warmth level
   const warm = Math.min(4, Math.floor(count / 6));
-  [1,2,3,4].forEach(n => document.body.classList.remove(`warmth-${n}`));
+  document.body.className = document.body.className.replace(/warmth-\d/,'');
   if (warm > 0) document.body.classList.add(`warmth-${warm}`);
 
   // Unlock room door at 10 secrets
@@ -597,9 +631,9 @@ function markFound(id) {
     $('#room-door').classList.add('show');
   }
 
-  // All 22 found — show the final reveal button instead of auto-triggering
+  // All 22 found
   if (count >= STATE.total) {
-    setTimeout(showFinalRevealButton, 800);
+    setTimeout(triggerFinalReveal, 800);
   }
 
   playPing();
@@ -806,6 +840,8 @@ function initSecrets() {
     // delay then final
   });
 
+  /* ── Scroll-triggered poems ── */
+  initScrollObserver();
 }
 
 /* ══════════════════════════════════════
@@ -924,12 +960,17 @@ function showModal(html) {
   const content = $('#modal-content');
   if (!overlay || !content) return;
 
-  // Save scroll position so page doesn't jump
-  const scrollY = window.scrollY;
+  ScrollLock.lock();
   content.innerHTML = html;
   overlay.classList.remove('hidden');
-  // Restore scroll position after DOM update
-  requestAnimationFrame(() => window.scrollTo(0, scrollY));
+
+  // Ensure modal-box is scrollable on its own if content overflows
+  const box = $('#modal-box');
+  if (box) {
+    box.style.maxHeight = '85vh';
+    box.style.overflowY = 'auto';
+    box.style.webkitOverflowScrolling = 'touch';
+  }
 
   $('#modal-close').onclick = closeModal;
   overlay.onclick = (e) => { if (e.target === overlay) closeModal(); };
@@ -937,9 +978,8 @@ function showModal(html) {
 }
 
 function closeModal() {
-  const scrollY = window.scrollY;
   $('#modal-overlay').classList.add('hidden');
-  requestAnimationFrame(() => window.scrollTo(0, scrollY));
+  ScrollLock.unlock();
   document.removeEventListener('keydown', escModal);
 }
 
@@ -976,13 +1016,13 @@ function showCinematic(text) {
   const textEl   = $('#cinematic-text');
   if (!overlay || !textEl) return;
 
-  const scrollY = window.scrollY;
+  ScrollLock.lock();
   textEl.innerHTML = text.split('\n').map(l => l ? `<span>${l}</span>` : `<br>`).join('');
   overlay.classList.remove('hidden');
-  requestAnimationFrame(() => window.scrollTo(0, scrollY));
 
   setTimeout(() => {
     overlay.classList.add('hidden');
+    ScrollLock.unlock();
   }, 5800);
 }
 
@@ -994,11 +1034,22 @@ function showWin98Error(msg) {
   const msgEl = $('#w98-msg');
   if (!popup || !msgEl) return;
 
+  ScrollLock.lock();
   msgEl.innerHTML = msg.replace(/\n/g, '<br>');
   popup.classList.remove('hidden');
   playError();
 
-  const closeIt = () => popup.classList.add('hidden');
+  // Transparent backdrop so taps outside the Win98 box don't hit the page
+  const backdrop = document.createElement('div');
+  backdrop.id = 'win98-backdrop';
+  backdrop.style.cssText = 'position:fixed;inset:0;z-index:9899;touch-action:none;';
+  document.body.appendChild(backdrop);
+
+  const closeIt = () => {
+    popup.classList.add('hidden');
+    backdrop.remove();
+    ScrollLock.unlock();
+  };
   $('#w98-close').onclick = closeIt;
   $('#w98-ok').onclick    = closeIt;
 }
@@ -1015,8 +1066,12 @@ function triggerDistortion() {
    BG COLOUR BLEED
 ══════════════════════════════════════ */
 function triggerBgBleed() {
-  document.body.classList.add('bg-bleed');
-  setTimeout(() => document.body.classList.remove('bg-bleed'), 3000);
+  document.body.style.transition = 'background-color 0.5s ease';
+  document.body.style.backgroundColor = '#f0c8d8';
+  setTimeout(() => {
+    document.body.style.backgroundColor = '';
+    setTimeout(() => document.body.style.transition = '', 1000);
+  }, 2500);
 }
 
 /* ══════════════════════════════════════
@@ -1073,8 +1128,8 @@ function buildRoomWall() {
     `;
 
     pol.addEventListener('click', () => {
-      wall.querySelectorAll('.room-pol').forEach(p => { if (p !== pol) p.style.zIndex = ''; });
-      pol.style.zIndex = pol.style.zIndex === '999' ? '' : '999';
+      // Lightbox-style zoom
+      pol.style.zIndex = '999';
     });
 
     wall.appendChild(pol);
@@ -1083,6 +1138,7 @@ function buildRoomWall() {
 
 $('#room-door') && $('#room-door').addEventListener('click', openRoom);
 $('#close-room') && $('#close-room').addEventListener('click', closeRoom);
+
 function openRoom() {
   // Secret lock check — she doesn't know, just gets a hint if not enough
   if (!STATE.roomUnlocked) {
@@ -1093,9 +1149,9 @@ function openRoom() {
 
   const room = $('#the-room');
   if (!room) return;
+  ScrollLock.lock();
   room.classList.remove('hidden');
   requestAnimationFrame(() => room.classList.add('open'));
-  document.body.style.overflow = 'hidden';
 
   // After 60 seconds, fade out polaroids and reveal the final letter
   if (!STATE.roomLetterShown) {
@@ -1109,11 +1165,10 @@ function revealRoomLetter() {
   const existing = $('#room-final-letter');
   if (existing) return; // already shown
 
-  // Fade out the wall, then remove from layout so letter centres cleanly
+  // Fade out the wall
   if (wall) {
     wall.style.transition = 'opacity 2s ease';
     wall.style.opacity = '0';
-    setTimeout(() => { wall.style.display = 'none'; }, 2000);
   }
 
   // Create and show the letter
@@ -1151,14 +1206,7 @@ function closeRoom() {
   room.classList.remove('open');
   setTimeout(() => {
     room.classList.add('hidden');
-    document.body.style.overflow = '';
-    // Reset wall so it shows on reopen
-    const wall = $('#room-wall');
-    if (wall) { wall.style.transition = ''; wall.style.opacity = '1'; wall.style.display = ''; }
-    // Remove letter so it re-triggers next visit
-    const letter = $('#room-final-letter');
-    if (letter) letter.remove();
-    STATE.roomLetterShown = false;
+    ScrollLock.unlock();
   }, 900);
 }
 
@@ -1296,49 +1344,13 @@ function playError() {
 }
 
 /* ══════════════════════════════════════
-   FINAL REVEAL BUTTON
-══════════════════════════════════════ */
-function showFinalRevealButton() {
-  // Inject the button wrap into the page if it doesn't exist yet
-  let wrap = $('#final-reveal-btn-wrap');
-  if (!wrap) {
-    wrap = document.createElement('div');
-    wrap.id = 'final-reveal-btn-wrap';
-
-    const btn = document.createElement('button');
-    btn.id = 'final-reveal-btn';
-    btn.textContent = 'open the last one';
-    btn.addEventListener('click', () => {
-      wrap.style.pointerEvents = 'none';
-      wrap.style.opacity = '0';
-      wrap.style.transition = 'opacity 0.6s ease';
-      setTimeout(triggerFinalReveal, 500);
-    });
-
-    wrap.appendChild(btn);
-
-    // Append to the desktop scroll container so it sits at the very bottom
-    const desktop = $('#desktop') || document.body;
-    desktop.appendChild(wrap);
-  }
-
-  // Scroll to it then fade it in
-  setTimeout(() => {
-    wrap.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    setTimeout(() => wrap.classList.add('show'), 400);
-  }, 200);
-
-  playChime();
-  fireConfetti(50);
-}
-
-/* ══════════════════════════════════════
    FINAL REVEAL
 ══════════════════════════════════════ */
 function triggerFinalReveal() {
   const rev = $('#final-reveal');
   if (!rev) return;
 
+  ScrollLock.lock();
   rev.classList.remove('hidden');
   requestAnimationFrame(() => rev.classList.add('show'));
 
@@ -1376,7 +1388,10 @@ function triggerFinalReveal() {
   setTimeout(() => {
     rev.addEventListener('click', () => {
       rev.style.opacity = '0';
-      setTimeout(() => rev.classList.add('hidden'), 2000);
+      setTimeout(() => {
+        rev.classList.add('hidden');
+        ScrollLock.unlock();
+      }, 2000);
     }, { once: true });
   }, 12000);
 }
