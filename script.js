@@ -22,92 +22,7 @@ const STATE = {
 const $ = (sel) => document.querySelector(sel);
 const $$ = (sel) => [...document.querySelectorAll(sel)];
 
-/* ══════════════════════════════════════
-   SCROLL LOCK UTILITY
-   Works on iPhone Safari (position:fixed trick),
-   Android Chrome, and desktop.
-══════════════════════════════════════ */
-const ScrollLock = (() => {
-  let _locked = 0;   // ref-count so nested open/close calls stay balanced
-  let _savedY  = 0;
 
-  function lock() {
-    _locked++;
-    if (_locked > 1) return;   // already locked
-
-    _savedY = window.scrollY;
-
-    // The only reliable cross-browser scroll-lock on iOS Safari:
-    // fix the body at the current scroll position.
-    document.body.style.overflow   = 'hidden';
-    document.body.style.position   = 'fixed';
-    document.body.style.top        = `-${_savedY}px`;
-    document.body.style.left       = '0';
-    document.body.style.right      = '0';
-    document.body.style.width      = '100%';
-  }
-
-  function unlock() {
-    if (_locked <= 0) return;
-    _locked--;
-    if (_locked > 0) return;   // still have an open layer
-
-    // Restore body to normal and jump back to saved position.
-    document.body.style.overflow   = '';
-    document.body.style.position   = '';
-    document.body.style.top        = '';
-    document.body.style.left       = '';
-    document.body.style.right      = '';
-    document.body.style.width      = '';
-    window.scrollTo(0, _savedY);
-  }
-
-  return { lock, unlock };
-})();
-
-/* ══════════════════════════════════════
-   SCROLL-THEN-LOCK SEQUENCER
-   1. Scroll triggerEl (or overlay) into centered view
-   2. Wait for scroll animation to finish (~600ms typical)
-   3. Wait an additional ~1000ms so the user has settled
-   4. Only then apply ScrollLock
-   Returns a cancel function so a fast close can abort the pending lock.
-══════════════════════════════════════ */
-function scrollThenLock(triggerEl, onLocked) {
-  let cancelled = false;
-
-  // If the trigger element exists and is not already comfortably in view,
-  // smooth-scroll it to the vertical center of the viewport.
-  if (triggerEl) {
-    const rect = triggerEl.getBoundingClientRect();
-    const vh   = window.innerHeight;
-    const inView = rect.top >= 0 && rect.bottom <= vh;
-
-    if (!inView) {
-      // scrollIntoView with block:'center' gives the smoothest result on mobile.
-      triggerEl.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'nearest' });
-    }
-  }
-
-  // Estimate scroll duration: browsers typically finish smooth-scroll within
-  // 400–700 ms. We wait 700ms for scroll + 1000ms settle = 1700ms total.
-  // If already in view we skip the scroll wait and just do the settle delay.
-  const scrollWait  = triggerEl ? 700 : 0;
-  const settleDelay = 1000;
-  const totalDelay  = scrollWait + settleDelay;
-
-  const timer = setTimeout(() => {
-    if (!cancelled) {
-      ScrollLock.lock();
-      if (onLocked) onLocked();
-    }
-  }, totalDelay);
-
-  return function cancel() {
-    cancelled = true;
-    clearTimeout(timer);
-  };
-}
 
 /* ══════════════════════════════════════
    BOOT SEQUENCE
@@ -176,6 +91,9 @@ function enterVault() {
 
   // Init all secrets
   initSecrets();
+
+  // Init hidden final-letter corner zone
+  initFinalCorner();
 
   // Init draggable
   initDraggable();
@@ -693,7 +611,7 @@ function initSecrets() {
   if (s1) s1.addEventListener('click', () => {
     markFound(1);
     showModal(`<span class="m-label">memory_01 / observation</span>
-    <p>The version of you that existed before you stopped apologising for taking up space was already incredible.<br><br>The version after?Unfair.</p>`, s1);
+    <p>The version of you that existed before you stopped apologising for taking up space was already incredible.<br><br>The version after?Unfair.</p>`);
   });
 
   /* ── S2: Double-click to flip ── */
@@ -719,7 +637,7 @@ function initSecrets() {
     triggerVHS();
     setTimeout(() => {
       showModal(`<span class="m-label">fragment_03 / vhs_recovered</span>
-      <p>You in your era of giving zero f*cks was one of the best things I've ever watched happen.</p>`, s3);
+      <p>You in your era of giving zero f*cks was one of the best things I've ever watched happen.</p>`);
     }, 800);
   });
 
@@ -729,7 +647,7 @@ function initSecrets() {
     markFound(4);
     playChime();
     showModal(`<span class="m-label">memory_04 / sound</span>
-    <p>Your hyena laugh the one that sets everyone else off without you even trying.</p>`, s4);
+    <p>Your hyena laugh the one that sets everyone else off without you even trying.</p>`);
   });
 
   /* ── S5: Shake then reveal note ── */
@@ -741,7 +659,7 @@ function initSecrets() {
       s5.classList.remove('pol-shaking');
       markFound(5);
       showModal(`<span class="m-label">memory_05 / shaken_loose</span>
-      <p>You’ve shaken off more than I know about.I know that much. and you still show up every time still you, just a little more gentle than before..</p>`, s5);
+      <p>You’ve shaken off more than I know about.I know that much. and you still show up every time still you, just a little more gentle than before..</p>`);
     }, 550);
   });
 
@@ -829,7 +747,7 @@ function initSecrets() {
     triggerDistortion();
     setTimeout(() => {
       showModal(`<span class="m-label">observation_17 / verified</span>
-      <p>You are not who you were two years ago. Not even close. The glow-up has been physical, mental, emotional, and honestly a little bit rude to the rest of us.</p>`, s17);
+      <p>You are not who you were two years ago. Not even close. The glow-up has been physical, mental, emotional, and honestly a little bit rude to the rest of us.</p>`);
     }, 900);
   });
 
@@ -837,7 +755,7 @@ function initSecrets() {
   const s18 = $('#s18');
   if (s18) s18.addEventListener('click', () => {
     markFound(18);
-    showCinematic("I don't know when exactly you went from figuring it out\n\nto actually living it.\n\nbut I was there.\n\nand it looked like something worth remembering.", s18);
+    showCinematic("I don't know when exactly you went from figuring it out\n\nto actually living it.\n\nbut I was there.\n\nand it looked like something worth remembering.");
   });
 
   /* ── S19: Background colour bleed ── */
@@ -846,7 +764,7 @@ function initSecrets() {
     markFound(19);
     triggerBgBleed();
     showModal(`<span class="m-label">memory_bleed.tmp</span>
-    <p>I don't know exactly when it happened. the shift. but one day you just... landed. You became someone who felt settled in themselves. Watching that happen from the outside.</p>`, s19);
+    <p>I don't know exactly when it happened. the shift. but one day you just... landed. You became someone who felt settled in themselves. Watching that happen from the outside.</p>`);
   });
 
   /* ── S20: Chaos — everything flies ── */
@@ -863,7 +781,7 @@ function initSecrets() {
     playError();
     setTimeout(() => {
       showModal(`<span class="m-label">UNKNOWN_DATA.fragment / decrypted</span>
-      <p>this file was corrupted. but the core message survived:<br><br>You are not a work in progress. You are already the work. you are already the point. Nothing about you is unfinished.</p>`, s21);
+      <p>this file was corrupted. but the core message survived:<br><br>You are not a work in progress. You are already the work. you are already the point. Nothing about you is unfinished.</p>`);
     }, 600);
     // glitch the icon
     s21.querySelector('.fi-icon').style.animation = 'corrupt 0.3s steps(2) 4';
@@ -874,7 +792,7 @@ function initSecrets() {
   const s21b = $('#s21b');
   if (s21b) s21b.addEventListener('click', () => {
     markFound('21b');
-    showCinematic("there was a moment.\n\nyou probably don't even remember it.\n\nbut everything changed.\n\nand i saw it.", s21b);
+    showCinematic("there was a moment.\n\nyou probably don't even remember it.\n\nbut everything changed.\n\nand i saw it.");
   });
 
   /* ── S22: The tiny dot — FINAL ── */
@@ -999,27 +917,13 @@ function initScrollObserver() {
 /* ══════════════════════════════════════
    MODAL
 ══════════════════════════════════════ */
-function showModal(html, triggerEl) {
+function showModal(html) {
   const overlay = $('#modal-overlay');
   const content = $('#modal-content');
   if (!overlay || !content) return;
 
-  // Show the popup immediately — visuals are instant.
   content.innerHTML = html;
   overlay.classList.remove('hidden');
-
-  // Ensure modal-box is scrollable on its own if content overflows
-  const box = $('#modal-box');
-  if (box) {
-    box.style.maxHeight = '85vh';
-    box.style.overflowY = 'auto';
-    box.style.webkitOverflowScrolling = 'touch';
-  }
-
-  // Scroll the trigger element into comfortable view first,
-  // then apply lock after scroll + settle.
-  // Store cancel fn so closeModal can abort if user closes before lock fires.
-  overlay._cancelLock = scrollThenLock(triggerEl || null);
 
   $('#modal-close').onclick = closeModal;
   overlay.onclick = (e) => { if (e.target === overlay) closeModal(); };
@@ -1027,14 +931,7 @@ function showModal(html, triggerEl) {
 }
 
 function closeModal() {
-  const overlay = $('#modal-overlay');
-  // Cancel any pending deferred lock before it fires.
-  if (overlay && overlay._cancelLock) {
-    overlay._cancelLock();
-    overlay._cancelLock = null;
-  }
-  overlay.classList.add('hidden');
-  ScrollLock.unlock();
+  $('#modal-overlay').classList.add('hidden');
   document.removeEventListener('keydown', escModal);
 }
 
@@ -1066,54 +963,32 @@ function triggerVHS() {
 /* ══════════════════════════════════════
    CINEMATIC OVERLAY
 ══════════════════════════════════════ */
-function showCinematic(text, triggerEl) {
+function showCinematic(text) {
   const overlay  = $('#cinematic-overlay');
   const textEl   = $('#cinematic-text');
   if (!overlay || !textEl) return;
 
-  // Show immediately — cinematic is fullscreen, no scroll needed.
   textEl.innerHTML = text.split('\n').map(l => l ? `<span>${l}</span>` : `<br>`).join('');
   overlay.classList.remove('hidden');
 
-  // Defer the lock: scroll trigger into view if needed, then settle.
-  let cancelLock = scrollThenLock(triggerEl || null);
-
   setTimeout(() => {
     overlay.classList.add('hidden');
-    // Cancel any pending lock that hasn't fired yet.
-    if (cancelLock) { cancelLock(); cancelLock = null; }
-    ScrollLock.unlock();
   }, 5800);
 }
 
 /* ══════════════════════════════════════
    WIN98 ERROR
 ══════════════════════════════════════ */
-function showWin98Error(msg, triggerEl) {
+function showWin98Error(msg) {
   const popup = $('#win98-error');
   const msgEl = $('#w98-msg');
   if (!popup || !msgEl) return;
 
-  // Show popup immediately.
   msgEl.innerHTML = msg.replace(/\n/g, '<br>');
   popup.classList.remove('hidden');
   playError();
 
-  // Transparent backdrop so taps outside the Win98 box don't hit the page
-  const backdrop = document.createElement('div');
-  backdrop.id = 'win98-backdrop';
-  backdrop.style.cssText = 'position:fixed;inset:0;z-index:9899;touch-action:none;';
-  document.body.appendChild(backdrop);
-
-  // Defer lock until scroll + settle.
-  let cancelLock = scrollThenLock(triggerEl || null);
-
-  const closeIt = () => {
-    if (cancelLock) { cancelLock(); cancelLock = null; }
-    popup.classList.add('hidden');
-    backdrop.remove();
-    ScrollLock.unlock();
-  };
+  const closeIt = () => popup.classList.add('hidden');
   $('#w98-close').onclick = closeIt;
   $('#w98-ok').onclick    = closeIt;
 }
@@ -1206,14 +1081,13 @@ $('#close-room') && $('#close-room').addEventListener('click', closeRoom);
 function openRoom() {
   // Secret lock check — she doesn't know, just gets a hint if not enough
   if (!STATE.roomUnlocked) {
-    showModal(`<span class="m-label">locked 🌹</span><p>some things aren't ready yet.<br><br>keep looking. you'll know when.</p>`, $('#room-door'));
+    showModal(`<span class="m-label">locked 🌹</span><p>some things aren't ready yet.<br><br>keep looking. you'll know when.</p>`);
     playError();
     return;
   }
 
   const room = $('#the-room');
   if (!room) return;
-  ScrollLock.lock();
   room.classList.remove('hidden');
   requestAnimationFrame(() => room.classList.add('open'));
 
@@ -1270,7 +1144,6 @@ function closeRoom() {
   room.classList.remove('open');
   setTimeout(() => {
     room.classList.add('hidden');
-    ScrollLock.unlock();
   }, 900);
 }
 
@@ -1414,12 +1287,8 @@ function triggerFinalReveal() {
   const rev = $('#final-reveal');
   if (!rev) return;
 
-  // Show immediately — fullscreen, no scroll guide needed.
   rev.classList.remove('hidden');
   requestAnimationFrame(() => rev.classList.add('show'));
-
-  // Defer lock with settle-only delay (no scroll target).
-  let cancelLock = scrollThenLock(null);
 
   playChime();
 
@@ -1454,15 +1323,61 @@ function triggerFinalReveal() {
   // Click anywhere to close (after it's all shown)
   setTimeout(() => {
     rev.addEventListener('click', () => {
-      if (cancelLock) { cancelLock(); cancelLock = null; }
       rev.style.opacity = '0';
-      setTimeout(() => {
-        rev.classList.add('hidden');
-        ScrollLock.unlock();
-      }, 2000);
+      setTimeout(() => rev.classList.add('hidden'), 2000);
     }, { once: true });
   }, 12000);
 }
+
+/* ══════════════════════════════════════
+   HIDDEN FINAL CORNER ZONE
+   Invisible fixed area, bottom-right.
+   Only activates after all 22 secrets are found.
+   Tapping it opens the room (which contains the final letter).
+   No hints, no labels, no announcements.
+══════════════════════════════════════ */
+function initFinalCorner() {
+  const zone = document.createElement('div');
+  zone.id = 'final-corner-zone';
+  // 60x60px invisible tap target, fixed bottom-right.
+  // Sits above normal content but below all overlays.
+  zone.style.cssText = [
+    'position:fixed',
+    'bottom:0',
+    'right:0',
+    'width:60px',
+    'height:60px',
+    'z-index:8500',
+    'cursor:default',
+    'opacity:0',
+    'pointer-events:none',   // disabled until all 22 found
+  ].join(';');
+  document.body.appendChild(zone);
+
+  zone.addEventListener('click', () => {
+    if (STATE.found.size < STATE.total) return;
+    // Open the room if not already open — the final letter lives there
+    const room = $('#the-room');
+    if (room && !room.classList.contains('open')) {
+      openRoom();
+    }
+  });
+
+}
+
+// Patch markFound to activate the corner zone once all 22 are found.
+// We do this by wrapping it after definition rather than modifying the
+// existing function body, to avoid touching the secret discovery logic.
+(function patchMarkFound() {
+  const _orig = markFound;
+  markFound = function(id) {
+    _orig(id);
+    if (STATE.found.size >= STATE.total) {
+      const zone = document.getElementById('final-corner-zone');
+      if (zone) zone.style.pointerEvents = 'auto';
+    }
+  };
+})();
 
 /* ══════════════════════════════════════
    INIT
