@@ -1188,16 +1188,74 @@ function getAudio() {
 function startAmbient() {
   const ctx = getAudio();
   if (!ctx) return;
-  // Very soft ambient hum
-  const osc = ctx.createOscillator();
-  const gain = ctx.createGain();
-  osc.type = 'sine';
-  osc.frequency.value = 60;
-  gain.gain.setValueAtTime(0, ctx.currentTime);
-  gain.gain.linearRampToValueAtTime(0.025, ctx.currentTime + 3);
-  osc.connect(gain);
-  gain.connect(ctx.destination);
-  osc.start();
+
+  const master = ctx.createGain();
+  master.gain.setValueAtTime(0, ctx.currentTime);
+  master.gain.linearRampToValueAtTime(0.18, ctx.currentTime + 4);
+  master.connect(ctx.destination);
+
+  // ── Warm lofi pad: Cmaj7 chord (C3 E3 G3 B3) slightly detuned ──
+  const padNotes = [130.81, 164.81, 196.00, 246.94]; // C3 E3 G3 B3
+  const detuneAmt = [0, 4, -3, 6]; // cents detuning per voice
+  padNotes.forEach((freq, i) => {
+    const osc  = ctx.createOscillator();
+    const gain = ctx.createGain();
+    const lfo  = ctx.createOscillator();
+    const lfoGain = ctx.createGain();
+
+    osc.type = 'triangle';
+    osc.frequency.value = freq;
+    osc.detune.value = detuneAmt[i];
+
+    // Slow LFO tremolo per voice
+    lfo.frequency.value = 0.18 + i * 0.07;
+    lfoGain.gain.value = 0.025;
+    lfo.connect(lfoGain);
+    lfoGain.connect(gain.gain);
+    lfo.start();
+
+    gain.gain.value = 0.06;
+
+    // Warm low-pass per voice
+    const lpf = ctx.createBiquadFilter();
+    lpf.type = 'lowpass';
+    lpf.frequency.value = 900;
+    lpf.Q.value = 0.7;
+
+    osc.connect(gain);
+    gain.connect(lpf);
+    lpf.connect(master);
+    osc.start();
+  });
+
+  // ── Vinyl crackle / tape hiss ──
+  const bufLen = ctx.sampleRate * 3;
+  const noiseBuf = ctx.createBuffer(1, bufLen, ctx.sampleRate);
+  const nd = noiseBuf.getChannelData(0);
+  // Pink-ish noise: accumulate for warmth
+  let b0 = 0, b1 = 0, b2 = 0;
+  for (let i = 0; i < bufLen; i++) {
+    const white = Math.random() * 2 - 1;
+    b0 = 0.99765 * b0 + white * 0.0990460;
+    b1 = 0.96300 * b1 + white * 0.2965164;
+    b2 = 0.57000 * b2 + white * 1.0526913;
+    nd[i] = (b0 + b1 + b2 + white * 0.1848) / 5.5;
+  }
+  const noiseLoop = ctx.createBufferSource();
+  noiseLoop.buffer = noiseBuf;
+  noiseLoop.loop = true;
+
+  const noiseGain = ctx.createGain();
+  noiseGain.gain.value = 0.022;
+
+  const noiseLpf = ctx.createBiquadFilter();
+  noiseLpf.type = 'lowpass';
+  noiseLpf.frequency.value = 2200;
+
+  noiseLoop.connect(noiseLpf);
+  noiseLpf.connect(noiseGain);
+  noiseGain.connect(master);
+  noiseLoop.start();
 }
 
 function playPing() {
@@ -1387,23 +1445,26 @@ function initLightbox() {
     if (e.key === 'Escape' && !lb.classList.contains('hidden')) closeLightbox();
   });
 
-  // Attach to all polaroid images — but don't steal the secret interaction
+  // Use capture phase so this fires BEFORE the polaroid's own bubble-phase
+  // secret handler — stopPropagation then prevents the secret from triggering.
   document.addEventListener('click', (e) => {
-    // Only fire on direct img click inside a pol-img-wrap
-    const img = e.target.closest('.pol-img-wrap img, .room-pol img');
+    // Only fire on direct img click inside a pol-img-wrap or room-pol
+    const img = e.target.tagName === 'IMG' &&
+      (e.target.closest('.pol-img-wrap') || e.target.closest('.room-pol'))
+      ? e.target : null;
     if (!img) return;
 
     const src = img.src;
     // Don't open if image failed to load (no-img state)
     if (!src || img.closest('.no-img') || img.parentElement.classList.contains('no-img')) return;
 
-    // Get caption from sibling .pol-caption or .room-pol caption
+    // Get caption from sibling .pol-caption
     const pol = img.closest('.polaroid, .row-pol, .room-pol');
     const caption = pol ? (pol.querySelector('.pol-caption')?.textContent || '') : '';
 
-    e.stopPropagation(); // prevent triggering the secret's own click handler
+    e.stopPropagation(); // blocks the secret handler from firing
     openLightbox(src, caption);
-  });
+  }, true); // <-- capture phase: fires before bubble-phase listeners
 }
 
 // Hook into enterVault so lightbox initialises with everything else
