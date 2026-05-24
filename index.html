@@ -118,14 +118,15 @@
     </div>
 
     <!-- ─────────────────────────
-         POLAROIDS (floating, scattered)
+         POLAROIDS (scattered row)
          SECRET 1–5
          ⚠ REPLACE assets/polaroids/p01.jpg → p05.jpg
     ───────────────────────── -->
+    <div id="secret-pol-wrap" style="display:flex;flex-wrap:wrap;justify-content:center;gap:30px 20px;margin:40px 0;position:relative;z-index:10;">
 
     <!-- S1: hover to reveal caption text -->
     <div class="polaroid secret" id="s1" data-secret="1" data-type="hover-reveal"
-         style="--px:6%;--py:18%;--pr:-5deg;">
+         style="--pr:-5deg;">
       <div class="pol-img-wrap">
         <img src="assets/polaroids/p01.jpg" alt="memory 01" onerror="this.parentElement.classList.add('no-img')"/>
         <div class="pol-placeholder"><span>p01.jpg</span></div>
@@ -136,7 +137,7 @@
 
     <!-- S2: double-click to flip -->
     <div class="polaroid flippable secret" id="s2" data-secret="2" data-type="flip"
-         style="--px:23%;--py:7%;--pr:3deg;">
+         style="--pr:3deg;">
       <div class="pol-flip-inner">
         <div class="pol-flip-front">
           <div class="pol-img-wrap">
@@ -154,7 +155,7 @@
 
     <!-- S3: VHS glitch on click -->
     <div class="polaroid secret vhs-pol" id="s3" data-secret="3" data-type="vhs"
-         style="--px:62%;--py:7%;--pr:6deg;">
+         style="--pr:6deg;">
       <div class="pol-img-wrap">
         <img src="assets/polaroids/p03.jpg" alt="memory 03" onerror="this.parentElement.classList.add('no-img')"/>
         <div class="pol-placeholder"><span>p03.jpg</span></div>
@@ -165,7 +166,7 @@
 
     <!-- S4: floating + audio ping -->
     <div class="polaroid float-pol secret" id="s4" data-secret="4" data-type="float-ping"
-         style="--px:78%;--py:20%;--pr:-9deg;">
+         style="--pr:-9deg;">
       <div class="pol-img-wrap">
         <img src="assets/polaroids/p04.jpg" alt="memory 04" onerror="this.parentElement.classList.add('no-img')"/>
         <div class="pol-placeholder"><span>p04.jpg</span></div>
@@ -176,7 +177,7 @@
 
     <!-- S5: shake then reveal note -->
     <div class="polaroid shake-pol secret" id="s5" data-secret="5" data-type="shake"
-         style="--px:44%;--py:14%;--pr:-2deg;">
+         style="--pr:-2deg;">
       <div class="pol-img-wrap">
         <img src="assets/polaroids/p05.jpg" alt="memory 05" onerror="this.parentElement.classList.add('no-img')"/>
         <div class="pol-placeholder"><span>p05.jpg</span></div>
@@ -184,6 +185,8 @@
       <div class="pol-caption">DO NOT shake this one.</div>
       <div class="pol-tape" style="--tr:0deg;--tx:42%"></div>
     </div>
+
+    </div><!-- /secret-pol-wrap -->
 
     <!-- ─────────────────────────
          SECTION DIVIDER
@@ -554,6 +557,15 @@
     <div class="fl fl-small hidden" id="fl6">like actually.Embarrassingly proud.</div>
     <div class="fl fl-love hidden" id="fl7">Happy Birthday Paige, Love always, Alwin 🌹🌹</div>
     <div class="fl fl-ps hidden" id="fl8">( you found all 22. of course you did. )</div>
+  </div>
+</div>
+
+<!-- PHOTO LIGHTBOX -->
+<div id="lightbox" class="hidden" role="dialog" aria-modal="true" aria-label="Photo viewer">
+  <div id="lb-img-wrap">
+    <button id="lb-close" aria-label="Close photo">✕</button>
+    <img id="lb-img" src="" alt=""/>
+    <div id="lb-caption"></div>
   </div>
 </div>
 
