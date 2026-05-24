@@ -1352,3 +1352,68 @@ document.addEventListener('click', () => {
     STATE.audioCtx.resume();
   }
 }, { once: false });
+
+/* ══════════════════════════════════════
+   PHOTO LIGHTBOX
+══════════════════════════════════════ */
+function initLightbox() {
+  const lb       = $('#lightbox');
+  const lbImg    = $('#lb-img');
+  const lbCap    = $('#lb-caption');
+  const lbClose  = $('#lb-close');
+  if (!lb) return;
+
+  function openLightbox(src, caption) {
+    if (!src || src === '') return;
+    lbImg.src = src;
+    lbImg.alt = caption || '';
+    lbCap.textContent = caption || '';
+    lb.classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeLightbox() {
+    lb.classList.add('hidden');
+    lbImg.src = '';
+    document.body.style.overflow = '';
+  }
+
+  // Close on backdrop click or close button
+  lb.addEventListener('click', (e) => {
+    if (e.target === lb) closeLightbox();
+  });
+  lbClose.addEventListener('click', closeLightbox);
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && !lb.classList.contains('hidden')) closeLightbox();
+  });
+
+  // Attach to all polaroid images — but don't steal the secret interaction
+  document.addEventListener('click', (e) => {
+    // Only fire on direct img click inside a pol-img-wrap
+    const img = e.target.closest('.pol-img-wrap img, .room-pol img');
+    if (!img) return;
+
+    const src = img.src;
+    // Don't open if image failed to load (no-img state)
+    if (!src || img.closest('.no-img') || img.parentElement.classList.contains('no-img')) return;
+
+    // Get caption from sibling .pol-caption or .room-pol caption
+    const pol = img.closest('.polaroid, .row-pol, .room-pol');
+    const caption = pol ? (pol.querySelector('.pol-caption')?.textContent || '') : '';
+
+    e.stopPropagation(); // prevent triggering the secret's own click handler
+    openLightbox(src, caption);
+  });
+}
+
+// Hook into enterVault so lightbox initialises with everything else
+const _origEnterVault = typeof enterVault === 'function' ? enterVault : null;
+document.addEventListener('DOMContentLoaded', () => {
+  // We patch the open-vault button to also init lightbox after vault opens
+  const btn = $('#open-vault-btn');
+  if (btn) {
+    btn.addEventListener('click', () => {
+      setTimeout(initLightbox, 400);
+    });
+  }
+});
