@@ -724,7 +724,6 @@ function initSecrets() {
     showWin98Error("cuteness.exe has encountered a fatal error.\n\n\"Cuteness overflow detectedfrom user.\nSystem cannot process this level\nof charm and resilience.\"\n\nPlease restart your heart.\nError code: TOO_MUCH_HER");
   });
 
-  /* ── S16: Theme changer ── */
   /* ── S17: Distortion ── */
   const s17 = $('#s17');
   if (s17) s17.addEventListener('click', () => {
