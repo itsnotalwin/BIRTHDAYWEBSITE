@@ -1088,7 +1088,7 @@ function openRoom() {
   // After 60 seconds, fade out polaroids and reveal the final letter
   if (!STATE.roomLetterShown) {
     STATE.roomLetterShown = true;
-    setTimeout(() => revealRoomLetter(), 60000);
+    setTimeout(() => revealRoomLetter(), 20000);
   }
 }
 
