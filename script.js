@@ -725,16 +725,6 @@ function initSecrets() {
   });
 
   /* ── S16: Theme changer ── */
-  const s16 = $('#s16');
-  if (s16) s16.addEventListener('click', () => {
-    markFound(16);
-    STATE.themeIdx = (STATE.themeIdx + 1) % STATE.themes.length;
-    const body = document.body;
-    STATE.themes.forEach(t => { if (t) body.classList.remove(t); });
-    if (STATE.themes[STATE.themeIdx]) body.classList.add(STATE.themes[STATE.themeIdx]);
-    playPing();
-  });
-
   /* ── S17: Distortion ── */
   const s17 = $('#s17');
   if (s17) s17.addEventListener('click', () => {
