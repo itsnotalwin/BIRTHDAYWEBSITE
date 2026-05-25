@@ -1088,7 +1088,7 @@ function openRoom() {
   // After 60 seconds, fade out polaroids and reveal the final letter
   if (!STATE.roomLetterShown) {
     STATE.roomLetterShown = true;
-    setTimeout(() => revealRoomLetter(), 20000);
+    setTimeout(() => revealRoomLetter(), 60000);
   }
 }
 
@@ -1110,13 +1110,13 @@ function revealRoomLetter() {
     <div class="rfl-tape"></div>
     <div class="rfl-body">
       <p class="rfl-to">to: tannie 🌹</p>
-      <p>If you found this room it means you looked for everything.</p>
-      <p>Geweet jy sou!</p>
-      <p>You don't half do anything. never have. that's the thing about you that I've always loved most.</p>
+      <p>if you found this room it means you looked for everything.</p>
+      <p>that's so you.</p>
+      <p>you don't half-do anything. never have. that's the thing about you that I've always loved most.</p>
       <p>you show up fully. for everything. for everyone.</p>
-      <p class="rfl-big">Show up for yourself that way too. 💕</p>
-      <p>Happy Birthday, Tannie.</p>
-      <p class="rfl-sig">— Oomie 🌹<br><span>(your biggest fan. still denying it.)</span></p>
+      <p class="rfl-big">show up for yourself that way too. 💕</p>
+      <p>happy birthday, tannie.</p>
+      <p class="rfl-sig">— oomie 🌹<br><span>(your biggest fan. still denying it.)</span></p>
     </div>
   `;
 
@@ -1177,16 +1177,139 @@ function getAudio() {
 function startAmbient() {
   const ctx = getAudio();
   if (!ctx) return;
-  // Very soft ambient hum
-  const osc = ctx.createOscillator();
-  const gain = ctx.createGain();
-  osc.type = 'sine';
-  osc.frequency.value = 60;
-  gain.gain.setValueAtTime(0, ctx.currentTime);
-  gain.gain.linearRampToValueAtTime(0.025, ctx.currentTime + 3);
-  osc.connect(gain);
-  gain.connect(ctx.destination);
-  osc.start();
+
+  /* ── Master output chain ── */
+  const masterGain = ctx.createGain();
+  masterGain.gain.setValueAtTime(0, ctx.currentTime);
+  masterGain.gain.linearRampToValueAtTime(0.22, ctx.currentTime + 5);
+  masterGain.connect(ctx.destination);
+
+  /* ── Warm low-pass filter (takes the harshness off) ── */
+  const filter = ctx.createBiquadFilter();
+  filter.type = 'lowpass';
+  filter.frequency.value = 1800;
+  filter.Q.value = 0.4;
+  filter.connect(masterGain);
+
+  /* ── Tape-delay for warmth & space ── */
+  const delay = ctx.createDelay(2.0);
+  delay.delayTime.value = 0.38;
+  const delayFB = ctx.createGain();
+  delayFB.gain.value = 0.32;
+  const delayMix = ctx.createGain();
+  delayMix.gain.value = 0.28;
+  delay.connect(delayFB);
+  delayFB.connect(delay);
+  delay.connect(delayMix);
+  delayMix.connect(masterGain);
+
+  /* ── Chord pads — F-major world (warm, romantic) ──
+       F maj → D min → B♭ maj → C maj → repeat          */
+  const CHORDS = [
+    [174.61, 220.00, 261.63],   // F  major  (F A C)
+    [146.83, 174.61, 220.00],   // D  minor  (D F A)
+    [233.08, 277.18, 349.23],   // B♭ major  (B♭ D F)
+    [261.63, 329.63, 392.00],   // C  major  (C E G)
+  ];
+  const CHORD_DUR  = 9;   // seconds per chord
+  const XFADE      = 2.0; // crossfade overlap
+  let chordIdx = 0;
+
+  function scheduleChordBlock(startTime) {
+    const freqs = CHORDS[chordIdx % CHORDS.length];
+    chordIdx++;
+
+    freqs.forEach((freq, i) => {
+      /* Pad layer — triangle for a soft, hollow tone */
+      const osc  = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = 'triangle';
+      osc.frequency.value = freq;
+      osc.detune.value = [-4, 0, 5][i]; // slight spread = chorus-like
+
+      gain.gain.setValueAtTime(0, startTime);
+      gain.gain.linearRampToValueAtTime(0.055, startTime + XFADE);
+      gain.gain.setValueAtTime(0.055, startTime + CHORD_DUR - XFADE);
+      gain.gain.linearRampToValueAtTime(0, startTime + CHORD_DUR);
+      osc.connect(gain);
+      gain.connect(filter);
+      osc.start(startTime);
+      osc.stop(startTime + CHORD_DUR + 0.05);
+
+      /* Sub octave — sine, adds body without muddiness */
+      if (i === 0) {
+        const sub     = ctx.createOscillator();
+        const subGain = ctx.createGain();
+        sub.type = 'sine';
+        sub.frequency.value = freq / 2;
+        subGain.gain.setValueAtTime(0, startTime);
+        subGain.gain.linearRampToValueAtTime(0.04, startTime + XFADE + 1);
+        subGain.gain.setValueAtTime(0.04, startTime + CHORD_DUR - XFADE);
+        subGain.gain.linearRampToValueAtTime(0, startTime + CHORD_DUR);
+        sub.connect(subGain);
+        subGain.connect(masterGain);
+        sub.start(startTime);
+        sub.stop(startTime + CHORD_DUR + 0.05);
+      }
+    });
+
+    /* Schedule next chord before this one ends */
+    const msUntilNext = (CHORD_DUR - XFADE) * 1000;
+    STATE.ambientChordTimer = setTimeout(() => {
+      if (STATE.soundOn) scheduleChordBlock(ctx.currentTime + XFADE * 0.5);
+    }, msUntilNext);
+  }
+
+  scheduleChordBlock(ctx.currentTime + 1.5);
+
+  /* ── Music-box melody floating on top ──
+       Pentatonic in F: F G A C D  (always sounds pretty, never clashing) */
+  const MELODY = [
+    523.25, 587.33, 659.25, 783.99,   // C5 D5 E5 G5
+    880.00, 783.99, 659.25, 523.25,   // A5 G5 E5 C5
+    587.33, 659.25, 783.99, 659.25,   // D5 E5 G5 E5
+  ];
+  let melIdx = 0;
+
+  function playMelodyNote() {
+    if (!STATE.soundOn) return;
+    const c = getAudio();
+    if (!c) return;
+
+    /* Occasionally skip a note for a more human, breathing feel */
+    if (Math.random() < 0.18) {
+      melIdx++;
+      STATE.melodyTimer = setTimeout(playMelodyNote, 900 + Math.random() * 1400);
+      return;
+    }
+
+    const freq = MELODY[melIdx % MELODY.length];
+    melIdx++;
+
+    /* Bell-like tone: sine + quiet octave above */
+    [freq, freq * 2].forEach((f, i) => {
+      const osc  = c.createOscillator();
+      const gain = c.createGain();
+      osc.type = 'sine';
+      osc.frequency.value = f;
+      const t = c.currentTime;
+      const vol = i === 0 ? 0.038 : 0.012;
+      gain.gain.setValueAtTime(0, t);
+      gain.gain.linearRampToValueAtTime(vol, t + 0.015);
+      gain.gain.exponentialRampToValueAtTime(0.0001, t + 1.6);
+      osc.connect(gain);
+      gain.connect(delay);   // send through the delay for shimmer
+      osc.start(t);
+      osc.stop(t + 1.7);
+    });
+
+    /* Varying gap = it breathes, feels hand-played */
+    const gap = 1200 + Math.random() * 2800;
+    STATE.melodyTimer = setTimeout(playMelodyNote, gap);
+  }
+
+  /* Melody starts after the pads have established themselves */
+  STATE.melodyTimer = setTimeout(playMelodyNote, 4500);
 }
 
 function playPing() {
