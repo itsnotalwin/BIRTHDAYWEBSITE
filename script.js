@@ -687,7 +687,7 @@ function initSecrets() {
 
   /* ── S13: Password unlock ── */
   const s13input = $('#s13-input');
-  const ANSWERS_13 = ['chips', 'fries', 'mcdonalds', 'mcdonald', 'mcds', 'kfc', 'pizza', 'nandos', 'nando', 'nuggets', 'burger', 'pap', 'ramen', 'sushi', 'bunny chow', 'bunny'];
+  const ANSWERS_13 = ['chips', 'fries', 'mcdonalds', 'mcdonald', 'mcds', 'tertjies', 'pizza', 'nandos', 'nando', 'nuggets', 'burger', 'pap', 'ramen', 'sushi', 'bunny chow', 'bunny'];
   if (s13input) {
     s13input.addEventListener('keydown', e => {
       if (e.key === 'Enter') checkPassword13();
@@ -1110,8 +1110,8 @@ function revealRoomLetter() {
     <div class="rfl-tape"></div>
     <div class="rfl-body">
       <p class="rfl-to">to: tannie 🌹</p>
-      <p>if you found this room it means you looked for everything.</p>
-      <p>that's so you.</p>
+      <p>If you found this room it means you looked for everything.</p>
+      <p>Geweet jy sou.</p>
       <p>you don't half-do anything. never have. that's the thing about you that I've always loved most.</p>
       <p>you show up fully. for everything. for everyone.</p>
       <p class="rfl-big">show up for yourself that way too. 💕</p>
